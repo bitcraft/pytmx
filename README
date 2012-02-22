@@ -1,0 +1,125 @@
+Map loader for TMX Files (PyTMX)
+bitcraft (leif dot theden at gmail.com)
+v.12 - for python 2.7
+
+If you have any problems or suggestions, please contact me via email.
+Tested with Tiled 0.8.0 for Mac.
+
+released under the GPL v3
+
+===============================================================================
+
+This map loader can be used to load maps created in the Tiled map editor.  It
+provides a simple way to get tiles and associated metadata so that you can draw
+a map onto the screen.
+
+This is *not* a rendering engine.  It will load the data that is necessary to
+render a map onto the screen.  All tiles will be loaded into in memory and
+available to blit onto the screen.
+
+
+Design Goals:
+    Simple api
+    Memory efficient and fast
+
+Features:
+    Loads data and "properties" metadata from Tile's TMX format
+    "Properties" for: maps, tilesets, layers, objectgroups, objects, and tiles
+    Automatic flipping and rotation of tiles
+    Supports base64, csv, gzip, zlib and uncompressed TMX
+    Image loading with pygame
+
+Missing:
+    Polyline (new in 0.8.0)
+    Polygon (new in 0.8.0)
+
+
+New in .12:
+    loader: Fixed bug where tile properties could contain reserved words
+    loader: Reduced size of image index by only allocating space for used tiles
+
+New in .11:
+    loader: Added support for tileset properties
+    loader: Now checks for property names that are reserved for internal use
+    loader: Added support for rotated tiles
+    pygame: Only the tiles that are used in the map will be loaded into memory
+    pygame: Added support for rotated tiles
+    pygame: Added option to force a bitsize (depth) for surfaces
+    pygame: Added option to convert alpha transparency to colorkey transparency
+    pygame: Tilesets no longer load with per-pixel alphas by default
+    pygame: Colorkey transparency should be correctly handled now
+
+
+NOTES:
+
+* The Tiled "properties" have reserved names.
+
+If you use "properties" for any of the following object types, you cannot use
+any of theese words as a name for your property.  A ValueError will be raised
+if there are any conflicts.
+
+As of 0.8.0, these values are:
+
+map:        version, orientation, width, height, tilewidth, tileheight
+            properties, tileset, layer, objectgroup
+
+tileset:    firstgid, source, name, tilewidth, tileheight, spacing, margin,
+            image, tile, properties
+
+tile:       id, image, properties
+
+layer:      name, x, y, width, height, opacity, visible, properties, data
+
+objectgroup: name, color, x, y, width, height, opacity, visible, object,
+             properties
+
+object:     name, type, x, y, width, height, gid, properties, polygon,
+            polyline, image
+
+
+
+I've had some suggestions that I include a rendering function for this loader.
+I have been intentionally not including a rendering utility since rendering a
+map will not be the same in every situation.  However, I can appreciate that
+some poeple won't understand how it works unless they see it, so I am including
+a sample map and viewer.
+
+I've included a copy of this loader that may work with python 3.x.  I
+personally do not think that python 3.x should be used with pygame, yet (and I
+am not the only person).  You can try it if you insist on using pygame with
+python 3.x, but it is not supported.
+
+===============================================================================
+
+Basic usage sample:
+
+    >>> import tmxloader
+    >>> tiledmap = tmxloader.load_pygame("map.tmx")
+
+
+When you want to draw tiles, you simply call "get_tile_image":
+
+    >>> image = tiledmap.get_tile_image(x, y, layer)    
+    >>> screen.blit(position, image)
+
+
+Maps, tilesets, layers, objectgroups, and objects all have a simple way to
+access metadata that was set inside tiled: they all become object attributes.
+
+    >>> layer = tiledmap.layers[0]
+    >>> print layer.tilewidth
+    32
+    >>> print layer.weather
+    'sunny'
+
+
+Tiles properties are the exception here, and must be accessed through
+"getTileProperties".  The data is a regular Python dictionary:
+
+    >>> tile = tiledmap.getTileProperties(x, y, layer)
+    >>> tile["name"]
+    'CobbleStone'
+
+
+Thanks for the artwork!
+Example uses tileset from http://opengameart.org/.  Author is MrBeast.
