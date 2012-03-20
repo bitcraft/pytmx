@@ -1,6 +1,6 @@
-Map loader for TMX Files (PyTMX)
+Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v.12 - for python 2.7
+v.13 - for python 2.7
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.0 for Mac.
@@ -33,6 +33,19 @@ Missing:
     Polyline (new in 0.8.0)
     Polygon (new in 0.8.0)
 
+
+New in .13:
+    loader: Renamed "get_tile_image" to "getTileImage"
+    loader: Removed duplicates returned from getTilePropertiesByLayer
+    loader: Modified confusing messages for GID errors
+    loader: Fixed bug where transformed tile properties are not available
+    loader: No longer loads metadata for tiles that are not used
+    loader: Reduced tile cache to 256 unique tiles
+    loader: Removed 'visible' from list of reserved words
+    loader: Added 'buildDistributionRects' and maputils module
+    loader: Added some misc. functions for retrieving properties
+    pygame: Smarter tile management made tile loading cache useless; removed it
+    pygame: pygame.RLEACCEL flag added when appropriate
 
 New in .12:
     loader: Fixed bug where tile properties could contain reserved words
@@ -68,17 +81,15 @@ tileset:    firstgid, source, name, tilewidth, tileheight, spacing, margin,
 
 tile:       id, image, properties
 
-layer:      name, x, y, width, height, opacity, visible, properties, data
+layer:      name, x, y, width, height, opacity, properties, data
 
-objectgroup: name, color, x, y, width, height, opacity, visible, object,
-             properties
+objectgroup: name, color, x, y, width, height, opacity, object, properties
 
 object:     name, type, x, y, width, height, gid, properties, polygon,
             polyline, image
 
 
 
-I've had some suggestions that I include a rendering function for this loader.
 I have been intentionally not including a rendering utility since rendering a
 map will not be the same in every situation.  However, I can appreciate that
 some poeple won't understand how it works unless they see it, so I am including
@@ -87,26 +98,26 @@ a sample map and viewer.
 I've included a copy of this loader that may work with python 3.x.  I
 personally do not think that python 3.x should be used with pygame, yet (and I
 am not the only person).  You can try it if you insist on using pygame with
-python 3.x, but it is not supported.
+python 3.x, but I don't update that often.
 
 ===============================================================================
 
 Basic usage sample:
 
     >>> import tmxloader
-    >>> tiledmap = tmxloader.load_pygame("map.tmx")
+    >>> tmxdata = tmxloader.load_pygame("map.tmx")
 
 
 When you want to draw tiles, you simply call "get_tile_image":
 
-    >>> image = tiledmap.get_tile_image(x, y, layer)    
+    >>> image = tmxdata.get_tile_image(x, y, layer)    
     >>> screen.blit(position, image)
 
 
 Maps, tilesets, layers, objectgroups, and objects all have a simple way to
 access metadata that was set inside tiled: they all become object attributes.
 
-    >>> layer = tiledmap.layers[0]
+    >>> layer = tmxdata.layers[0]
     >>> print layer.tilewidth
     32
     >>> print layer.weather
@@ -116,10 +127,7 @@ access metadata that was set inside tiled: they all become object attributes.
 Tiles properties are the exception here, and must be accessed through
 "getTileProperties".  The data is a regular Python dictionary:
 
-    >>> tile = tiledmap.getTileProperties(x, y, layer)
+    >>> tile = tmxdata.getTileProperties(x, y, layer)
     >>> tile["name"]
     'CobbleStone'
 
-
-Thanks for the artwork!
-Example uses tileset from http://opengameart.org/.  Author is MrBeast.
