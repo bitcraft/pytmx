@@ -24,7 +24,7 @@ class TiledRenderer():
 
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.get_tile_image
+        gt = self.tiledmap.getTileImage
 
         for l in xrange(0, len(self.tiledmap.layers)):
             for y in xrange(0, self.tiledmap.height):
