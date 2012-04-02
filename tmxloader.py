@@ -217,7 +217,7 @@ class TiledMap(TiledElement):
             try:
                 return self.images[gid]
             except (IndexError, ValueError):
-                msg = "Coords: ({0},{1}) in layer {2} has invaid GID: {3}"
+                msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
                 raise Exception, msg.format(x, y, layer, gid)
 
 
