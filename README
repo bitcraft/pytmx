@@ -7,6 +7,7 @@ Tested with Tiled 0.8.0 for Mac.
 
 released under the GPL v3
 
+
 ===============================================================================
 
 This map loader can be used to load maps created in the Tiled map editor.  It
@@ -34,4 +35,12 @@ Missing:
     Polygon (new in Tiled 0.8.0)
 
 
+===============================================================================
+
+The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
+
+
+===============================================================================
+
 Please see the module's docstring for version information and sample usage.
+
