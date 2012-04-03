@@ -105,7 +105,7 @@ python 3.x, but I don't update that often.
 
 Basic usage sample:
 
-    >>> import tmxloader
+    >>> from pytmx import tmxloader
     >>> tmxdata = tmxloader.load_pygame("map.tmx")
 
 
@@ -132,6 +132,9 @@ Tiles properties are the exception here, and must be accessed through
     >>> tile["name"]
     'CobbleStone'
 
+
+
+Please see the TiledMap class for some api information.
 """
 
 from itertools import chain, product
@@ -251,7 +254,7 @@ class TiledMap(TiledElement):
         return a group of tiles in an area
         expects a pygame rect or rect-like list/tuple
 
-        usefull if you don't want to repeatedly call get_tile_image
+        useful if you don't want to repeatedly call getTileImage
         """
 
         raise NotImplementedError
@@ -295,7 +298,7 @@ class TiledMap(TiledElement):
 
         Data is an array of arrays.
 
-        pos = data[y][x]
+        >>> pos = data[y][x]
         """
 
         try:
@@ -331,8 +334,8 @@ class TiledMap(TiledElement):
         try:
             layer = int(layer)
         except:
-            msg = "Layer must be an integer"
-            raise ValueError, msg
+            msg = "Layer must be an integer.  Got {} instead."
+            raise ValueError, msg.format(type(layer))
 
         p = product(range(self.width),range(self.height))
         layergids = set( self.tilelayers[layer].data[y][x] for x, y in p )
