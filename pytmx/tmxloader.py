@@ -111,7 +111,7 @@ Basic usage sample:
 
 When you want to draw tiles, you simply call "get_tile_image":
 
-    >>> image = tmxdata.get_tile_image(x, y, layer)    
+    >>> image = tmxdata.getTileImage(x, y, layer)    
     >>> screen.blit(position, image)
 
 

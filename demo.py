@@ -14,7 +14,7 @@ class TiledRenderer():
     """
 
     def __init__(self, filename):
-        import tmxloader
+        from pytmx import tmxloader
         self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
    
  
