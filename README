@@ -2,7 +2,7 @@ Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
 v.13 - for python 2.7
 
-If you have any problems or suggestions, please contact me via email.
+If you have any problems or suggestions, please contact me via email or github.
 Tested with Tiled 0.8.0 for Mac.
 
 released under the GPL v3
@@ -19,115 +19,19 @@ available to blit onto the screen.
 
 
 Design Goals:
-    Simple api
+    Simple api for accessing tile metadata and images
     Memory efficient and fast
 
 Features:
     Loads data and "properties" metadata from Tile's TMX format
     "Properties" for: maps, tilesets, layers, objectgroups, objects, and tiles
-    Automatic flipping and rotation of tiles
+    Automatic flipping and rotation of tile images
     Supports base64, csv, gzip, zlib and uncompressed TMX
     Image loading with pygame
 
 Missing:
-    Polyline (new in 0.8.0)
-    Polygon (new in 0.8.0)
+    Polyline (new in Tiled 0.8.0)
+    Polygon (new in Tiled 0.8.0)
 
 
-New in .13:
-    loader: Renamed "get_tile_image" to "getTileImage"
-    loader: Removed duplicates returned from getTilePropertiesByLayer
-    loader: Modified confusing messages for GID errors
-    loader: Fixed bug where transformed tile properties are not available
-    loader: No longer loads metadata for tiles that are not used
-    loader: Reduced tile cache to 256 unique tiles
-    loader: Removed 'visible' from list of reserved words
-    loader: Added 'buildDistributionRects' and maputils module
-    loader: Added some misc. functions for retrieving properties
-    pygame: Smarter tile management made tile loading cache useless; removed it
-    pygame: pygame.RLEACCEL flag added when appropriate
-
-New in .12:
-    loader: Fixed bug where tile properties could contain reserved words
-    loader: Reduced size of image index by only allocating space for used tiles
-
-New in .11:
-    loader: Added support for tileset properties
-    loader: Now checks for property names that are reserved for internal use
-    loader: Added support for rotated tiles
-    pygame: Only the tiles that are used in the map will be loaded into memory
-    pygame: Added support for rotated tiles
-    pygame: Added option to force a bitsize (depth) for surfaces
-    pygame: Added option to convert alpha transparency to colorkey transparency
-    pygame: Tilesets no longer load with per-pixel alphas by default
-    pygame: Colorkey transparency should be correctly handled now
-
-
-NOTES:
-
-* The Tiled "properties" have reserved names.
-
-If you use "properties" for any of the following object types, you cannot use
-any of theese words as a name for your property.  A ValueError will be raised
-if there are any conflicts.
-
-As of 0.8.0, these values are:
-
-map:        version, orientation, width, height, tilewidth, tileheight
-            properties, tileset, layer, objectgroup
-
-tileset:    firstgid, source, name, tilewidth, tileheight, spacing, margin,
-            image, tile, properties
-
-tile:       id, image, properties
-
-layer:      name, x, y, width, height, opacity, properties, data
-
-objectgroup: name, color, x, y, width, height, opacity, object, properties
-
-object:     name, type, x, y, width, height, gid, properties, polygon,
-            polyline, image
-
-
-
-I have been intentionally not including a rendering utility since rendering a
-map will not be the same in every situation.  However, I can appreciate that
-some poeple won't understand how it works unless they see it, so I am including
-a sample map and viewer.
-
-I've included a copy of this loader that may work with python 3.x.  I
-personally do not think that python 3.x should be used with pygame, yet (and I
-am not the only person).  You can try it if you insist on using pygame with
-python 3.x, but I don't update that often.
-
-===============================================================================
-
-Basic usage sample:
-
-    >>> import tmxloader
-    >>> tmxdata = tmxloader.load_pygame("map.tmx")
-
-
-When you want to draw tiles, you simply call "get_tile_image":
-
-    >>> image = tmxdata.get_tile_image(x, y, layer)    
-    >>> screen.blit(position, image)
-
-
-Maps, tilesets, layers, objectgroups, and objects all have a simple way to
-access metadata that was set inside tiled: they all become object attributes.
-
-    >>> layer = tmxdata.layers[0]
-    >>> print layer.tilewidth
-    32
-    >>> print layer.weather
-    'sunny'
-
-
-Tiles properties are the exception here, and must be accessed through
-"getTileProperties".  The data is a regular Python dictionary:
-
-    >>> tile = tmxdata.getTileProperties(x, y, layer)
-    >>> tile["name"]
-    'CobbleStone'
-
+Please see the module's docstring for version information and sample usage.
