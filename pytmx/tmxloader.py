@@ -6,7 +6,7 @@ v.13 - for python 2.7
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.0 for Mac.
 
-released under the GPL v3
+released under the LGPL v3
 
 ===============================================================================
 

@@ -6,6 +6,8 @@ v.7  -- for python 3.x
 If you have any problems, please contact me via email.
 Tested with Tiled 0.7.1 for Mac.
 
+released under the LGPL v3
+
 ======================================================================
 Design Goals:
     Simple api
