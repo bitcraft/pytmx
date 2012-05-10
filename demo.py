@@ -88,6 +88,7 @@ from itertools import product
 
 
 pygame.init()
+pygame.font.init()
 screen = pygame.display.set_mode((480, 480))
 pygame.display.set_caption('TMXLoader Test')
 
@@ -98,6 +99,9 @@ def simpleTest():
     formosa = TiledRenderer("formosa.tmx")
     formosa.render(screen_buf)
     pygame.transform.scale(screen_buf, screen.get_size(), screen)
+    f = pygame.font.Font(pygame.font.get_default_font(), 20)
+    i = f.render("simple demo. press any key to continue", 1, (180,180,0))
+    screen.blit(i, (0,0))
     pygame.display.flip()
 
     run = True
@@ -121,14 +125,25 @@ def scrollTest():
     mw = formosa.tiledmap.width * formosa.tiledmap.tilewidth
     mh = formosa.tiledmap.height * formosa.tiledmap.tileheight
 
+    f = pygame.font.Font(pygame.font.get_default_font(), 20)
+    t = ["scroll demo. press escape to quit",
+         "arrow keys move",
+         "z and x will zoom the map"]
+
+    text = [ f.render(i, 1, (180, 180, 0)) for i in t ]
+
     def draw():
         bw, bh = screen_buf.get_size()
         sw, sh = screen.get_size()
 
         if (sw >= bw) and (sh >= bh):
+            y = 0
             screen_buf.fill((0,128,255))
             formosa.render(screen_buf, center)
             pygame.transform.smoothscale(screen_buf, (sw, sh), screen)
+            for i in text:
+                screen.blit(i, (0,y))
+                y += i.get_height()
         else:
             pass
 
@@ -165,6 +180,9 @@ def scrollTest():
                 if (buf_dim[0] < 1) or (buf_dim[1] < 0):
                     buf_dim[0] += 1 - buf_dim[0]
                     buf_dim[1] += 1 - buf_dim[1]
+                if buf_dim[0] > screen.get_width() / 2:
+                    buf_dim = [screen.get_width() / 2, screen.get_height() / 2]
+                    movt[2] = 0
                 screen_buf = pygame.Surface(buf_dim)
 
             sw, sh = screen_buf.get_size()

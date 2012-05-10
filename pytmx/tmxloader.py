@@ -37,6 +37,7 @@ Missing:
 New in .14:
     loader: Fixed gid lookup for "buildDistributionRects"
     loader: Added useful output to a few classes "__repr__"
+    added scrolling demo
 
 New in .13:
     loader: Renamed "get_tile_image" to "getTileImage"
@@ -97,7 +98,7 @@ object:     name, type, x, y, width, height, gid, properties, polygon,
 I have been intentionally not including a rendering utility since rendering a
 map will not be the same in every situation.  However, I can appreciate that
 some poeple won't understand how it works unless they see it, so I am including
-a sample map and viewer.
+a sample map and viewer.  it includes a scrolling/zooming renderer.
 
 I've included a copy of this loader that may work with python 3.x.  I
 personally do not think that python 3.x should be used with pygame, yet (and I
@@ -909,7 +910,6 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             # there are transparent pixels, and we won't handle them
             else:
                 tile = temp.convert()
-
 
             tmxdata.images[tmxdata.gidmap[gid]] = tile
 
