@@ -1,7 +1,7 @@
 """
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v.13 - for python 2.7
+v.14 - for python 2.7
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.0 for Mac.
@@ -34,6 +34,8 @@ Missing:
     Polyline (new in 0.8.0)
     Polygon (new in 0.8.0)
 
+New in .14:
+    loader: Fixed gid lookup for "buildDistributionRects"
 
 New in .13:
     loader: Renamed "get_tile_image" to "getTileImage"
@@ -959,6 +961,8 @@ def buildDistributionRects(tmxmap, layer, gid=None):
 
     if gid == None:
         gid = tmxmap.gidmap[tmxmap.tilesets[layer].firstgid]
+    else:
+        gid = tmxmap.gidmap[gid]
 
     layer_data = tmxmap.getLayerData(layer)
     p = product(xrange(tmxmap.width), xrange(tmxmap.height))
