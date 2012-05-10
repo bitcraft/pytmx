@@ -36,6 +36,7 @@ Missing:
 
 New in .14:
     loader: Fixed gid lookup for "buildDistributionRects"
+    loader: Added useful output to a few classes "__repr__"
 
 New in .13:
     loader: Renamed "get_tile_image" to "getTileImage"
@@ -200,6 +201,8 @@ class TiledMap(TiledElement):
         self.loadgids = []  # gids that should be loaded for display
         self.maxgid = 1
 
+    def __repr__(self):
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
 
     def getTileImage(self, x, y, layer):
         """
@@ -374,6 +377,9 @@ class TiledTileset(TiledElement):
         self.spacing = 0
         self.margin = 0
 
+    def __repr__(self):
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+
 class TiledLayer(TiledElement):
     reserved = "name x y width height opacity properties data".split()
 
@@ -385,7 +391,10 @@ class TiledLayer(TiledElement):
         self.name = None
         self.opacity = 1.0
         self.visible = True
-        
+       
+    def __repr__(self):
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+ 
 class TiledObjectGroup(TiledElement):
     reserved = "name color x y width height opacity object properties".split()
 
@@ -395,6 +404,9 @@ class TiledObjectGroup(TiledElement):
 
         # defaults from the specification
         self.name = None
+
+    def __repr__(self):
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
 
 class TiledObject(TiledElement):
     __slots__ = "reserved name type x y width height gid".split()
@@ -412,6 +424,8 @@ class TiledObject(TiledElement):
         self.height = 0
         self.gid = 0
 
+    def __repr__(self):
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
 
 def load_tmx(filename, *args, **kwargs):
     """
