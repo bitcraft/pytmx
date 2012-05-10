@@ -164,7 +164,7 @@ class TiledMap(TiledElement):
     not really useful unless "loaded"  ie: don't instance directly.
     see the pygame loader for inspiration
 
-    In the interest of memory consumption, this loader ignores any tiles that
+    In the interest of memory conservation, this loader ignores any tiles that
     are never actually displayed on the map.  As a consequence, the GID's that
     are stored in Tiled and the TMX format will not be the same in most cases.
     """
@@ -1012,12 +1012,8 @@ def buildDistributionRects(tmxmap, layer, tileset=None, gid=None):
         except KeyError:
             msg = "GID #{} not found"
             raise ValueError, msg.format(gid)
-    else:
-        if not tileset:
-            msg = "Must specify either GID or tileset"
-            raise ValueError, msg
 
-        gid = tileset.firstgid
+    #gid = tileset.firstgid
 
     if isinstance(layer, int):
         layer_data = tmxmap.getLayerData(layer).data
@@ -1030,6 +1026,10 @@ def buildDistributionRects(tmxmap, layer, tileset=None, gid=None):
             raise ValueError, msg.format(layer, tmxmap)
 
     p = product(xrange(tmxmap.width), xrange(tmxmap.height))
-    points = [ (x,y) for (x,y) in p if layer_data[y][x] == gid ]
+    if gid:
+        points = [ (x,y) for (x,y) in p if layer_data[y][x] == gid ]
+    else:
+        points = [ (x,y) for (x,y) in p if layer_data[y][x] ]
+
     rects = maputils.simplify(points, tmxmap.tilewidth, tmxmap.tileheight)
     return rects
