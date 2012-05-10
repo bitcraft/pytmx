@@ -203,7 +203,7 @@ class TiledMap(TiledElement):
         self.maxgid = 1
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+        return "<{}: \"{}\">".format(self.__class__.__name__, self.filename)
 
     def getTileImage(self, x, y, layer):
         """
@@ -594,11 +594,17 @@ def load_tmx(filename, *args, **kwargs):
         dict will not be loaded
         """
 
+        if mapping:
+            if not isinstance(mapping, dict):
+                msg = "mapping supplied to parse_tileset must be a dict"
+                raise TypeError, msg
+
+
         tileset = TiledTileset()
         set_properties(tileset, node)
         tiles = {}
 
-        if firstgid != None:
+        if firstgid:
             tileset.firstgid = firstgid
 
         # since tile objects [probably] don't have a lot of metadata,
@@ -607,18 +613,15 @@ def load_tmx(filename, *args, **kwargs):
             if child.nodeName == "tile":
                 p = get_properties(child)
                 gid = p["id"] + tileset.firstgid
-                if mapping == None:
-                    del p["id"]
-                    tiles[gid] = p
-                elif isinstance(mapping, dict):
+                if mapping:
                     try:
                         tiles[mapping[gid]] = p
                         del p["id"]
                     except KeyError:
                         pass
                 else:
-                    msg = "mapping supplied to parse_tileset must be a dict"
-                    raise TypeError, msg
+                    del p["id"]
+                    tiles[gid] = p
 
         # check for tiled "external tilesets"
         if tileset.source:
@@ -634,7 +637,7 @@ def load_tmx(filename, *args, **kwargs):
 
                 tileset_node = tsx.getElementsByTagName("tileset")[0]
                 tileset, tiles = parse_tileset(tileset_node, \
-                                                tileset.firstgid, mapping)
+                                               tileset.firstgid, mapping)
             else:
                 msg = "Found external tileset, but cannot handle type: {}"
                 raise Exception, msg.format(tileset.source)
@@ -654,7 +657,18 @@ def load_tmx(filename, *args, **kwargs):
             y, r = divmod(attr["height"], tileset.tileheight)
 
             tileset.lastgid = tileset.firstgid + x + y
-          
+       
+        if mapping: 
+            try:
+                tileset.firstgid = mapping[tileset.firstgid]
+            except KeyError:
+                pass
+
+            try:
+                tileset.lastgid = mapping[tileset.lastgid]
+            except KeyError:
+                pass
+
         return tileset, tiles
 
 
@@ -963,7 +977,7 @@ def load_pygame(filename, *args, **kwargs):
     return tmxdata
 
 
-def buildDistributionRects(tmxmap, layer, gid=None):
+def buildDistributionRects(tmxmap, layer, tileset=None, gid=None):
     """
     generate a set of non-overlapping rects that represents the distribution
     of the specfied gid.  if gid is not passed, then will choose one.
@@ -973,12 +987,48 @@ def buildDistributionRects(tmxmap, layer, gid=None):
     
     import maputils
 
-    if gid == None:
-        gid = tmxmap.gidmap[tmxmap.tilesets[layer].firstgid]
-    else:
-        gid = tmxmap.gidmap[gid]
+    if isinstance(tileset, int):
+        try:
+            tileset = tmxmap.tilesets[tileset]
+        except IndexError:
+            msg = "Tileset #{} not found in map {}."
+            raise IndexError, msg.format(tileset, tmxmap)
 
-    layer_data = tmxmap.getLayerData(layer)
+    elif isinstance(tileset, str):
+        try:
+            tileset = [ t for t in tmxmap.tilesets if t.name == tileset ].pop()
+        except IndexError:
+            msg = "Tileset \"{}\" not found in map {}."
+            raise ValueError, msg.format(tileset, tmxmap)
+
+    elif tileset:
+        msg = "Tileset must be either a int or string. got: {}"
+        raise ValueError, msg.format(type(tileset))
+
+
+    if gid:
+        try:
+            gid = tmxmap.gidmap[gid]
+        except KeyError:
+            msg = "GID #{} not found"
+            raise ValueError, msg.format(gid)
+    else:
+        if not tileset:
+            msg = "Must specify either GID or tileset"
+            raise ValueError, msg
+
+        gid = tileset.firstgid
+
+    if isinstance(layer, int):
+        layer_data = tmxmap.getLayerData(layer).data
+    elif isinstance(layer, str):
+        try:
+            layer = [ l for l in tmxmap.layers if l.name == layer ].pop()
+            layer_data = layer.data
+        except IndexError:
+            msg = "Layer \"{}\" not found in map {}."
+            raise ValueError, msg.format(layer, tmxmap)
+
     p = product(xrange(tmxmap.width), xrange(tmxmap.height))
     points = [ (x,y) for (x,y) in p if layer_data[y][x] == gid ]
     rects = maputils.simplify(points, tmxmap.tilewidth, tmxmap.tileheight)
