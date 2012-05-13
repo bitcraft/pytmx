@@ -915,7 +915,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             # there are transparent pixels, and tiled set a colorkey
             elif t.trans:
                 tile = temp.convert()
-                tile.set_colorkey(t.trans, pygame.RLEACCEL)
+                tile.set_colorkey(int(t.trans, 16), pygame.RLEACCEL)
 
             # there are transparent pixels, and set for perpixel alpha
             elif pixelalpha:
