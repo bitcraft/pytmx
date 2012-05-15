@@ -707,24 +707,25 @@ def load_tmx(filename, *args, **kwargs):
             msg = "TMX encoding type: {} is not supported."
             raise Exception, msg.format(str(attr["encoding"]))
 
-        if attr["compression"] == "gzip":
-            from StringIO import StringIO
-            import gzip
-            with gzip.GzipFile(fileobj=StringIO(data)) as fh:
-                data = fh.read()
+        if hasattr(attr, "compression"):
+            if attr["compression"] == "gzip":
+                from StringIO import StringIO
+                import gzip
+                with gzip.GzipFile(fileobj=StringIO(data)) as fh:
+                    data = fh.read()
 
-        elif attr["compression"] == "zlib":
-            try:
-                import zlib
-            except:
-                msg = "Cannot import zlib. Make sure it is installed."
-                raise Exception, msg
+            elif attr["compression"] == "zlib":
+                try:
+                    import zlib
+                except:
+                    msg = "Cannot import zlib. Make sure it is installed."
+                    raise Exception, msg
 
-            data = zlib.decompress(data)
+                data = zlib.decompress(data)
 
-        elif not attr["compression"] == None:
-            msg = "TMX compression type: {} is not supported."
-            raise Exception, msg.format(str(attr["compression"]))
+            elif not attr["compression"] == None:
+                msg = "TMX compression type: {} is not supported."
+                raise Exception, msg.format(str(attr["compression"]))
      
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
