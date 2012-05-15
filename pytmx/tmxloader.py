@@ -503,7 +503,7 @@ def load_tmx(filename, *args, **kwargs):
 
     def group(l, n):
         # return a list as a sequence of n tuples
-        return izip(*[islice(l, i, None, n) for i in xrange(n)])
+        return izip(*(islice(l, i, None, n) for i in xrange(n)))
 
     def parse_properties(node):
         """
@@ -519,7 +519,7 @@ def load_tmx(filename, *args, **kwargs):
                     # quality that "name" and "value" is included.
                     # here we mangle it to get that stuff out.
                     d.update(dict(pairwise(
-                        [str(i.value) for i in subnode.attributes.values()])))
+                        str(i.value) for i in subnode.attributes.values())))
 
         return d
 
@@ -569,8 +569,8 @@ def load_tmx(filename, *args, **kwargs):
         get the attributes from a node and fix them to the correct type
         """
 
-        return dict([ (str(k), types[str(k)](v))
-                    for (k,v) in node.attributes.items() ])
+        return dict((str(k), types[str(k)](v))
+                    for (k,v) in node.attributes.items())
 
 
     def decode_gid(raw_gid):
@@ -694,51 +694,51 @@ def load_tmx(filename, *args, **kwargs):
         data_node = node.getElementsByTagName("data")[0]
         attr = get_attributes(data_node)
 
-        if hasattr(attr, "encoding"):
-            if attr["encoding"] == "base64":
-                from base64 import decodestring
-                data = decodestring(data_node.lastChild.nodeValue)
+        encoding = attr.get("encoding", None)
+        if encoding == "base64":
+            from base64 import decodestring
+            data = decodestring(data_node.lastChild.nodeValue)
 
-            elif attr["encoding"] == "csv":
-                next_gid = imap(int, "".join(
-                    [ line.strip() for line in data_node.lastChild.nodeValue ]
-                    ).split(","))
+        elif encoding == "csv":
+            next_gid = imap(int, "".join(
+                line.strip() for line in data_node.lastChild.nodeValue
+                ).split(","))
 
-            elif not attr["encoding"] == None:
-                msg = "TMX encoding type: {} is not supported."
-                raise Exception, msg.format(str(attr["encoding"]))
+        elif encoding:
+            msg = "TMX encoding type: {} is not supported."
+            raise Exception, msg.format(str(attr["encoding"]))
 
-        if hasattr(attr, "compression"):
-            if attr["compression"] == "gzip":
-                from StringIO import StringIO
-                import gzip
-                with gzip.GzipFile(fileobj=StringIO(data)) as fh:
-                    data = fh.read()
+        compression = attr.get("compression", None)
+        if compression == "gzip":
+            from StringIO import StringIO
+            import gzip
+            with gzip.GzipFile(fileobj=StringIO(data)) as fh:
+                data = fh.read()
 
-            elif attr["compression"] == "zlib":
-                try:
-                    import zlib
-                except:
-                    msg = "Cannot import zlib. Make sure it is installed."
-                    raise Exception, msg
+        elif compression == "zlib":
+            try:
+                import zlib
+            except:
+                msg = "Cannot import zlib. Make sure it is installed."
+                raise Exception, msg
 
-                data = zlib.decompress(data)
+            data = zlib.decompress(data)
 
-            elif not attr["compression"] == None:
-                msg = "TMX compression type: {} is not supported."
-                raise Exception, msg.format(str(attr["compression"]))
+        elif compression:
+            msg = "TMX compression type: {} is not supported."
+            raise Exception, msg.format(str(attr["compression"]))
      
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
         # TODO: this will probably raise an exception if there are no tiles
-        if attr.get("encoding", None) == next_gid == None:
+        if encoding == next_gid == None:
             def get_children(parent):
                 for child in parent.getElementsByTagName("tile"):
                     yield int(child.getAttribute("gid"))
 
             next_gid = get_children(data_node)
 
-        elif not data == None:
+        elif data:
             # data is a list of gid's. cast as 32-bit ints to format properly
             next_gid=imap(lambda i:unpack("<L", "".join(i))[0], group(data, 4))
 
