@@ -694,18 +694,19 @@ def load_tmx(filename, *args, **kwargs):
         data_node = node.getElementsByTagName("data")[0]
         attr = get_attributes(data_node)
 
-        if attr["encoding"] == "base64":
-            from base64 import decodestring
-            data = decodestring(data_node.lastChild.nodeValue)
+        if hasattr(attr, "encoding"):
+            if attr["encoding"] == "base64":
+                from base64 import decodestring
+                data = decodestring(data_node.lastChild.nodeValue)
 
-        elif attr["encoding"] == "csv":
-            next_gid = imap(int, "".join(
-                [ line.strip() for line in data_node.lastChild.nodeValue ]
-                ).split(","))
+            elif attr["encoding"] == "csv":
+                next_gid = imap(int, "".join(
+                    [ line.strip() for line in data_node.lastChild.nodeValue ]
+                    ).split(","))
 
-        elif not attr["encoding"] == None:
-            msg = "TMX encoding type: {} is not supported."
-            raise Exception, msg.format(str(attr["encoding"]))
+            elif not attr["encoding"] == None:
+                msg = "TMX encoding type: {} is not supported."
+                raise Exception, msg.format(str(attr["encoding"]))
 
         if hasattr(attr, "compression"):
             if attr["compression"] == "gzip":
@@ -730,7 +731,7 @@ def load_tmx(filename, *args, **kwargs):
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
         # TODO: this will probably raise an exception if there are no tiles
-        if attr["encoding"] == next_gid == None:
+        if attr.get("encoding", None) == next_gid == None:
             def get_children(parent):
                 for child in parent.getElementsByTagName("tile"):
                     yield int(child.getAttribute("gid"))
