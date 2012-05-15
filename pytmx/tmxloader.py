@@ -4,7 +4,7 @@ bitcraft (leif dot theden at gmail.com)
 v.14 - for python 2.7
 
 If you have any problems or suggestions, please contact me via email.
-Tested with Tiled 0.8.0 for Mac.
+Tested with Tiled 0.8.1 for Mac.
 
 released under the LGPL v3
 
@@ -37,6 +37,9 @@ Missing:
 New in .14:
     loader: Fixed gid lookup for "buildDistributionRects"
     loader: Added useful output to a few classes "__repr__"
+    pygame: fixed colorkey handling
+    pygame: correctly handles margins and spacing between tiles in tilesets
+    pygame: b/c of changes, now correctly renders tiled's example maps
     added scrolling demo
 
 New in .13:
@@ -657,7 +660,8 @@ def load_tmx(filename, *args, **kwargs):
             y, r = divmod(attr["height"], tileset.tileheight)
 
             tileset.lastgid = tileset.firstgid + x + y
-       
+   
+        """ 
         if mapping: 
             try:
                 tileset.firstgid = mapping[tileset.firstgid]
@@ -668,6 +672,8 @@ def load_tmx(filename, *args, **kwargs):
                 tileset.lastgid = mapping[tileset.lastgid]
             except KeyError:
                 pass
+        """
+
 
         return tileset, tiles
 
@@ -881,24 +887,35 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
         tile_size = (t.tilewidth, t.tileheight)
         gid = firstgid
 
-        # some tileset images may be slightly larger than the tiles area
+        if t.trans:
+            tileset_colorkey = pygame.Color("#{}".format(t.trans)) 
+
+        # i dont agree with margins and spacing, but i'll support it anyway
+        # such is life.  okay.jpg
+        tilewidth = t.tilewidth + t.spacing
+        tileheight = t.tileheight + t.spacing
+
+        # some tileset images may be slightly larger than the tile area
         # ie: may include a banner, copyright, ect.  this compensates for that
-        x_range = xrange(0, int(w / t.tilewidth) * t.tilewidth, t.tilewidth)
-        y_range = xrange(0, int(h / t.tileheight) * t.tileheight, t.tileheight)
+        width = ((int((w-t.margin*2) + t.spacing) / tilewidth) * tilewidth) - t.spacing
+        height = ((int((h-t.margin*2) + t.spacing) / tileheight) * tileheight) - t.spacing
 
         # using product avoids the overhead of nested loops
-        for (y, x) in product(y_range, x_range):
+        p = product(xrange(t.margin, height+t.margin, tileheight),
+                    xrange(t.margin, width+t.margin, tilewidth))
+
+        for (y, x) in p:
 
             # prevent loading of tiles that are never used in the loader
             if not gid in usedgids:
                 gid += 1
                 continue
 
-            # determine if the tile contains any transparent area
+            # we do some tests to correctly handle the tile and set the right
+            # blitting flags.  just grab a section of it.
             temp = image.subsurface(((x,y), tile_size))
 
-            # if not, then we don't set any special blitting flags
-            # make a copy so that the parent surface isn't lingering in memory
+            # count the number of pixels in the tile that are not transparent
             px = mask.from_surface(temp).count()
 
             # there are no transparent pixels in the image
@@ -915,7 +932,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             # there are transparent pixels, and tiled set a colorkey
             elif t.trans:
                 tile = temp.convert()
-                tile.set_colorkey(t.trans, pygame.RLEACCEL)
+                tile.set_colorkey(tileset_colorkey, pygame.RLEACCEL)
 
             # there are transparent pixels, and set for perpixel alpha
             elif pixelalpha:
