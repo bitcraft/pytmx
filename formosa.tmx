@@ -5,7 +5,7 @@
  </tileset>
  <layer name="Grass" width="15" height="15">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAAxNiYGAQGsXDEmdToI8cvdlk6s0mUy+6vqGKAWminuuEAwAA
+   H4sIAAAAAAAAAxNiYGAQGubYi5FhgRUQawExqXqBehSAehWAZiiQYe8BIHYAmtFAql6gnQeA2MGKDL1A+w4AsYMXGXpBOBuKydVHqt5sMvWi6xuqGACDojZihAMAAA==
   </data>
  </layer>
  <layer name="Tile Layer 1" width="15" height="15">

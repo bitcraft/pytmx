@@ -152,7 +152,7 @@ def scrollTest():
     run = True
     while run:
         try:
-            clock.tick(60)
+            clock.tick(30)
             event = pygame.event.poll()
 
             if event.type == QUIT: run = False
