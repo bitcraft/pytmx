@@ -37,6 +37,7 @@ Missing:
 New in .14:
     loader: Fixed gid lookup for "buildDistributionRects"
     loader: Added useful output to a few classes "__repr__"
+    loader: Fixed a gid mapping issue that broke rotated tiles
     pygame: fixed colorkey handling
     pygame: correctly handles margins and spacing between tiles in tilesets
     pygame: b/c of changes, now correctly renders tiled's example maps
@@ -636,8 +637,8 @@ def load_tmx(filename, *args, **kwargs):
         for child in node.childNodes:
             if child.nodeName == "tile":
                 p = get_properties(child)
-                gid, flags = tmxdata.mapGID(p["id"] + tileset.firstgid)
-                tiles[gid] = p
+                for gid, flags in tmxdata.mapGID(p["id"] + tileset.firstgid):
+                    tiles[gid] = p
                 del p["id"]
 
         # check for tiled "external tilesets"
@@ -653,8 +654,8 @@ def load_tmx(filename, *args, **kwargs):
                     raise Exception, msg.format(path)
 
                 tileset_node = tsx.getElementsByTagName("tileset")[0]
-                tileset, tiles = parse_tileset(tileset_node, \
-                                               tileset.firstgid, mapping)
+                tileset, tiles = parse_tileset(tmxdata, tileset_node, \
+                                               tileset.firstgid)
             else:
                 msg = "Found external tileset, but cannot handle type: {}"
                 raise Exception, msg.format(tileset.source)
@@ -787,6 +788,7 @@ def load_tmx(filename, *args, **kwargs):
             t, tiles = parse_tileset(tmxdata, node)
             tmxdata.tilesets.append(t)
             tmxdata.tile_properties.update(tiles)
+            print tiles
 
         # we may have created new GID's because a tile was transformed.
         # go through tile properties and make copies if needed
@@ -961,12 +963,12 @@ def load_pygame(filename, *args, **kwargs):
     return tmxdata
 
 
-def buildDistributionRects(tmxmap, layer, tileset=None, gid=None):
+def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
     """
     generate a set of non-overlapping rects that represents the distribution
-    of the specfied gid.  if gid is not passed, then will choose one.
+    of the specfied gid.
 
-    useful for collision detection
+    useful for generating rects for use in collision detection
     """
     
     import maputils
@@ -989,15 +991,14 @@ def buildDistributionRects(tmxmap, layer, tileset=None, gid=None):
         msg = "Tileset must be either a int or string. got: {}"
         raise ValueError, msg.format(type(tileset))
 
-
-    if gid:
+    gid = None
+    if real_gid:
         try:
-            gid = tmxmap.gidmap[gid]
-        except KeyError:
+            gid, flags = tmxmap.mapGID(real_gid)[0]
+        except KeyError, IndexError:
             msg = "GID #{} not found"
-            raise ValueError, msg.format(gid)
+            raise ValueError, msg.format(real_gid)
 
-    #gid = tileset.firstgid
 
     if isinstance(layer, int):
         layer_data = tmxmap.getLayerData(layer).data
