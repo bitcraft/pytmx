@@ -784,20 +784,20 @@ def load_tmx(filename, *args, **kwargs):
             if l.visible:
                 tmxdata.visibleTileLayers.append(l)
 
+        # load object groups...
+        for node in dom.getElementsByTagName("objectgroup"):
+            o = parse_objectgroup(tmxdata, node)
+            tmxdata.objectgroups.append(o)
+            tmxdata.layers.append(o)
+        
         # load tilesets...
         for node in map_node.getElementsByTagName("tileset"):
             t, tiles = parse_tileset(tmxdata, node)
             tmxdata.tilesets.append(t)
             tmxdata.tile_properties.update(tiles)
-            print tiles
-
+        
         # we may have created new GID's because a tile was transformed.
         # go through tile properties and make copies if needed
-
-        for node in dom.getElementsByTagName("objectgroup"):
-            o = parse_objectgroup(tmxdata, node)
-            tmxdata.objectgroups.append(o)
-            tmxdata.layers.append(o)
 
         return tmxdata
 
