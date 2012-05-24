@@ -745,7 +745,7 @@ def load_tmx(filename, *args, **kwargs):
         return layer
 
 
-    def parse_objectgroup(node):
+    def parse_objectgroup(tmxdata, node):
         """
         parse a objectgroup element and return a object group
         """
@@ -753,10 +753,11 @@ def load_tmx(filename, *args, **kwargs):
         objgroup = TiledObjectGroup()
         set_properties(objgroup, node)
 
-        # TODO: objects may contain a GID, we need to change it to mapped GID
         for subnode in node.getElementsByTagName("object"):
             obj = TiledObject()
             set_properties(obj, subnode)
+            if hasattr(obj, "gid"):
+                obj.gid = tmxdata.registerGID(*decode_gid(obj.gid))
             objgroup.objects.append(obj)
 
         return objgroup
@@ -794,7 +795,7 @@ def load_tmx(filename, *args, **kwargs):
         # go through tile properties and make copies if needed
 
         for node in dom.getElementsByTagName("objectgroup"):
-            o = parse_objectgroup(node)
+            o = parse_objectgroup(tmxdata, node)
             tmxdata.objectgroups.append(o)
             tmxdata.layers.append(o)
 
