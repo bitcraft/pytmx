@@ -445,7 +445,6 @@ class TiledObjectGroup(TiledElement):
         return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
 
 class TiledObject(TiledElement):
-    __slots__ = "reserved name type x y width height gid".split()
     reserved = "name type x y width height gid properties polygon polyline image".split()
 
     def __init__(self):
@@ -745,7 +744,7 @@ def load_tmx(filename, *args, **kwargs):
         return layer
 
 
-    def parse_objectgroup(node):
+    def parse_objectgroup(tmxdata, node):
         """
         parse a objectgroup element and return a object group
         """
@@ -753,10 +752,11 @@ def load_tmx(filename, *args, **kwargs):
         objgroup = TiledObjectGroup()
         set_properties(objgroup, node)
 
-        # TODO: objects may contain a GID, we need to change it to mapped GID
         for subnode in node.getElementsByTagName("object"):
             obj = TiledObject()
             set_properties(obj, subnode)
+            if hasattr(obj, "gid"):
+                obj.gid = tmxdata.registerGID(*decode_gid(obj.gid))
             objgroup.objects.append(obj)
 
         return objgroup
@@ -783,20 +783,20 @@ def load_tmx(filename, *args, **kwargs):
             if l.visible:
                 tmxdata.visibleTileLayers.append(l)
 
+        # load object groups...
+        for node in dom.getElementsByTagName("objectgroup"):
+            o = parse_objectgroup(tmxdata, node)
+            tmxdata.objectgroups.append(o)
+            tmxdata.layers.append(o)
+        
         # load tilesets...
         for node in map_node.getElementsByTagName("tileset"):
             t, tiles = parse_tileset(tmxdata, node)
             tmxdata.tilesets.append(t)
             tmxdata.tile_properties.update(tiles)
-            print tiles
-
+        
         # we may have created new GID's because a tile was transformed.
         # go through tile properties and make copies if needed
-
-        for node in dom.getElementsByTagName("objectgroup"):
-            o = parse_objectgroup(node)
-            tmxdata.objectgroups.append(o)
-            tmxdata.layers.append(o)
 
         return tmxdata
 
