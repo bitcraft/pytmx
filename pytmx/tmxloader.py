@@ -445,7 +445,6 @@ class TiledObjectGroup(TiledElement):
         return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
 
 class TiledObject(TiledElement):
-    __slots__ = "reserved name type x y width height gid".split()
     reserved = "name type x y width height gid properties polygon polyline image".split()
 
     def __init__(self):
