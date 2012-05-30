@@ -20,27 +20,23 @@ available to blit onto the screen.
 
 
 Design Goals:
-    Simple api for accessing tile metadata and images
+    Simple api
     Memory efficient and fast
 
 Features:
     Loads data and "properties" metadata from Tile's TMX format
     "Properties" for: maps, tilesets, layers, objectgroups, objects, and tiles
-    Automatic flipping and rotation of tile images
-    Supports base64, csv, gzip, zlib and uncompressed TMX
+    Point data for polygon and polyline objects
+    Automatic flipping and rotation of tiles
+    Supports base64, csv, gzip, zlib and uncompressed XML
     Image loading with pygame
 
-Missing:
-    Polyline (new in Tiled 0.8.0)
-    Polygon (new in Tiled 0.8.0)
+
+===============================================================================
+
+Please see tmxloader.py's docstring for version information and sample usage.
 
 
 ===============================================================================
 
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
-
-
-===============================================================================
-
-Please see the module's docstring for version information and sample usage.
-
