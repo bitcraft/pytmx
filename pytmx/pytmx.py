@@ -6,6 +6,12 @@ from constants import *
 
 
 
+"""
+Class declarations and other important stuff
+"""
+
+
+
 class TiledElement(object):
     def set_properties(self, node):
         """

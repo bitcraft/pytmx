@@ -176,11 +176,6 @@ def load_tmx(filename, *args, **kwargs):
 
 def load_images_pygame(tmxdata, mapping, *args, **kwargs):
     """
-    given tmx data, return an array of images.
-
-    why use this?  to change the tileset on the fly without reloading the
-    the entire .tmx file.  metadata will be preserved. (test this)
-
     due to the way the tiles are loaded, they will be in the same pixel format
     as the display when it is loaded.  take this into consideration if you
     intend to support different screen pixel formats.

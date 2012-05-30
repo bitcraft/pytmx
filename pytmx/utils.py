@@ -5,6 +5,11 @@ from constants import *
 
 
 
+"""
+Various code that doesn't really fit anywhere else
+"""
+
+
 def read_points(text):
     return [ tuple(map(lambda x: int(x), i.split(',')))
          for i in text.split() ]
