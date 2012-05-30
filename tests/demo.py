@@ -6,6 +6,12 @@ bitcraft (leif dot theden at gmail.com)
 Rendering demo for the TMXLoader.  This simply shows that the loader works.
 If you need a rendering library that will handle large maps and scrolling, you
 can check out my lib2d project at pygame.org.  Have fun!
+
+
+Known bugs:
+    Tile Objects are not handled by any renderer.
+
+
 """
 
 class TiledRenderer(object):
@@ -26,7 +32,7 @@ class TiledRenderer(object):
         th = self.tiledmap.tileheight
         gt = self.tiledmap.getTileImage
 
-        for l in xrange(0, len(self.tiledmap.layers)):
+        for l in xrange(0, len(self.tiledmap.tilelayers)):
             for y in xrange(0, self.tiledmap.height):
                 for x in xrange(0, self.tiledmap.width):
                     tile = gt(x, y, l)
@@ -73,7 +79,7 @@ class ScrollingRenderer(TiledRenderer):
         if sth + tyf > self.mapheight: sth -= 1
 
         p = product(xrange(stw), xrange(sth),
-                    xrange(len(self.tiledmap.layers)))
+                    xrange(len(self.tiledmap.tilelayers)))
 
         for x, y, l in p:
             tile = gt(x+txf, y+tyf, l)
@@ -93,10 +99,10 @@ screen = pygame.display.set_mode((480, 480))
 pygame.display.set_caption('TMXLoader Test')
 
 
-def simpleTest():
+def simpleTest(filename):
     screen_buf = pygame.Surface((240, 240))
     screen_buf.fill((0,128,255))
-    formosa = TiledRenderer("formosa.tmx")
+    formosa = TiledRenderer(filename)
     formosa.render(screen_buf)
     pygame.transform.scale(screen_buf, screen.get_size(), screen)
     f = pygame.font.Font(pygame.font.get_default_font(), 20)
@@ -114,14 +120,14 @@ def simpleTest():
             run = False
 
 
-def scrollTest():
+def scrollTest(filename):
     buf_dim = [screen.get_width() / 2, screen.get_height() / 2]
     center = [buf_dim[0]/2, buf_dim[1]/2]
     movt = [0, 0, 0]
 
     clock = pygame.time.Clock()
     screen_buf = pygame.Surface(buf_dim)
-    formosa = ScrollingRenderer("formosa.tmx")
+    formosa = ScrollingRenderer(filename)
     mw = formosa.tiledmap.width * formosa.tiledmap.tilewidth
     mh = formosa.tiledmap.height * formosa.tiledmap.tileheight
 
@@ -217,8 +223,15 @@ def scrollTest():
             run = False
 
 
-simpleTest()
-scrollTest()
+if __name__ == "__main__":
+    import sys
+    try:
+        filename = sys.argv[1]
+    except:
+        print "no TMX map specified, using default"
+        filename = "formosa-base64-gzip.tmx"
 
+    simpleTest(filename)
+    scrollTest(filename)
 
-pygame.quit()
+    pygame.quit()
