@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="15" height="15" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16">
+  <image source="16x16-overworld.png" width="256" height="336"/>
+  <tile id="17">
+   <properties>
+    <property name="name" value="grass"/>
+   </properties>
+  </tile>
+  <tile id="245">
+   <properties>
+    <property name="type" value="GrassCave"/>
+   </properties>
+  </tile>
+  <tile id="261">
+   <properties>
+    <property name="type" value="SandCave"/>
+   </properties>
+  </tile>
+  <tile id="275">
+   <properties>
+    <property name="name" value="castle-door"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Grass and Water" width="15" height="15">
+  <data encoding="base64" compression="zlib">
+   eJwTYmBgEBrFwxJnU6CPHL3ZZOrNJlMvuj5CerGpHwwYAHdzIkA=
+  </data>
+ </layer>
+ <layer name="Tile Layer 1" width="15" height="15">
+  <data encoding="base64" compression="zlib">
+   eJzdjksOQDAURd8LgjGCKZbABtiYPaOYuZKKT6rU0E1O0t95vURm6UAPBrkXYAQTmB9ci4ls4PB+5mLtAZ/1cwLchyA6uDHWCUj5PEco/IKpvet1nKOKzt0iyPxfVRp0qCSloVte+tcm8sXLf+it7zOJyss0fOn3NgsYKxS4
+  </data>
+ </layer>
+ <layer name="Tile Layer 2" width="15" height="15">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFxAIvRgYHID5Ajl4roF4rqF4tRoYEIDsBaFYCMXqB6h20oHqBehYA9S4A8heQ4w5SANAOEG6AsklyM1AtCIP1kupmoHoQbiDL0UMQAAAYyhAJ
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="15" height="15">
+  <object name="Castle" x="192" y="16">
+   <properties>
+    <property name="Population" value="234"/>
+   </properties>
+   <polygon points="0,0 0,32 48,32 48,0"/>
+  </object>
+  <object name="Towers Area" x="0" y="192">
+   <polygon points="0,0 32,0 48,-16 96,-16 96,-96 48,-96 32,-112 0,-112"/>
+  </object>
+  <object name="Coastline" x="0" y="208">
+   <polyline points="0,0 112,0 128,-16 160,-16 240,-96"/>
+  </object>
+  <object name="GenericObject" x="96" y="64" width="32" height="32"/>
+  <object name="SandCave" gid="262" x="64" y="80"/>
+  <object name="Road" x="224" y="48">
+   <properties>
+    <property name="MoveCost" value="2"/>
+   </properties>
+   <polyline points="0,0 0,48 -64,48 -64,64 -48,64"/>
+  </object>
+ </objectgroup>
+</map>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="10" height="10" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32">
+  <image source="tiles.png" width="64" height="64"/>
+  <tile id="1">
+   <properties>
+    <property name="color" value="blue"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJyNkMEKADAIQh32/9+8HQqk2djhEWWYRABxYBJSla5Pfc1W0n1U+8H5l6a9y07MOZx/3+1ZaHyJO6+79fqVzjfbTAEP
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="10" height="10">
+  <object gid="2" x="96" y="128"/>
+ </objectgroup>
+</map>
