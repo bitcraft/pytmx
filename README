@@ -35,8 +35,10 @@ Features:
 ===============================================================================
 
 Please see tmxloader.py's docstring for version information and sample usage.
+Check tests/test.py and tests/demo.py for examples on how to use the library.
 
 
 ===============================================================================
 
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
+
