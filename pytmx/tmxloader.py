@@ -105,10 +105,12 @@ object:     name, type, x, y, width, height, gid, properties, polygon,
 
 
 
-I have been intentionally not including a rendering utility since rendering a
-map will not be the same in every situation.  However, I can appreciate that
-some poeple won't understand how it works unless they see it, so I am including
-a sample map and viewer.  It includes a scrolling/zooming renderer.
+I have been intentionally not including a module rendering utility since
+rendering a map will have different requirements for every situation.  However,
+I can appreciate that some poeple won't understand how it works unless they see
+it, so I am including a sample map and viewer.  It includes a scrolling/zooming
+renderer.  They are for demonstation purposes, and may not be suitable for all
+projects.  Use at your own risk.
 
 I've also included a copy of this loader that may work with python 3.x.  I
 personally do not think that python 3.x should be used with pygame, yet (and I
@@ -151,18 +153,7 @@ Tiles properties are the exception here, and must be accessed through
 Please see the TiledMap class for some api information.
 """
 from utils import types
-
-
-# internal flags
-TRANS_FLIPX = 1
-TRANS_FLIPY = 2
-TRANS_ROT = 4
-
-
-# Tiled gid flags
-GID_TRANS_FLIPX = 1<<31
-GID_TRANS_FLIPY = 1<<30
-GID_TRANS_ROT   = 1<<29
+from constants import *
 
 
 
