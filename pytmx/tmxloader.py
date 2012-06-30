@@ -290,8 +290,10 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             else:
                 tile = temp.convert()
 
+            tile = handle_transformation(tile, flags)
+
             for gid, flags in gids:
-                tmxdata.images[gid] = handle_transformation(tile, flags)
+                tmxdata.images[gid] = tile
 
 
 def load_pygame(filename, *args, **kwargs):
