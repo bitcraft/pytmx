@@ -45,7 +45,7 @@ class TiledMap(TiledElement):
     reserved = "version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
 
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         from collections import defaultdict
 
         TiledElement.__init__(self)
@@ -74,7 +74,7 @@ class TiledMap(TiledElement):
         self.imagemap = {}  # mapping of gid and trans flags to real gids
         self.maxgid = 1
 
-        self.load()
+        if filename: self.load()
 
 
     def __repr__(self):
