@@ -1,7 +1,7 @@
 """
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v.15 - for python 2.7
+v.15 - for python 2.6 and 2.7
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -33,6 +33,7 @@ Features:
     Image loading with pygame
 
 New in .15:
+    loader: python 2.6 support
     loader: fixed issue where objects with tile gid did not load properties
     loader: polygon and polyline objects
     loader: new lookup methods use iterators
@@ -118,6 +119,12 @@ am not the only person).  You can try it if you insist on using pygame with
 python 3.x, but I don't update that often.
 
 ===============================================================================
+
+Installation:
+
+    There is no install script.  To use PyTMX in your projects, just copy
+    the folder into your project directory and follow the guide below.
+
 
 Basic usage sample:
 

@@ -28,7 +28,7 @@ class TiledElement(object):
             if k in self.reserved:
                 msg = "{0} \"{1}\" has a property called \"{2}\""
                 print msg.format(self.__class__.__name__, self.name, k, self.__class__.__name__)
-                msg = "This name is reserved for {0} objects and can cannot be used."
+                msg = "This name is reserved for {0} objects and cannot be used."
                 print msg.format(self.__class__.__name__)
                 print "Please change the name in Tiled and try again."
                 print v
