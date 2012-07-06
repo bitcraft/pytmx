@@ -68,10 +68,10 @@ class TiledMap(TiledElement):
         # defaults from the TMX specification
         self.version = 0.0
         self.orientation = None
-        self.width = 0
-        self.height = 0
-        self.tilewidth = 0
-        self.tileheight = 0 
+        self.width = 0                  # width of map in tiles
+        self.height = 0                 # height of map in tiles
+        self.tilewidth = 0              # width of a tile in pixels
+        self.tileheight = 0             # height of a tile in pixels
 
         self.imagemap = {}  # mapping of gid and trans flags to real gids
         self.maxgid = 1
