@@ -223,7 +223,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
         try:
             force_colorkey = pygame.Color(*force_colorkey)
         except:
-            msg = "Cannot understand color: {}"
+            msg = "Cannot understand color: {0}"
             raise Exception, msg.format(force_colorkey)
 
     tmxdata.images = [0] * tmxdata.maxgid
@@ -238,7 +238,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
         real_gid = t.firstgid - 1
 
         if t.trans:
-            tileset_colorkey = pygame.Color("#{}".format(t.trans)) 
+            tileset_colorkey = pygame.Color("#{0}".format(t.trans)) 
 
         # i dont agree with margins and spacing, but i'll support it anyway
         # such is life.  okay.jpg

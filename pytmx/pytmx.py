@@ -26,9 +26,9 @@ class TiledElement(object):
         # set the attributes that are derived from tiled 'properties'
         for k,v in parse_properties(node).items():
             if k in self.reserved:
-                msg = "{} \"{}\" has a property called \"{}\""
+                msg = "{0} \"{1}\" has a property called \"{2}\""
                 print msg.format(self.__class__.__name__, self.name, k, self.__class__.__name__)
-                msg = "This name is reserved for {} objects and can cannot be used."
+                msg = "This name is reserved for {0} objects and can cannot be used."
                 print msg.format(self.__class__.__name__)
                 print "Please change the name in Tiled and try again."
                 print v
@@ -78,7 +78,7 @@ class TiledMap(TiledElement):
 
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.filename)
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.filename)
 
 
     def getTileImage(self, x, y, layer):
@@ -186,7 +186,7 @@ class TiledMap(TiledElement):
         try:
             return self.tilelayers[layer].data
         except IndexError:
-            msg = "Layer {} does not exist."
+            msg = "Layer {0} does not exist."
             raise ValueError, msg.format(layer)
 
 
@@ -217,7 +217,7 @@ class TiledMap(TiledElement):
         try:
             self.tile_properties[gid] = d
         except KeyError:
-            msg = "GID #{} does not exist."
+            msg = "GID #{0} does not exist."
             raise ValueError, msg.format(gid)
 
 
@@ -229,7 +229,7 @@ class TiledMap(TiledElement):
         try:
             layer = int(layer)
         except:
-            msg = "Layer must be an integer.  Got {} instead."
+            msg = "Layer must be an integer.  Got {0} instead."
             raise ValueError, msg.format(type(layer))
 
         p = product(range(self.width),range(self.height))
@@ -341,7 +341,7 @@ class TiledTileset(TiledElement):
         self.parse(node)
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
 
     def parse(self, node):
@@ -369,18 +369,18 @@ class TiledTileset(TiledElement):
                 try:
                     node = ElementTree.parse(path).getroot()
                 except IOError:
-                    msg = "Cannot load external tileset: {}"
+                    msg = "Cannot load external tileset: {0}"
                     raise Exception, msg.format(path)
 
             else:
-                msg = "Found external tileset, but cannot handle type: {}"
+                msg = "Found external tileset, but cannot handle type: {0}"
                 raise Exception, msg.format(self.source)
            
         self.set_properties(node)
 
         # since tile objects [probably] don't have a lot of metadata,
         # we store it seperately in the parent (a TiledMap instance)
-        for child in node.iter('tile'):
+        for child in node.getiterator('tile'):
             real_gid = int(child.get("id"))
             p = parse_properties(child)
             p['width'] = self.tilewidth
@@ -411,7 +411,7 @@ class TiledLayer(TiledElement):
 
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
 
     def parse(self, node):
@@ -441,22 +441,23 @@ class TiledLayer(TiledElement):
                 ).split(","))
 
         elif encoding:
-            msg = "TMX encoding type: {} is not supported."
+            msg = "TMX encoding type: {0} is not supported."
             raise Exception, msg.format(encoding)
 
         compression = data_node.get("compression", None)
         if compression == "gzip":
             from StringIO import StringIO
             import gzip
-            with gzip.GzipFile(fileobj=StringIO(data)) as fh:
-                data = fh.read()
+            fh = gzip.GzipFile(fileobj=StringIO(data))
+            data = fh.read()
+            fh.close()
 
         elif compression == "zlib":
             import zlib
             data = zlib.decompress(data)
 
         elif compression:
-            msg = "TMX compression type: {} is not supported."
+            msg = "TMX compression type: {0} is not supported."
             raise Exception, msg.format(str(attr["compression"]))
      
         # if data is None, then it was not decoded or decompressed, so
@@ -500,7 +501,7 @@ class TiledObjectGroup(TiledElement, list):
 
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
 
     def parse(self, node):
@@ -535,7 +536,7 @@ class TiledObject(TiledElement):
 
 
     def __repr__(self):
-        return "<{}: \"{}\">".format(self.__class__.__name__, self.name)
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
 
     def parse(self, node):
