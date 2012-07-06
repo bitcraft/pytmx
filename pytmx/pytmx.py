@@ -55,6 +55,8 @@ class TiledMap(TiledElement):
         self.tile_properties = {}   # dict of tiles that have metadata
         self.filename = filename
 
+        self.layernames = {}
+
         # only used tiles are actually loaded, so there will be a difference
         # between the GID's in the Tile map data (tmx) and the data in this
         # class and the layers.  This dictionary keeps track of that difference.
@@ -168,7 +170,7 @@ class TiledMap(TiledElement):
             try:
                 return self.tile_properties[gid]
             except (IndexError, ValueError):
-                msg = "Coords: ({0},{1}) in layer {2} has invaid GID: {3}"
+                msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
                 raise Exception, msg.format(x, y, layer, gid)
             except KeyError:
                 return None
@@ -299,7 +301,7 @@ class TiledMap(TiledElement):
         self.imagemap[(0,0)] = 0
 
         for node in etree.findall('layer'):
-            self.tilelayers.append(TiledLayer(self, node))
+            self.addTileLayer(TiledLayer(self, node))
 
         for node in etree.findall('objectgroup'):
             self.objectgroups.append(TiledObjectGroup(self, node))
@@ -316,8 +318,49 @@ class TiledMap(TiledElement):
                 o.__dict__.update(p)
 
 
+    def addTileLayer(self, layer):
+        """
+        Add a TiledLayer layer object to the map.
+        """
+
+        if not isinstance(layer, TiledLayer):
+            msg = "Layer must be an TiledLayer object.  Got {0} instead."
+            raise ValueError, msg.format(type(layer))
+
+        self.tilelayers.append(layer)
+        self.layernames[layer.name] = layer
+
+
+    def getTileLayerByName(self, name):
+        """
+        Return a TiledLayer object with the name.
+        This is case-sensitive.
+        """
+
+        try:
+            return self.layernames[name]
+        except KeyError:
+            msg = "Layer \"{0}\" not found."
+            raise ValueError, msg.format(name)
+
+
+    def getTileLayerOrder(self):
+        """
+        Return a list of the map's layers in drawing order.
+        """
+
+        return list(self.tilelayers)
+
+
     @property
     def visibleTileLayers(self):
+        """
+        Returns a list of TileLayer objects that are set 'visible'.
+ 
+        Layers have their visivility set in Tiled.  Optionally, you can over-
+        ride the Tiled visibility by creating a property named 'visible'.
+        """
+
         return [layer for layer in self.tilelayers if layer.visible]
 
 
@@ -349,7 +392,7 @@ class TiledTileset(TiledElement):
         parse a tileset element and return a tileset object and properties for
         tiles as a dict
 
-        a bit of mangling is doew here so that tilesets that have external
+        a bit of mangling is done here so that tilesets that have external
         TSX files appear the same as those that don't
         """
         import os
@@ -379,7 +422,7 @@ class TiledTileset(TiledElement):
         self.set_properties(node)
 
         # since tile objects [probably] don't have a lot of metadata,
-        # we store it seperately in the parent (a TiledMap instance)
+        # we store it separately in the parent (a TiledMap instance)
         for child in node.getiterator('tile'):
             real_gid = int(child.get("id"))
             p = parse_properties(child)
@@ -472,7 +515,7 @@ class TiledLayer(TiledElement):
 
         elif data:
             # data is a list of gid's. cast as 32-bit ints to format properly
-            # create iterator to effeciently parse data
+            # create iterator to efficiently parse data
             next_gid=imap(lambda i:unpack("<L", "".join(i))[0], group(data, 4))
 
         # using bytes here limits the layer to 256 unique tiles
@@ -571,3 +614,5 @@ class TiledObject(TiledElement):
                 if y > y2: y2 = y
             self.width = abs(x1) + abs(x2) 
             self.height = abs(y1) + abs(y2)
+
+

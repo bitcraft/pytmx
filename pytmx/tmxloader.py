@@ -33,6 +33,7 @@ Features:
     Image loading with pygame
 
 New in .15:
+    loader: new getTileLayerByName(name) method
     loader: python 2.6 support
     loader: fixed issue where objects with tile gid did not load properties
     loader: polygon and polyline objects
@@ -141,7 +142,10 @@ When you want to draw tiles, you simply call "getTileImage":
 Maps, tilesets, layers, objectgroups, and objects all have a simple way to
 access metadata that was set inside tiled: they all become object attributes.
 
-    >>> layer = tmxdata.layers[0]
+    >>> layer = tmxdata.tilelayers[0]
+    or
+    >>> layer = tmxdata.getTileLayerByName("Background")
+
     >>> print layer.tilewidth
     32
     >>> print layer.weather
