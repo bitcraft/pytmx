@@ -40,6 +40,10 @@ class TiledMap(TiledElement):
     """
     Contains the tile layers, tile images, object groups, and objects from a
     Tiled TMX map.
+
+    This class cannot load images by itself (to retain compatability between
+    defferent video systems).  Use the loading functions in tmxload.py to get
+    the images.
     """
 
     reserved = "version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
@@ -53,9 +57,9 @@ class TiledMap(TiledElement):
         self.tilelayers   = []      # list of TiledLayer objects
         self.objectgroups = []      # list of TiledObjectGroup objects
         self.tile_properties = {}   # dict of tiles that have metadata
-        self.filename = filename
-
         self.layernames = {}
+
+        self.filename = filename
 
         # only used tiles are actually loaded, so there will be a difference
         # between the GID's in the Tile map data (tmx) and the data in this
@@ -121,18 +125,6 @@ class TiledMap(TiledElement):
             raise Exception, msg.format(x, y, layer)
 
 
-    def getDrawOrder(self):
-        """
-        return a list of objects in the order that they should be drawn
-        this will also exclude any layers that are not set to visible
-
-        may be useful if you have objects and want to control rendering
-        from tiled
-        """
-
-        raise NotImplementedError
-
-
     def getTileImages(self, r, layer):
         """
         return a group of tiles in an area
@@ -182,7 +174,7 @@ class TiledMap(TiledElement):
 
         Data is an array of arrays.
 
-        >>> pos = data[y][x]
+        >>> gid = data[y][x]
         """
 
         try:
@@ -271,7 +263,6 @@ class TiledMap(TiledElement):
             return 0
 
 
-
     def mapGID(self, real_gid):
         """
         used to lookup a GID read from a TMX file's data
@@ -284,10 +275,6 @@ class TiledMap(TiledElement):
         except TypeError:
             msg = "GID's must be an integer"
             raise TypeError, msg
-
-
-    def loadTileImages(self, filename):
-        raise NotImplementedError
 
 
     def load(self):
@@ -383,6 +370,7 @@ class TiledTileset(TiledElement):
 
         self.parse(node)
 
+
     def __repr__(self):
         return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
@@ -430,7 +418,6 @@ class TiledTileset(TiledElement):
             p['height'] = self.tileheight
             for gid, flags in self.parent.mapGID(real_gid + self.firstgid):
                 self.parent.setTileProperties(gid, p)
-
 
         image_node = node.find('image')
         self.source = image_node.get('source')
@@ -518,9 +505,8 @@ class TiledLayer(TiledElement):
             # create iterator to efficiently parse data
             next_gid=imap(lambda i:unpack("<L", "".join(i))[0], group(data, 4))
 
-        # using bytes here limits the layer to 256 unique tiles
-        # may be a limitation for very detailed maps, but most maps are not
-        # so detailed. 
+        # using bytes here limits each layer to 256 unique tiles.
+        # may be a limitation for very detailed maps
         [ self.data.append(array.array("B")) for i in xrange(self.height) ]
 
         for (y, x) in product(xrange(self.height), xrange(self.width)):
