@@ -22,8 +22,8 @@ class TiledRenderer(object):
     def __init__(self, filename):
         from pytmx import tmxloader
         self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
-   
- 
+
+
     def render(self, surface):
         # not going for effeciency here
         # for demonstration purposes only
@@ -69,7 +69,7 @@ class ScrollingRenderer(TiledRenderer):
         th = self.tiledmap.tileheight
         gt = self.tiledmap.getTileImage
 
-        stw = int(math.ceil(float(sw) / tw)) + 1 
+        stw = int(math.ceil(float(sw) / tw)) + 1
         sth = int(math.ceil(float(sh) / th)) + 1
 
         txf, pxf = divmod((cx-sw/2), tw)
@@ -200,7 +200,7 @@ def scrollTest(filename):
                     center[0] = hsw
                     movt[0] = 0
                 elif center[0] > mw - hsw-1:
-                    center[0] = mw - hsw-1 
+                    center[0] = mw - hsw-1
                     movt[0] = 0
             else:
                 center[0] = formosa.width / 2

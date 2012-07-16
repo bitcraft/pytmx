@@ -34,7 +34,7 @@ def parse_properties(node):
 
 
 def decode_gid(raw_gid):
-    # gid's are encoded with extra information
+    # gids are encoded with extra information
     # as of 0.7.0 it determines if the tile should be flipped when rendered
     # as of 0.8.0 bit 30 determines if GID is rotated
 
@@ -62,11 +62,11 @@ def handle_bool(text):
         if text == "no":     return False
     except:
         pass
-        
+
     raise ValueError
 
 
-# used to change the unicode string returned from xml to proper python 
+# used to change the unicode string returned from xml to proper python
 # variable types.
 types = defaultdict(lambda: str)
 types.update({
@@ -111,11 +111,11 @@ def group(l, n):
 def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
     """
     generate a set of non-overlapping rects that represents the distribution
-    of the specfied gid.
+    of the specified gid.
 
     useful for generating rects for use in collision detection
     """
-    
+
     if isinstance(tileset, int):
         try:
             tileset = tmxmap.tilesets[tileset]
@@ -165,29 +165,29 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
 
 def simplify(all_points, tilewidth, tileheight):
     """
-    klugde:
+    kludge:
 
     "A kludge (or kluge) is a workaround, a quick-and-dirty solution,
     a clumsy or inelegant, yet effective, solution to a problem, typically
     using parts that are cobbled together."
 
     -- wikipedia
-   
-    turn a list of points into a rects 
+
+    turn a list of points into a rects
     adjacent rects will be combined.
 
     plain english:
-        the input list must be a a list of tuples that represent
+        the input list must be a list of tuples that represent
         the areas to be combined into rects
         the rects will be blended together over solid groups
 
         so if data is something like:
 
-        0 1 1 1 0 0 0 
-        0 1 1 0 0 0 0 
-        0 0 0 0 0 4 0 
+        0 1 1 1 0 0 0
+        0 1 1 0 0 0 0
         0 0 0 0 0 4 0
-        0 0 0 0 0 0 0 
+        0 0 0 0 0 4 0
+        0 0 0 0 0 0 0
         0 0 1 1 1 1 1
 
         you'll have the 4 rects that mask the area like this:
@@ -202,7 +202,7 @@ def simplify(all_points, tilewidth, tileheight):
         pretty cool, right?
 
     there may be cases where the number of rectangles is not as low as possible,
-    but i haven't found that it is excessively bad.  certainly much better than
+    but I haven't found that it is excessively bad.  certainly much better than
     making a list of rects, one for each tile on the map!
 
     """
@@ -211,7 +211,7 @@ def simplify(all_points, tilewidth, tileheight):
         ox, oy = sorted([ (sum(p), p) for p in points ])[0][1]
         x = ox
         y = oy
-        ex = None            
+        ex = None
 
         while 1:
             x += 1
