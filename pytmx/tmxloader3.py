@@ -27,7 +27,7 @@ Todo:
     Pygame: test colorkey transparency
 
     Optimized for maps that do not make heavy use of tile
-    properties.  If i find that it is used a lot then i can rework
+    properties.  If I find that it is used a lot then I can rework
     it for better performance.
 
 ======================================================================
@@ -40,7 +40,7 @@ Basic usage sample:
 
 When you want to draw tiles, you simply call "get_tile_image":
 
-    >>> image = tiledmap.get_tile_image(x, y, layer)    
+    >>> image = tiledmap.get_tile_image(x, y, layer)
     >>> screen.blit(position, image)
 
 
@@ -102,7 +102,7 @@ class TiledMap(TiledElement):
         self.width = 0
         self.height = 0
         self.tilewidth = 0
-        self.tileheight = 0 
+        self.tileheight = 0
 
     def get_tile_image(self, x, y, layer):
         """
@@ -153,8 +153,8 @@ class TiledMap(TiledElement):
         return a group of tiles in an area
         expects a pygame rect or rect-like list/tuple
 
-        usefull if you don't want to repeatedly call get_tile_image
-        probably not the most effecient way of doing this, but oh well.
+        useful if you don't want to repeatedly call get_tile_image
+        probably not the most efficient way of doing this, but oh well.
         """
 
         raise NotImplementedError
@@ -217,7 +217,7 @@ class TiledLayer(TiledElement):
         self.name = None
         self.opacity = 1.0
         self.visible = 1
-        
+
 class TiledObjectGroup(TiledElement):
     def __init__(self):
         TiledElement.__init__(self)
@@ -252,7 +252,7 @@ def load_tmx(filename):
 
     from xml.dom.minidom import parse
     from itertools import tee, islice, chain
-    from collections import defaultdict 
+    from collections import defaultdict
     from struct import unpack
     import array, os
 
@@ -283,7 +283,7 @@ def load_tmx(filename):
         "y": int,
         "value": str,
     }
- 
+
     def pairwise(iterable):
         # return a list as a sequence of pairs
         a, b = tee(iterable)
@@ -324,7 +324,7 @@ def load_tmx(filename):
 
         # get vlues of the properties element, if any
         d.update(parse_properties(node))
-     
+
         return d
 
     def set_properties(obj, node):
@@ -349,7 +349,7 @@ def load_tmx(filename):
         return d
 
     def decode_gid(raw_gid):
-        # gid's are encoded with extra information
+        # gids are encoded with extra information
         # as of 0.7.0 it determines if the tile should be flipped when rendered
 
         flags = 0
@@ -401,7 +401,7 @@ def load_tmx(filename):
             tileset.firstgid = firstgid
 
         # since tile objects probably don't have a lot of metadata,
-        # we store it seperately from the class itself
+        # we store it separately from the class itself
         for child in node.childNodes:
             if child.nodeName == "tile":
                 p = get_properties(child)
@@ -439,7 +439,7 @@ def load_tmx(filename):
             y, r = divmod(attr["height"], tileset.tileheight)
 
             tileset.lastgid = tileset.firstgid + x + y
-          
+
         return tileset, tiles
 
 
@@ -470,7 +470,7 @@ def load_tmx(filename):
 
         elif not attr["encoding"] is None:
             raise Exception("TMX encoding type: " + str(attr["encoding"]) + " is not supported.")
-      
+
         if attr["compression"] == "gzip":
             from io import BytesIO
             import gzip
@@ -479,7 +479,7 @@ def load_tmx(filename):
 
         elif not attr["compression"] is None:
             raise Exception("TMX compression type: " + str(attr["compression"]) + " is not supported.")
-     
+
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
         if attr["encoding"] == next_gid is None:
@@ -496,7 +496,7 @@ def load_tmx(filename):
 
         gids = [ i.firstgid for i in tilesets ]
 
-        # fill up our 2D array of gid's.
+        # fill up our 2D array of gids.
         for y in range(layer.height):
 
             # store as 16-bit ints, since we will never use enough tiles to fill a 32-bit int
@@ -557,7 +557,7 @@ def load_pygame(filename):
         tile_size = (t.tilewidth, t.tileheight)
 
         # some tileset images may be slightly larger than the tiles area
-        # ie: may include a banner, copyright, ect.  this compensates for that
+        # ie: may include a banner, copyright, etc.  this compensates for that
         for y in range(0, int(h / t.tileheight) * t.tileheight, t.tileheight):
             for x in range(0, int(w / t.tilewidth) * t.tilewidth, t.tilewidth):
 
@@ -572,7 +572,7 @@ def load_pygame(filename):
 
                 # make a unique id for this image, not sure if this is the best way, but it works
                 key = pygame.image.tostring(tile, "RGBA")
-        
+
                 # make sure we don't have a duplicate tile
                 try:
                     tile = cache[key]

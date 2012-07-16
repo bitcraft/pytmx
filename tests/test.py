@@ -16,10 +16,10 @@ class TiledRenderer(object):
     def __init__(self, filename):
         from pytmx import tmxloader
         self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
-   
- 
+
+
     def render(self, surface):
-        # not going for effeciency here
+        # not going for efficiency here
         # for demonstration purposes only
 
         tw = self.tiledmap.tilewidth
