@@ -468,7 +468,7 @@ def load_tmx(filename):
         elif attr["encoding"] == "csv":
             next_gid = map(int, "".join([line.strip() for line in data_node.lastChild.nodeValue]).split(","))
 
-        elif not attr["encoding"] == None:
+        elif not attr["encoding"] is None:
             raise Exception("TMX encoding type: " + str(attr["encoding"]) + " is not supported.")
       
         if attr["compression"] == "gzip":
@@ -477,19 +477,19 @@ def load_tmx(filename):
             with gzip.GzipFile(fileobj=BytesIO(data)) as fh:
                 data = fh.read()
 
-        elif not attr["compression"] == None:
+        elif not attr["compression"] is None:
             raise Exception("TMX compression type: " + str(attr["compression"]) + " is not supported.")
      
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
-        if attr["encoding"] == next_gid == None:
+        if attr["encoding"] == next_gid is None:
             def get_children(parent):
                 for child in parent.getElementsByTagName("tile"):
                     yield int(child.getAttribute("gid"))
 
             next_gid = get_children(data_node)
 
-        elif not data == None:
+        elif not data is None:
             # cast the data as a list of 32-bit integers
             def u(i): return unpack("<L", bytes(i))[0]
             next_gid = map(u, group(data, 4))
@@ -562,7 +562,7 @@ def load_pygame(filename):
             for x in range(0, int(w / t.tilewidth) * t.tilewidth, t.tilewidth):
 
                 # somewhat handle transparency, though colorkey handling is not tested
-                if t.trans == None:
+                if t.trans is None:
                     tile = Surface(tile_size, pygame.SRCALPHA)
                 else:
                     tile = Surface(tile_size)
@@ -577,7 +577,7 @@ def load_pygame(filename):
                 try:
                     tile = cache[key]
                 except KeyError:
-                    if t.trans == None:
+                    if t.trans is None:
                         tile = tile.convert_alpha()
                     else:
                         tile = tile.convert()

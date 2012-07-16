@@ -216,7 +216,7 @@ def simplify(all_points, tilewidth, tileheight):
         while 1:
             x += 1
             if not (x, y) in points:
-                if ex == None:
+                if ex is None:
                     ex = x - 1
 
                 if ((ox, y+1) in points):
