@@ -87,9 +87,9 @@ New in .11:
 
 I have been intentionally not including a module rendering utility since
 rendering a map will have different requirements for every situation.  However,
-I can appreciate that some poeple won't understand how it works unless they see
+I can appreciate that some people won't understand how it works unless they see
 it, so I am including a sample map and viewer.  It includes a scrolling/zooming
-renderer.  They are for demonstation purposes, and may not be suitable for all
+renderer.  They are for demonstration purposes, and may not be suitable for all
 projects.  Use at your own risk.
 
 I've also included a copy of this loader that may work with python 3.x.  I
@@ -117,7 +117,7 @@ don't have to worry about that after you load the map.
 
 When you want to draw tiles, you simply call "getTileImage":
 
-    >>> image = tmxdata.getTileImage(x, y, layer)    
+    >>> image = tmxdata.getTileImage(x, y, layer)
     >>> screen.blit(position, image)
 
 
@@ -148,7 +148,7 @@ NOTES:
 * The Tiled "properties" have reserved names.
 
 If you use "properties" for any of the following object types, you cannot use
-any of theese words as a name for your property.  A ValueError will be raised
+any of these words as a name for your property.  A ValueError will be raised
 if there are any conflicts.
 
 As of 0.8.1, these values are:
@@ -308,7 +308,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
 
         colorkey = None
         if t.trans:
-            colorkey = pygame.Color("#{0}".format(t.trans)) 
+            colorkey = pygame.Color("#{0}".format(t.trans))
 
         # i dont agree with margins and spacing, but i'll support it anyway
         # such is life.  okay.jpg
