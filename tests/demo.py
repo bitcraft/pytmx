@@ -7,6 +7,9 @@ Rendering demo for the TMXLoader.  This simply shows that the loader works.
 If you need a rendering library that will handle large maps and scrolling, you
 can check out my lib2d project at pygame.org.  Have fun!
 
+In this demo, I am accessing the layer and map data directly.  It is perfectly
+fine to develop a data structure that works for you.
+
 
 Known bugs:
     Tile Objects are not handled by any renderer.

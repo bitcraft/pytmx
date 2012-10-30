@@ -1,11 +1,9 @@
 """
-This is tested on pygame 1.9 and python 2.7.
-This will not work on python 3.  Don't ask either.  I will say 'no'.
+This is tested on pygame 1.9 and python 2.6 and 2.7.
 bitcraft (leif dot theden at gmail.com)
 
-Rendering demo for the TMXLoader.  This simply shows that the loader works.
-If you need a rendering library that will handle large maps and scrolling, you
-can check out my lib2d project at pygame.org.  Have fun!
+Rendering demo for the TMXLoader.  Typically this is run to verify that any
+code changes do do break the loader.
 """
 
 class TiledRenderer(object):
@@ -26,12 +24,14 @@ class TiledRenderer(object):
         th = self.tiledmap.tileheight
         gt = self.tiledmap.getTileImage
 
+        # draw map tiles
         for l in xrange(0, len(self.tiledmap.tilelayers)):
             for y in xrange(0, self.tiledmap.height):
                 for x in xrange(0, self.tiledmap.width):
                     tile = gt(x, y, l)
                     if tile: surface.blit(tile, (x*tw, y*th))
 
+        # draw polygon and poly line objects
         for og in self.tiledmap.objectgroups:
             for o in og:
                 if hasattr(o, 'points'):
@@ -44,7 +44,6 @@ class TiledRenderer(object):
 import pygame
 from pygame.locals import *
 import math, glob
-from itertools import product
 
 
 pygame.init()

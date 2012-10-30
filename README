@@ -31,6 +31,28 @@ Features:
     Supports base64, csv, gzip, zlib and uncompressed XML
     Image loading with pygame
 
+Why use PyTMX?
+
+    PyTMX is efficient:
+        Only the tiles used on a map are loaded into memory
+        Map information is stored as integers (8-16 bit), not python data (32+kb)
+        Extensive use of generators and iterators make it easy on memory
+
+    PyTMX is flexible:
+        Supports all major Tiled features and object types
+        PyTMX data classes can be subclassed and extended
+        Has built-in pygame tile loading
+	Does not force you to render data in any particular way
+
+    PyTMX is supported:
+        GitHub hosting allows for community participation
+        I have kept PyTMX current with new versions of Tiled since v.7
+
+    PyTMX is usable:
+        Liberal LGPL license means you can use PyTMX any way you want
+
+More information can be found in the source files.
+
 
 ===============================================================================
 
@@ -41,4 +63,3 @@ Check tests/test.py and tests/demo.py for examples on how to use the library.
 ===============================================================================
 
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
-
