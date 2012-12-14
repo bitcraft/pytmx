@@ -152,13 +152,15 @@ class TiledMap(TiledElement):
         return chain(*(i for i in self.objectgroups))
 
 
-    def getTileProperties(self, (x, y, layer)):
+    def getTileProperties(self, tile):
         """
         return the properties for the tile, if any
         x and y must be integers and are in tile coordinates, not pixel
 
         returns a dict of there are properties, otherwise will be None
         """
+        
+        x, y, layer = tile
 
         try:
             gid = self.tilelayers[int(layer)].data[int(y)][int(x)]
