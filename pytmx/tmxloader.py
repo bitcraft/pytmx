@@ -172,6 +172,7 @@ object:     name, type, x, y, width, height, gid, properties, polygon,
 
 Please see the TiledMap class for more api information.
 """
+from pygame import Surface, mask, RLEACCEL
 from utils import types
 from constants import *
 
@@ -193,8 +194,9 @@ def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
 
     this is done for the best rendering speeds and removes the need to
     convert() the images on your own
+
+    original is a surface and MUST NOT HAVE AN ALPHA CHANNEL
     """
-    from pygame import Surface, mask, RLEACCEL
 
     tile_size = original.get_size()
 
@@ -278,7 +280,8 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
                 newtile = pygame.transform.flip(tile, fx, fy)
 
             # preserve any flags that may have been lost after the transformation
-            return newtile.convert(tile)
+            return newtile
+            #return newtile.convert(tile)
 
         else:
             return tile
