@@ -41,7 +41,7 @@ Basic usage sample:
 When you want to draw tiles, you simply call "get_tile_image":
 
     >>> image = tiledmap.get_tile_image(x, y, layer)
-    >>> screen.blit(position, image)
+    >>> screen.blit(image, position)
 
 
 Layers, objectgroups, tilesets, and maps all have a simple way to access
