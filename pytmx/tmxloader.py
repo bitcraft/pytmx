@@ -109,7 +109,7 @@ Basic usage sample:
 
     >>> from pytmx import tmxloader
     >>> tmxdata = tmxloader.load_pygame("map.tmx")
-    >>> tmxdata = tmxloader.load_pygame("map.tmx", pixel_alpha=True)
+    >>> tmxdata = tmxloader.load_pygame("map.tmx", pixelalpha=True)
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
 don't have to worry about that after you load the map.
@@ -118,7 +118,7 @@ don't have to worry about that after you load the map.
 When you want to draw tiles, you simply call "getTileImage":
 
     >>> image = tmxdata.getTileImage(x, y, layer)
-    >>> screen.blit(position, image)
+    >>> screen.blit(image, position)
 
 
 Maps, tilesets, layers, objectgroups, and objects all have a simple way to
