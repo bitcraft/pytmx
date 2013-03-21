@@ -172,7 +172,7 @@ object:     name, type, x, y, width, height, gid, properties, polygon,
 
 Please see the TiledMap class for more api information.
 """
-from pygame import Surface, mask, RLEACCEL
+
 from utils import types
 from constants import *
 
@@ -197,7 +197,8 @@ def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
 
     original is a surface and MUST NOT HAVE AN ALPHA CHANNEL
     """
-
+    from pygame import Surface, mask, RLEACCEL
+    
     tile_size = original.get_size()
 
     # count the number of pixels in the tile that are not transparent

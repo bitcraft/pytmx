@@ -365,7 +365,8 @@ class TiledMap(TiledElement):
 
 
 class TiledTileset(TiledElement):
-    reserved = "firstgid source name tilewidth tileheight spacing margin image tile properties".split()
+    reserved = ("firstgid source name tilewidth tileheight width height spacing"
+    " margin image tile properties".split())
 
     def __init__(self, parent, node):
         TiledElement.__init__(self)
@@ -377,6 +378,8 @@ class TiledTileset(TiledElement):
         self.name = None
         self.tilewidth = 0
         self.tileheight = 0
+        self.width = 0
+        self.height = 0
         self.spacing = 0
         self.margin = 0
         self.tiles = {}
@@ -434,6 +437,8 @@ class TiledTileset(TiledElement):
 
         image_node = node.find('image')
         self.source = image_node.get('source')
+        self.width = int(image_node.get('width'))
+        self.height = int(image_node.get('height'))
         self.trans = image_node.get("trans", None)
 
 
