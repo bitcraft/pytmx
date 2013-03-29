@@ -314,7 +314,6 @@ class TiledMap(TiledElement):
         for o in self.getObjects():
             p = self.getTilePropertiesByGID(o.gid)
             if p:
-                o.name = "TileObject"
                 o.__dict__.update(p)
 
 
