@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 """
 This is tested on pygame 1.9 and python 2.6 and 2.7.
 bitcraft (leif dot theden at gmail.com)
