@@ -81,7 +81,6 @@ types.update({
     "name": str,
     "spacing": int,
     "margin": int,
-    "source": str,
     "trans": str,
     "id": int,
     "opacity": float,
