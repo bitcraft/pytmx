@@ -270,7 +270,6 @@ def load_tmx(filename):
         "name": str,
         "spacing": int,
         "margin": int,
-        "source": str,
         "trans": str,
         "id": int,
         "opacity": float,
