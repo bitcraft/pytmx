@@ -15,7 +15,7 @@ setup(name="PyTMX",
         author='bitcraft',
         packages=['pytmx',],
         license = "LGPLv3",
-        long_description=read('README'),
+        long_description=read('readme.md'),
         classifiers=[
             "Intended Audience :: Developers",
             "Development Status :: 4 - Beta",
