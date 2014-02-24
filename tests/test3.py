@@ -9,9 +9,11 @@ Typically this is run to verify that any code changes do do break the loader.
 untested:
     image layers
 """
+import os.path
 import glob
 import pygame
 from pygame.locals import *
+from pytmx3 import *
 
 
 class TiledRenderer(object):
@@ -19,8 +21,6 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
     def __init__(self, filename):
-        from pytmx3 import tmxloader
-
         self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
 
     def render(self, surface):
@@ -31,13 +31,25 @@ class TiledRenderer(object):
         th = self.tiledmap.tileheight
         gt = self.tiledmap.get_tile_image
 
+        # fill the background color
+        if self.tiledmap.background_color:
+            surface.fill(self.tiledmap.background_color)
+
         # draw map tiles
-        for l in range(0, len(self.tiledmap.layers)):
-            for y in range(0, self.tiledmap.height):
-                for x in range(0, self.tiledmap.width):
-                    tile = gt(x, y, l)
+        for layer in self.tiledmap.visible_layers:
+            if isinstance(layer, TiledTileLayer):
+                for x, y, gid in layer:
+                    tile = gt(x, y, layer)
                     if tile:
                         surface.blit(tile, (x * tw, y * th))
+
+            elif isinstance(layer, TiledObjectGroup):
+                pass
+
+            elif isinstance(layer, TiledImageLayer):
+                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                if image:
+                    surface.blit(image, (0, 0))
 
         # draw polygon and poly line objects
         for o in self.tiledmap.objects:
@@ -111,7 +123,7 @@ pygame.font.init()
 screen = init_screen(600, 600)
 pygame.display.set_caption('TMXLoader Test')
 
-for filename in glob.glob('*.tmx'):
+for filename in glob.glob(os.path.join('0.9.1', '*.tmx')):
     if not simple_test(filename):
         break
 

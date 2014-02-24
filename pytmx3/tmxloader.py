@@ -162,12 +162,13 @@ object:      name, type, x, y, width, height, gid, properties, polygon,
 """
 from pygame import Surface, mask, RLEACCEL
 from pytmx3.constants import *
+from pytmx3.pytmx import *
+
+__all__ = ['load_pygame']
 
 
 # for .14 compatibility
 def load_tmx(filename, *args, **kwargs):
-    from pytmx3 import TiledMap
-
     return TiledMap(filename)
 
 
@@ -269,6 +270,10 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
         else:
             return tile
 
+    # change background color into something nice
+    if tmxdata.background_color:
+        tmxdata.background_color = pygame.Color(tmxdata.background_color)
+
     pixelalpha = kwargs.get("pixelalpha", False)
     force_colorkey = kwargs.get("force_colorkey", False)
 
@@ -282,6 +287,7 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
 
     tmxdata.images = [0] * tmxdata.maxgid
 
+    real_gid = None
     for firstgid, t in sorted((t.firstgid, t) for t in tmxdata.tilesets):
         path = os.path.join(os.path.dirname(tmxdata.filename), t.source)
 
@@ -322,6 +328,21 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
                 tile = smart_convert(tile, colorkey, force_colorkey, pixelalpha)
                 tmxdata.images[gid] = tile
 
+    for layer in tmxdata.layers:
+        if isinstance(layer, TiledImageLayer):
+            colorkey = None
+            if getattr(layer, 'trans', None):
+                colorkey = pygame.Color("#{0}".format(t.trans))
+
+            source = getattr(layer, 'source', None)
+            if source:
+                gid = tmxdata.register_gid(real_gid)
+                layer.gid = gid
+                path = os.path.join(os.path.dirname(tmxdata.filename), source)
+                image = pygame.image.load(path)
+                image = smart_convert(image, colorkey, force_colorkey, pixelalpha)
+                tmxdata.images.append(image)
+                real_gid = len(tmxdata.images)
 
 def load_pygame(filename, *args, **kwargs):
     """
@@ -332,3 +353,4 @@ def load_pygame(filename, *args, **kwargs):
     tmxdata = load_tmx(filename, *args, **kwargs)
     _load_images_pygame(tmxdata, None, *args, **kwargs)
     return tmxdata
+
