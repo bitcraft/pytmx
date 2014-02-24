@@ -346,20 +346,18 @@ class TiledMap(TiledElement):
         # initialize the gid mapping
         self.imagemap[(0, 0)] = 0
 
-        # layers must be loaded before anything else, otherwise problems
-        # with gid mapping will occur.
+        # *** do not change this load order!  mapping errors will occur if changed ***
         for node in etree.findall('layer'):
             self.add_layer(TiledTileLayer(self, node))
 
-        for node in etree.iter():
-            if node.tag == 'objectgroup':
-                self.objectgroups.append(TiledObjectGroup(self, node))
+        for node in etree.findall('imagelayer'):
+            self.add_layer(TiledImageLayer(self, node))
 
-            elif node.tag == 'tileset':
-                self.tilesets.append(TiledTileset(self, node))
+        for node in etree.findall('objectgroup'):
+            self.objectgroups.append(TiledObjectGroup(self, node))
 
-            elif node.tag == 'imagelayer':
-                self.add_layer(TiledImageLayer(self, node))
+        for node in etree.findall('tileset'):
+            self.tilesets.append(TiledTileset(self, node))
 
         # "tile objects", objects with a GID, have need to have their
         # attributes set after the tileset is loaded, so this step must be performed last
