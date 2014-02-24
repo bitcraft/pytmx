@@ -4,7 +4,8 @@ _______________________________________________________________________________
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)
-v.15 - for python 2.6 and 2.7
+v.15  - for python 2.6 and 2.7
+v3.15 - for python 3.3
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -37,7 +38,7 @@ available to blit onto the screen.
 _______________________________________________________________________________
 
 * Simple api
-*  Memory efficient and fast
+* Memory efficient and fast
 
 ## Features:
 _______________________________________________________________________________
