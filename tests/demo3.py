@@ -11,6 +11,7 @@ import math
 import pygame
 from pygame.locals import *
 from itertools import product
+from pytmx3 import *
 
 
 class TiledRenderer(object):
@@ -18,8 +19,7 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
     def __init__(self, filename):
-        from pytmx3 import tmxloader
-        self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
+        self.tiledmap = load_pygame(filename, pixelalpha=True)
 
     def render(self, surface):
         # not going for efficiency here
@@ -29,11 +29,20 @@ class TiledRenderer(object):
         th = self.tiledmap.tileheight
         gt = self.tiledmap.get_tile_image
 
-        for l in range(0, len(self.tiledmap.tilelayers)):
-            for y in range(0, self.tiledmap.height):
-                for x in range(0, self.tiledmap.width):
-                    tile = gt(x, y, l)
-                    if tile: surface.blit(tile, (x * tw, y * th))
+        for layer in self.tiledmap.visible_layers:
+            if isinstance(layer, TiledTileLayer):
+                for x, y, gid in layer:
+                    tile = gt(x, y, layer)
+                    if tile:
+                        surface.blit(tile, (x * tw, y * th))
+
+            elif isinstance(layer, TiledObjectGroup):
+                pass
+
+            elif isinstance(layer, TiledImageLayer):
+                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                if image:
+                    surface.blit(image, (0, 0))
 
 
 class ScrollingRenderer(TiledRenderer):
@@ -59,6 +68,8 @@ class ScrollingRenderer(TiledRenderer):
         self.halfheight = self.tiledmap.height / 2 + 1
 
     def render(self, surface, center):
+        # TODO: correctly handle imagelayers
+
         cx, cy = center
         sw, sh = surface.get_size()
         tw = self.tiledmap.tilewidth
@@ -68,19 +79,26 @@ class ScrollingRenderer(TiledRenderer):
         stw = int(math.ceil(float(sw) / tw)) + 1
         sth = int(math.ceil(float(sh) / th)) + 1
 
-        txf, pxf = divmod((cx - sw / 2), tw)
-        tyf, pyf = divmod((cy - sh / 2), th)
+        txf, pxf = map(int, (divmod((cx - sw / 2), tw)))
+        tyf, pyf = map(int, (divmod((cy - sh / 2), th)))
 
         if stw + txf > self.mapwidth: stw -= 1
         if sth + tyf > self.mapheight: sth -= 1
 
-        p = product(range(stw), range(sth),
-                    range(len(self.tiledmap.tilelayers)))
+        for layer in self.tiledmap.visible_layers:
+            if isinstance(layer, TiledTileLayer):
+                for x, y, in product(range(stw), range(sth)):
+                    tile = gt(x + txf, y + tyf, layer)
+                    if tile:
+                        surface.blit(tile, (x * tw - pxf, y * th - pyf))
 
-        for x, y, l in p:
-            tile = gt(x + txf, y + tyf, l)
-            if tile:
-                surface.blit(tile, (x * tw - pxf, y * th - pyf))
+            elif isinstance(layer, TiledObjectGroup):
+                pass
+
+            elif isinstance(layer, TiledImageLayer):
+                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                if image:
+                    surface.blit(image, (0, 0))
 
 
 def init_screen(width, height):
