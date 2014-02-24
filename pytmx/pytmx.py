@@ -1,15 +1,10 @@
-from itertools import chain, product
-from xml.etree import ElementTree
-from collections import defaultdict
-from utils import decode_gid, types, parse_properties, read_points
-from constants import *
-
-
-
 """
 Class declarations and other important stuff
 """
-
+from itertools import chain, product
+from xml.etree import ElementTree
+from pytmx.utils import decode_gid, types, parse_properties, read_points
+from pytmx.constants import *
 
 
 class TiledElement(object):

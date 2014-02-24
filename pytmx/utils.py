@@ -1,19 +1,12 @@
 from pygame import Rect
 from itertools import tee, islice, izip, product
 from collections import defaultdict
-from constants import *
-
-
-
-"""
-Various code that doesn't really fit anywhere else
-"""
+from pytmx.constants import *
 
 
 def read_points(text):
     return [ tuple(map(lambda x: int(x), i.split(',')))
          for i in text.split() ]
-
 
 
 def parse_properties(node):
@@ -140,7 +133,6 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
         except IndexError:
             msg = "GID #{0} not found"
             raise ValueError, msg.format(real_gid)
-
 
     if isinstance(layer, int):
         layer_data = tmxmap.getLayerData(layer).data

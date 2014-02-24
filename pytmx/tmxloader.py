@@ -1,7 +1,7 @@
 """
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v.15 - for python 2.6 and 2.7
+v2.15.2 - for python 2.6 and 2.7
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -10,32 +10,9 @@ released under the LGPL v3
 
 ===============================================================================
 
-This map loader can be used to load maps created in the Tiled map editor.  It
-provides a simple way to get tiles and associated metadata so that you can draw
-a map onto the screen.  It does not force you to draw your map in any
-particular way.
-
-This module doesn't require you to use the classes exposed here.  If you wish,
-you can load the map with this module, extract the data from it using the
-methods in the TiledMap class, and use your own game engine.
-
-This is *not* a rendering engine.  It will load the data that is necessary to
-render a map onto the screen and extract the metadata for object.  For Pygame,
-all tile images will be loaded into in memory and available to blit onto the
-screen.
-
-
-Design Goals:
-    Simple api
-    Memory efficient and fast
-
-Features:
-    Loads data and "properties" metadata from Tile's TMX format
-    "Properties" for: maps, tilesets, layers, objectgroups, objects, and tiles
-    Point data for polygon and polyline objects
-    Automatic flipping and rotation of tiles
-    Supports base64, csv, gzip, zlib and uncompressed XML
-    Image loading with pygame
+New in 2.15.2:
+   general: new version number to reflect supported python version
+   general: python 3 support in new library
 
 New in .15:
     loader: new getTileLayerByName(name) method
@@ -84,19 +61,6 @@ New in .11:
     pygame: Tilesets no longer load with per-pixel alphas by default
     pygame: Colorkey transparency should be correctly handled now
 
-
-I have been intentionally not including a module rendering utility since
-rendering a map will have different requirements for every situation.  However,
-I can appreciate that some people won't understand how it works unless they see
-it, so I am including a sample map and viewer.  It includes a scrolling/zooming
-renderer.  They are for demonstration purposes, and may not be suitable for all
-projects.  Use at your own risk.
-
-I've also included a copy of this loader that may work with python 3.x.  I
-personally do not think that python 3.x should be used with pygame, yet (and I
-am not the only person).  You can try it if you insist on using pygame with
-python 3.x, but I don't update that often.
-
 ===============================================================================
 
 Installation:
@@ -141,7 +105,14 @@ Tiles properties are the exception here, and must be accessed through
     'CobbleStone'
 
 
-===============================================================================
+===================================================================================
+IMPORTANT FOR PYGAME USERS!!
+The loader will correctly convert() or convert_alpha() each tile image, so you
+shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
+problems with images and transparency, pass "pixelalpha=True" while loading.
+
+ALSO FOR PYGAME USERS:  Load your map after initializing your display.
+===================================================================================
 
 NOTES:
 
@@ -149,33 +120,31 @@ NOTES:
 
 If you use "properties" for any of the following object types, you cannot use
 any of these words as a name for your property.  A ValueError will be raised
-if there are any conflicts.
+if a Tile Object attempts to use a reserved name.
+
+In summary: don't use the following names when adding metadata in Tiled.
 
 As of 0.8.1, these values are:
 
-map:        version, orientation, width, height, tilewidth, tileheight
-            properties, tileset, layer, objectgroup
+map:         version, orientation, width, height, tilewidth, tileheight
+             properties, tileset, layer, objectgroup
 
-tileset:    firstgid, source, name, tilewidth, tileheight, spacing, margin,
-            image, tile, properties
+tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,
+             image, tile, properties
 
-tile:       id, image, properties
+tile:        id, image, properties
 
-layer:      name, x, y, width, height, opacity, properties, data
+layer:       name, x, y, width, height, opacity, properties, data
 
 objectgroup: name, color, x, y, width, height, opacity, object, properties
 
-object:     name, type, x, y, width, height, gid, properties, polygon,
-            polyline, image
+object:      name, type, x, y, width, height, gid, properties, polygon,
+             polyline, image
 
-
-
-Please see the TiledMap class for more api information.
+***   Please see the TiledMap class for more api information.   ***
 """
 from pygame import Surface, mask, RLEACCEL
-from utils import types
-from constants import *
-
+from pytmx.constants import *
 
 
 def load_tmx(filename, *args, **kwargs):
@@ -184,7 +153,6 @@ def load_tmx(filename, *args, **kwargs):
 
     tiledmap = TiledMap(filename)
     return tiledmap
-
 
 
 def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
@@ -289,7 +257,6 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
 
     pixelalpha     = kwargs.get("pixelalpha", False)
     force_colorkey = kwargs.get("force_colorkey", False)
-    force_bitdepth = kwargs.get("depth", False)
 
     if force_colorkey:
         try:
@@ -345,6 +312,3 @@ def load_pygame(filename, *args, **kwargs):
     load_images_pygame(tmxdata, None, *args, **kwargs)
 
     return tmxdata
-
-
-

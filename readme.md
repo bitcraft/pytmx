@@ -4,8 +4,8 @@ _______________________________________________________________________________
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)
-v.15  - for python 2.6 and 2.7
-v3.15 - for python 3.3
+v2.15.1  - for python 2.6 and 2.7
+v3.16    - for python 3.3
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -17,7 +17,8 @@ Tested with Tiled 0.8.1 for Mac.
 ## News
 _______________________________________________________________________________
 
-##### 2/6/14 - Python 3 support coming soon.    
+##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
+##### 02/06/14 - Python 3 support coming soon
 
    
    
@@ -25,44 +26,53 @@ _______________________________________________________________________________
 ## Introduction
 _______________________________________________________________________________
 
-This map loader can be used to load maps created in the Tiled map editor.  It
-provides a simple way to get tiles and associated metadata so that you can draw
-a map onto the screen.
+This map loader can be used to load maps created in the Tiled Map Editor.  It
+provides a simple way to get tile images and associated metadata so that you
+can draw a map onto the screen and do useful things with metadata.
 
-This is *not* a rendering engine.  It will load the data that is necessary to
-render a map onto the screen.  All tiles will be loaded into in memory and
-available to blit onto the screen.
+PyTMX strives to balance performance, flexibility, and performance.  Feel free
+to use the classes provided in pytmx.py as superclasses to your own maps, or
+simply load the data with PyTMX and copy the data into your own classes with
+the simple api.
+
+I've included a test suite and demo in the 'tests' folder.  It should work
+across all platforms.  test.py demonstrates loading a variety of maps and
+formats, and demo.py shows how you can create scrolling maps in a very simple
+fashion, while still retaining all the power of the Tiled Editor.
 
 
 ## Design Goals:
 _______________________________________________________________________________
 
-* Simple api
-* Memory efficient and fast
+* Simple API with many handy functions
+* Memory efficient and performant
+* Extensible and easy to understand
 
 ## Features:
 _______________________________________________________________________________
 
-* Loads data and "properties" metadata from Tile's TMX format
-* "Properties" for: maps, tilesets, layers, objectgroups, objects, and tiles
+* Loads data, "properties" metadata, and images from Tiled's TMX format
+* Supports base64, csv, gzip, zlib and uncompressed XML
+* Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
-* Supports base64, csv, gzip, zlib and uncompressed XML
-* Image loading with pygame
+* Image loading with pygame (will work without images as well)
 
 ## Why use PyTMX?
 _______________________________________________________________________________
 
 ### PyTMX is efficient:
 * Only the tiles used on a map are loaded into memory
-* Map information is stored as integers (8-16 bit), not python data (32+kb)
+* Map information is stored as integers (8-16 bit), not python objects (32+kb)
 * Extensive use of generators and iterators make it easy on memory
+* Code is designed for compact size and readability
 
 ### PyTMX is flexible:
 * Supports all major Tiled features and object types
-* PyTMX data classes can be subclassed and extended
-* Has built-in pygame tile loading
+* Built-in pygame image loading
+* PyTMX data classes can be extended
 * Does not force you to render data in any particular way
+* Includes many checks to give useful debugging information
 
 ### PyTMX is supported:
 * GitHub hosting allows for community participation
