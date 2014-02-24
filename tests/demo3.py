@@ -149,7 +149,7 @@ def scroll_test(filename):
             y = 0
             map_buffer.fill((0, 128, 255))
             formosa.render(map_buffer, center)
-            pygame.transform.smoothscale(map_buffer, (sw, sh), screen)
+            pygame.transform.scale(map_buffer, (sw, sh), screen)
             for i in text:
                 screen.blit(i, (0, y))
                 y += i.get_height()
