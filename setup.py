@@ -14,6 +14,7 @@ setup(name="PyTMX",
         description='Map loader for TMX Files',
         author='bitcraft',
         packages=['pytmx',],
+        install_requires=['pygame'],
         license = "LGPLv3",
         long_description=read('readme.md'),
         classifiers=[
