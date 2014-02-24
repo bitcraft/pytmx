@@ -27,7 +27,7 @@ class TiledRenderer(object):
 
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.getTileImage
+        gt = self.tiledmap.get_tile_image
 
         # draw map tiles
         for l in range(0, len(self.tiledmap.tilelayers)):
@@ -61,7 +61,7 @@ def simple_test(filename):
     pygame.display.flip()
 
     print("Objects in map:")
-    for o in formosa.tiledmap.getObjects():
+    for o in formosa.tiledmap.get_objects():
         print(o)
         for k, v in o.__dict__.items():
             print("  ", k, v)

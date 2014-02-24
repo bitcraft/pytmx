@@ -19,7 +19,6 @@ class TiledRenderer(object):
     """
     def __init__(self, filename):
         from pytmx3 import tmxloader
-
         self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
 
     def render(self, surface):
@@ -28,7 +27,7 @@ class TiledRenderer(object):
 
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.getTileImage
+        gt = self.tiledmap.get_tile_image
 
         for l in range(0, len(self.tiledmap.tilelayers)):
             for y in range(0, self.tiledmap.height):
@@ -64,7 +63,7 @@ class ScrollingRenderer(TiledRenderer):
         sw, sh = surface.get_size()
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.getTileImage
+        gt = self.tiledmap.get_tile_image
 
         stw = int(math.ceil(float(sw) / tw)) + 1
         sth = int(math.ceil(float(sh) / th)) + 1
@@ -229,7 +228,6 @@ def scroll_test(filename):
 
 
 import sys
-
 sys.path.append('..')
 
 pygame.init()

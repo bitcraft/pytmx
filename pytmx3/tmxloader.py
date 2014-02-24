@@ -1,7 +1,7 @@
 """
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v3.15 - for python 3.3
+v3.16 - for python 3.3
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -37,8 +37,16 @@ Features:
     Supports base64, csv, gzip, zlib and uncompressed XML
     Image loading with pygame
 
-New in 3.15:
-    python 3 support
+New in 3.16:
+    ***     jumped to version 3.x to reflect new python compatibility     ***
+
+       all: python 3 support
+      pep8: changed method/function names to lowercase with underscore spacing
+      pep8: modified various style infractions
+      core: simplified file structure
+      core: added __all__ to some modules for less clutter
+     utils: renamed buildDistributionRects to build_rects
+      demo: added ability to resize preview window
 
 New in .15:
     loader: new getTileLayerByName(name) method
@@ -105,7 +113,7 @@ Installation:
 
 Basic usage sample:
 
-    >>> from pytmx import tmxloader
+    >>> from pytmx3 import tmxloader
     >>> tmxdata = tmxloader.load_pygame("map.tmx")
     >>> tmxdata = tmxloader.load_pygame("map.tmx", pixelalpha=True)
 
@@ -115,7 +123,7 @@ don't have to worry about that after you load the map.
 
 When you want to draw tiles, you simply call "getTileImage":
 
-    >>> image = tmxdata.getTileImage(x, y, layer)
+    >>> image = tmxdata.get_tile_image(x, y, layer)
     >>> screen.blit(image, position)
 
 
@@ -123,7 +131,7 @@ Maps, tilesets, layers, objectgroups, and objects all have a simple way to
 access metadata that was set inside tiled: they all become object attributes.
 
     >>> layer = tmxdata.tilelayers[0]
-    >>> layer = tmxdata.getTileLayerByName("Background")
+    >>> layer = tmxdata.get_tile_layer_by_name("Background")
 
     >>> print layer.tilewidth
     32
@@ -134,7 +142,7 @@ access metadata that was set inside tiled: they all become object attributes.
 Tiles properties are the exception here, and must be accessed through
 "getTileProperties".  The data is a regular Python dictionary:
 
-    >>> tile = tmxdata.getTileProperties(x, y, layer)
+    >>> tile = tmxdata.get_tile_properties(x, y, layer)
     >>> tile["name"]
     'CobbleStone'
 
@@ -171,16 +179,13 @@ object:     name, type, x, y, width, height, gid, properties, polygon,
 Please see the TiledMap class for more api information.
 """
 from pygame import Surface, mask, RLEACCEL
-from pytmx3.utils import types
 from pytmx3.constants import *
 
 
+# for .14 compatibility
 def load_tmx(filename, *args, **kwargs):
-    # for .14 compatibility
     from pytmx3 import TiledMap
-
-    tiledmap = TiledMap(filename)
-    return tiledmap
+    return TiledMap(filename)
 
 
 def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
@@ -322,7 +327,7 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
 
         for (y, x) in p:
             real_gid += 1
-            gids = tmxdata.mapGID(real_gid)
+            gids = tmxdata.map_gid(real_gid)
 
             if not gids:
                 continue
