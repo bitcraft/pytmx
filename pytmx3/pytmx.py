@@ -100,6 +100,9 @@ class TiledElement(object):
                 raise ValueError
             setattr(self, k, types[str(k)](v))
 
+    def __repr__(self):
+        return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
+
 
 class TiledMap(TiledElement):
     """
@@ -433,9 +436,6 @@ class TiledTileset(TiledElement):
 
         self.parse(node)
 
-    def __repr__(self):
-        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
-
     def parse(self, node):
         """
         parse a tileset element and return a tileset object and properties for
@@ -500,9 +500,6 @@ class TiledTileLayer(TiledElement):
         self.visible = True
 
         self.parse(node)
-
-    def __repr__(self):
-        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
     def parse(self, node):
         """
@@ -588,9 +585,6 @@ class TiledObjectGroup(TiledElement, list):
 
         self.parse(node)
 
-    def __repr__(self):
-        return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
-
     def parse(self, node):
         """
         parse a objectgroup element and return an object group
@@ -619,9 +613,6 @@ class TiledObject(TiledElement):
         self.gid = 0
 
         self.parse(node)
-
-    def __repr__(self):
-        return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
 
     def parse(self, node):
         def read_points(text):
@@ -696,9 +687,5 @@ class TiledImageLayer(TiledElement):
             self.trans = image_node.get('trans', None)
             self.width = image_node.get('width', None)
             self.height = image_node.get('height', None)
-
-    def __repr__(self):
-        return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
-
 
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
