@@ -51,7 +51,9 @@ class TiledMap(TiledElement):
         TiledElement.__init__(self)
         self.tilesets = []          # list of TiledTileset objects
         self.tilelayers   = []      # list of TiledLayer objects
+        self.imagelayers  = []      # list of TiledImageLayer objects
         self.objectgroups = []      # list of TiledObjectGroup objects
+        self.all_layers = []        # list of all layers in proper order
         self.tile_properties = {}   # dict of tiles that have metadata
         self.filename = filename
 
@@ -299,15 +301,18 @@ class TiledMap(TiledElement):
 
         # initialize the gid mapping
         self.imagemap[(0,0)] = 0
-
-        for node in etree.findall('layer'):
-            self.addTileLayer(TiledLayer(self, node))
-
-        for node in etree.findall('objectgroup'):
-            self.objectgroups.append(TiledObjectGroup(self, node))
-
-        for node in etree.findall('tileset'):
-            self.tilesets.append(TiledTileset(self, node))
+        
+        for node in etree.iter():
+            if node.tag == 'tileset':
+                self.tilesets.append(TiledTileset(self, node))
+            else:
+                if node.tag == 'layer':
+                    self.addTileLayer(TiledLayer(self, node))
+                elif node.tag == 'imagelayer':
+                    self.addImageLayer(TiledImageLayer(self, node))
+                elif node.tag == 'objectgroup':
+                    self.objectgroups.append(TiledObjectGroup(self, node))
+                    self.all_layers.append(self.objectgroups[-1])
 
         # "tile objects", objects with a GID, have need to have their
         # attributes set after the tileset is loaded
@@ -327,6 +332,21 @@ class TiledMap(TiledElement):
             raise ValueError, msg.format(type(layer))
 
         self.tilelayers.append(layer)
+        self.all_layers.append(layer)
+        self.layernames[layer.name] = layer
+        
+
+    def addImageLayer(self, layer):
+        """
+        Add a TiledImageLayer layer object to the map.
+        """
+
+        if not isinstance(layer, TiledImageLayer):
+            msg = "Layer must be an TiledImageLayer object.  Got {0} instead."
+            raise ValueError, msg.format(type(layer))
+
+        self.imagelayers.append(layer)
+        self.all_layers.append(layer)
         self.layernames[layer.name] = layer
 
 
@@ -361,6 +381,47 @@ class TiledMap(TiledElement):
         """
 
         return [layer for layer in self.tilelayers if layer.visible]
+
+
+class TiledImageLayer(TiledElement):
+    reserved = "source name width height opacity visible".split()
+    
+    def __init__(self, parent, node):
+        TiledElement.__init__(self)
+        self.parent = parent
+
+        # defaults from the specification
+        self.name = None
+        # width and height in tiles meaningless according to the specification
+        #self.width = None
+        #self.height = None
+        self.opacity = 1
+        self.visible = 1
+
+        self.parse(node)
+
+    def parse(self, node):
+        """
+        basic implementation of imagelayers.
+        
+        only works with non embebed images.
+        """
+        
+        self.name = node.get('name', None)
+        self.opacity = node.get('opacity', 1)
+        self.visible = node.get('visible', 1)
+        
+        # image node things
+        image_node = node.find('image', None)
+        if image_node != None:
+            
+            self.source = image_node.get('source', None)
+            self.trans = image_node.get('trans', None)
+            self.width = image_node.get('width', None)
+            self.height = image_node.get('height', None)
+
+    def __repr__(self):
+        return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
 
 
 class TiledTileset(TiledElement):
@@ -520,7 +581,7 @@ class TiledLayer(TiledElement):
         # using bytes here limits the layer to 256 unique tiles
         # may be a limitation for very detailed maps, but most maps are not
         # so detailed.
-        [ self.data.append(array.array("B")) for i in xrange(self.height) ]
+        [ self.data.append(array.array("H")) for i in xrange(self.height) ]
 
         for (y, x) in product(xrange(self.height), xrange(self.width)):
             self.data[y].append(self.parent.registerGID(*decode_gid(next(next_gid))))
