@@ -1,7 +1,7 @@
 from pygame import Rect
 from itertools import tee, islice, izip, product
 from collections import defaultdict
-from pytmx.constants import *
+from .constants import *
 
 
 def read_points(text):
