@@ -92,7 +92,7 @@ Installation:
 
 Basic usage sample:
 
-    >>> from pytmx3 import tmxloader
+    >>> from pytmx import tmxloader
     >>> tmxdata = tmxloader.load_pygame("map.tmx")
     >>> tmxdata = tmxloader.load_pygame("map.tmx", pixelalpha=True)
 
@@ -161,8 +161,8 @@ object:      name, type, x, y, width, height, gid, properties, polygon,
 ***   Please see the TiledMap class for more api information.   ***
 """
 from pygame import Surface, mask, RLEACCEL
-from pytmx3.constants import *
-from pytmx3.pytmx import *
+from .constants import *
+from .pytmx import *
 
 __all__ = ['load_pygame']
 

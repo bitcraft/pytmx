@@ -13,7 +13,7 @@ import os.path
 import glob
 import pygame
 from pygame.locals import *
-from pytmx3 import *
+from pytmx import *
 
 
 class TiledRenderer(object):

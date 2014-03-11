@@ -11,7 +11,7 @@ import math
 import pygame
 from pygame.locals import *
 from itertools import product
-from pytmx3 import *
+from pytmx import *
 
 
 class TiledRenderer(object):

@@ -1,5 +1,5 @@
-from pytmx3.tmxloader import load_tmx, load_pygame
-from pytmx3.utils import build_rects
-from pytmx3.pytmx import *
+from .tmxloader import load_tmx, load_pygame
+from .utils import build_rects
+from .pytmx import *
 
 __version__ = '3.16'

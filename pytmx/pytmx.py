@@ -1,7 +1,7 @@
 from itertools import chain, product, islice
 from collections import defaultdict
 from xml.etree import ElementTree
-from pytmx3.constants import *
+from .constants import *
 
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
 
