@@ -1,45 +1,48 @@
 """
-This is tested on pygame 1.9 and python 2.7.
-This will not work on python 3.  Don't ask either.  I will say 'no'.
+This is tested on pygame 1.9 and python 3.3.
 bitcraft (leif dot theden at gmail.com)
 
-Rendering demo for the TMXLoader.  This simply shows that the loader works.
-If you need a rendering library that will handle large maps and scrolling, you
-can check out my lib2d project at pygame.org.  Have fun!
-
-In this demo, I am accessing the layer and map data directly.  It is perfectly
-fine to develop a data structure that works for you.
-
+Rendering demo for the TMXLoader3.
 
 Known bugs:
     Tile Objects are not handled by any renderer.
-
-
 """
+import math
+import pygame
+from pygame.locals import *
+from itertools import product
+from pytmx3 import *
+
 
 class TiledRenderer(object):
     """
     Super simple way to render a tiled map
     """
-
     def __init__(self, filename):
-        from pytmx import tmxloader
-        self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
-
+        self.tiledmap = load_pygame(filename, pixelalpha=True)
 
     def render(self, surface):
-        # not going for effeciency here
+        # not going for efficiency here
         # for demonstration purposes only
 
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.getTileImage
+        gt = self.tiledmap.get_tile_image
 
-        for l in xrange(0, len(self.tiledmap.tilelayers)):
-            for y in xrange(0, self.tiledmap.height):
-                for x in xrange(0, self.tiledmap.width):
-                    tile = gt(x, y, l)
-                    if tile: surface.blit(tile, (x*tw, y*th))
+        for layer in self.tiledmap.visible_layers:
+            if isinstance(layer, TiledTileLayer):
+                for x, y, gid in layer:
+                    tile = gt(x, y, layer)
+                    if tile:
+                        surface.blit(tile, (x * tw, y * th))
+
+            elif isinstance(layer, TiledObjectGroup):
+                pass
+
+            elif isinstance(layer, TiledImageLayer):
+                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                if image:
+                    surface.blit(image, (0, 0))
 
 
 class ScrollingRenderer(TiledRenderer):
@@ -53,7 +56,6 @@ class ScrollingRenderer(TiledRenderer):
     IS ONLY A DEMONSTRATION ON SCROLLING A MAP USING THIS LIBRARY AND IS IN NO
     WAY IMPLIED TO BE THE BEST OR CORRECT WAY.
     """
-
     def __init__(self, filename):
         super(ScrollingRenderer, self).__init__(filename)
         self.width = self.tiledmap.width * self.tiledmap.tilewidth
@@ -65,71 +67,96 @@ class ScrollingRenderer(TiledRenderer):
         self.halfwidth = self.tiledmap.width / 2
         self.halfheight = self.tiledmap.height / 2 + 1
 
+    def render(self, surface, center):
+        # TODO: correctly handle imagelayers
 
-    def render(self, surface, (cx, cy)):
+        cx, cy = center
         sw, sh = surface.get_size()
         tw = self.tiledmap.tilewidth
         th = self.tiledmap.tileheight
-        gt = self.tiledmap.getTileImage
+        gt = self.tiledmap.get_tile_image
 
         stw = int(math.ceil(float(sw) / tw)) + 1
         sth = int(math.ceil(float(sh) / th)) + 1
 
-        txf, pxf = divmod((cx-sw/2), tw)
-        tyf, pyf = divmod((cy-sh/2), th)
+        txf, pxf = map(int, (divmod((cx - sw / 2), tw)))
+        tyf, pyf = map(int, (divmod((cy - sh / 2), th)))
 
         if stw + txf > self.mapwidth: stw -= 1
         if sth + tyf > self.mapheight: sth -= 1
 
-        p = product(xrange(stw), xrange(sth),
-                    xrange(len(self.tiledmap.tilelayers)))
+        for layer in self.tiledmap.visible_layers:
+            if isinstance(layer, TiledTileLayer):
+                for x, y, in product(range(stw), range(sth)):
+                    tile = gt(x + txf, y + tyf, layer)
+                    if tile:
+                        surface.blit(tile, (x * tw - pxf, y * th - pyf))
 
-        for x, y, l in p:
-            tile = gt(x+txf, y+tyf, l)
-            if tile: surface.blit(tile, (x*tw-pxf, y*th-pyf))
+            elif isinstance(layer, TiledObjectGroup):
+                pass
 
-
-
-import pygame
-from pygame.locals import *
-import math
-from itertools import product
-
-
-pygame.init()
-pygame.font.init()
-screen = pygame.display.set_mode((480, 480))
-pygame.display.set_caption('TMXLoader Test')
+            elif isinstance(layer, TiledImageLayer):
+                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                if image:
+                    surface.blit(image, (0, 0))
 
 
-def simpleTest(filename):
-    screen_buf = pygame.Surface((240, 240))
-    screen_buf.fill((0,128,255))
+def init_screen(width, height):
+    return pygame.display.set_mode((width, height), pygame.RESIZABLE)
+
+
+def simple_test(filename):
+    def draw():
+        tw = formosa.tiledmap.width * formosa.tiledmap.tilewidth
+        th = formosa.tiledmap.height * formosa.tiledmap.tileheight
+        map_buffer = pygame.Surface((tw, th))
+        map_buffer.fill((0, 128, 255))
+        formosa.render(map_buffer)
+        pygame.transform.scale(map_buffer, screen.get_size(), screen)
+        f = pygame.font.Font(pygame.font.get_default_font(), 20)
+        i = f.render("simple demo. press any key to continue", 1, (180, 180, 0))
+        screen.blit(i, (0, 0))
+        pygame.display.flip()
+
     formosa = TiledRenderer(filename)
-    formosa.render(screen_buf)
-    pygame.transform.scale(screen_buf, screen.get_size(), screen)
-    f = pygame.font.Font(pygame.font.get_default_font(), 20)
-    i = f.render("simple demo. press any key to continue", 1, (180,180,0))
-    screen.blit(i, (0,0))
-    pygame.display.flip()
-
+    draw()
     run = True
     while run:
         try:
-            event = pygame.event.wait()
-            if (event.type == QUIT) or (event.type == KEYDOWN): run = False
-
+            event = pygame.event.poll()
+            if (event.type == QUIT) or (event.type == KEYDOWN):
+                run = False
+            if event.type == VIDEORESIZE:
+                init_screen(event.w, event.h)
+                draw()
         except KeyboardInterrupt:
             run = False
 
 
-def scrollTest(filename):
-    buf_dim = [screen.get_width() / 2, screen.get_height() / 2]
-    center = [buf_dim[0]/2, buf_dim[1]/2]
-    movt = [0, 0, 0]
+def scroll_test(filename):
+    def init_buffer(size):
+        if size[0] > mw: size[0] = mw
+        if size[1] > mh: size[1] = mh
+        s = pygame.Surface(size)
+        b = list(map(int, size))
+        return s, b
+
+    def draw():
+        bw, bh = map_buffer.get_size()
+        sw, sh = screen.get_size()
+
+        if (sw >= bw) and (sh >= bh):
+            y = 0
+            map_buffer.fill((0, 128, 255))
+            formosa.render(map_buffer, center)
+            pygame.transform.scale(map_buffer, (sw, sh), screen)
+            for i in text:
+                screen.blit(i, (0, y))
+                y += i.get_height()
+        else:
+            pass
 
     clock = pygame.time.Clock()
-    screen_buf = pygame.Surface(buf_dim)
     formosa = ScrollingRenderer(filename)
     mw = formosa.tiledmap.width * formosa.tiledmap.tilewidth
     mh = formosa.tiledmap.height * formosa.tiledmap.tileheight
@@ -139,32 +166,21 @@ def scrollTest(filename):
          "arrow keys move",
          "z and x will zoom the map"]
 
-    text = [ f.render(i, 1, (180, 180, 0)) for i in t ]
+    text = [f.render(i, 1, (180, 180, 0)) for i in t]
 
-    def draw():
-        bw, bh = screen_buf.get_size()
-        sw, sh = screen.get_size()
-
-        if (sw >= bw) and (sh >= bh):
-            y = 0
-            screen_buf.fill((0,128,255))
-            formosa.render(screen_buf, center)
-            pygame.transform.smoothscale(screen_buf, (sw, sh), screen)
-            for i in text:
-                screen.blit(i, (0,y))
-                y += i.get_height()
-        else:
-            pass
-
+    map_buffer, map_buffer_size = init_buffer([screen.get_width() / 2, screen.get_height() / 2])
+    center = [int(map_buffer.get_width() / 2), int(map_buffer.get_height() / 2)]
+    movt = [0, 0, 0]
 
     draw()
     run = True
     while run:
         try:
-            clock.tick(30)
+            clock.tick(60)
             event = pygame.event.poll()
 
-            if event.type == QUIT: run = False
+            if event.type == QUIT:
+                run = False
             elif event.type == KEYDOWN:
                 if event.key == K_z:
                     movt[2] -= 2
@@ -181,20 +197,24 @@ def scrollTest(filename):
                 elif event.key == K_ESCAPE:
                     run = False
 
+            elif event.type == VIDEORESIZE:
+                init_screen(event.w, event.h)
+                map_buffer, map_buffer_size = init_buffer([screen.get_width() / 2, screen.get_height() / 2])
+
             center[0] += movt[0]
             center[1] += movt[1]
             if not movt[2] == 0:
-                buf_dim[0] += movt[2]
-                buf_dim[1] += movt[2]
-                if (buf_dim[0] < 1) or (buf_dim[1] < 0):
-                    buf_dim[0] += 1 - buf_dim[0]
-                    buf_dim[1] += 1 - buf_dim[1]
-                if buf_dim[0] > screen.get_width() / 2:
-                    buf_dim = [screen.get_width() / 2, screen.get_height() / 2]
+                map_buffer_size[0] += movt[2]
+                map_buffer_size[1] += movt[2]
+                if (map_buffer_size[0] < 1) or (map_buffer_size[1] < 0):
+                    map_buffer_size[0] += 1 - map_buffer_size[0]
+                    map_buffer_size[1] += 1 - map_buffer_size[1]
+                if map_buffer_size[0] > screen.get_width() / 2:
+                    map_buffer_size = [screen.get_width() / 2, screen.get_height() / 2]
                     movt[2] = 0
-                screen_buf = pygame.Surface(buf_dim)
+                map_buffer, map_buffer_size = init_buffer(map_buffer_size)
 
-            sw, sh = screen_buf.get_size()
+            sw, sh = map_buffer.get_size()
             hsw = sw / 2
             hsh = sh / 2
 
@@ -202,8 +222,8 @@ def scrollTest(filename):
                 if center[0] < hsw:
                     center[0] = hsw
                     movt[0] = 0
-                elif center[0] > mw - hsw-1:
-                    center[0] = mw - hsw-1
+                elif center[0] > mw - hsw - 1:
+                    center[0] = mw - hsw - 1
                     movt[0] = 0
             else:
                 center[0] = formosa.width / 2
@@ -221,20 +241,25 @@ def scrollTest(filename):
             draw()
             pygame.display.flip()
 
-
         except KeyboardInterrupt:
             run = False
 
 
-if __name__ == "__main__":
-    import sys
-    try:
-        filename = sys.argv[1]
-    except:
-        print "no TMX map specified, using default"
-        filename = "formosa-base64-gzip.tmx"
+import sys
+sys.path.append('..')
 
-    simpleTest(filename)
-    scrollTest(filename)
+pygame.init()
+pygame.font.init()
+screen = init_screen(200, 200)
+pygame.display.set_caption('TMXLoader Test')
 
-    pygame.quit()
+try:
+    filename = sys.argv[1]
+except IndexError:
+    print("no TMX map specified, using default")
+    filename = "formosa-base64-gzip.tmx"
+
+simple_test(filename)
+scroll_test(filename)
+
+pygame.quit()

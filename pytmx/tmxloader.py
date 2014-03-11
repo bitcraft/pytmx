@@ -1,7 +1,7 @@
 """
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v2.15.2 - for python 2.6 and 2.7
+v3.16 - for python 3.3
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
@@ -10,9 +10,26 @@ released under the LGPL v3
 
 ===============================================================================
 
-New in 2.15.2:
-   general: new version number to reflect supported python version
-   general: python 3 support in new library
+New in 3.16:
+    ***    jumped to version 3.x to reflect new python 3.3 compatibility    ***
+
+       all: python 3 support
+      pep8: changed method/function names to lowercase with underscore spacing
+      pep8: modified various style infractions
+      core: simplified file structure
+      core: added __all__ to some modules for less clutter
+      demo: added ability to resize preview window
+      test: mouse clicks now advance the test
+      test: added ability to resize preview window
+      test: tile objects are drawn (previously supported, but not shown in test)
+     utils: renamed buildDistributionRects to build_rects
+     pytmx: bumped up gid limit from 255 to 65535 (16-bit)
+     pytmx: removed get_objects(), replaces with objects property
+     pytmx: removed get_draw_order(), replaced with visible_layers property
+    loader: added ImageLayer support
+    loader: minor documentation fixes
+    loader: small optimizations
+    loader: possible [ultra minor] optimization: using iterator on etree to load
 
 New in .15:
     loader: new getTileLayerByName(name) method
@@ -61,6 +78,10 @@ New in .11:
     pygame: Tilesets no longer load with per-pixel alphas by default
     pygame: Colorkey transparency should be correctly handled now
 
+
+Includes a scrolling/zooming renderer.  They are for demonstration purposes,
+and may not be suitable for all projects.  Use at your own risk.
+
 ===============================================================================
 
 Installation:
@@ -71,39 +92,35 @@ Installation:
 
 Basic usage sample:
 
-    >>> from pytmx import tmxloader
+    >>> from pytmx3 import tmxloader
     >>> tmxdata = tmxloader.load_pygame("map.tmx")
     >>> tmxdata = tmxloader.load_pygame("map.tmx", pixelalpha=True)
-
-The loader will correctly convert() or convert_alpha() each tile image, so you
-don't have to worry about that after you load the map.
 
 
 When you want to draw tiles, you simply call "getTileImage":
 
-    >>> image = tmxdata.getTileImage(x, y, layer)
+    >>> image = tmxdata.get_tile_image(x, y, layer)
     >>> screen.blit(image, position)
-
 
 Maps, tilesets, layers, objectgroups, and objects all have a simple way to
 access metadata that was set inside tiled: they all become object attributes.
 
     >>> layer = tmxdata.tilelayers[0]
-    >>> layer = tmxdata.getTileLayerByName("Background")
+    >>> layer = tmxdata.get_tile_layer_by_name("Background")
 
     >>> print layer.tilewidth
     32
     >>> print layer.weather
     'sunny'
 
-
-Tiles properties are the exception here, and must be accessed through
+Tiles properties are the exception here*, and must be accessed through
 "getTileProperties".  The data is a regular Python dictionary:
 
-    >>> tile = tmxdata.getTileProperties(x, y, layer)
+    >>> tile = tmxdata.get_tile_properties(x, y, layer)
     >>> tile["name"]
     'CobbleStone'
 
+* this is compromise in the API delivers great memory saving
 
 ===================================================================================
 IMPORTANT FOR PYGAME USERS!!
@@ -144,28 +161,25 @@ object:      name, type, x, y, width, height, gid, properties, polygon,
 ***   Please see the TiledMap class for more api information.   ***
 """
 from pygame import Surface, mask, RLEACCEL
-from .constants import *
+from pytmx3.constants import *
+from pytmx3.pytmx import *
+
+__all__ = ['load_pygame']
 
 
+# for .14 compatibility
 def load_tmx(filename, *args, **kwargs):
-    # for .14 compatibility
-    from pytmx import TiledMap
-
-    tiledmap = TiledMap(filename)
-    return tiledmap
+    return TiledMap(filename)
 
 
-def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
+def smart_convert(original, colorkey, force_colorkey, pixelalpha):
     """
     this method does several tests on a surface to determine the optimal
-    flags and pixel format for each tile.
+    flags and pixel format for each tile surface.
 
     this is done for the best rendering speeds and removes the need to
     convert() the images on your own
-
-    original is a surface and MUST NOT HAVE AN ALPHA CHANNEL
     """
-
     tile_size = original.get_size()
 
     # count the number of pixels in the tile that are not transparent
@@ -179,7 +193,7 @@ def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
     elif force_colorkey:
         tile = Surface(tile_size)
         tile.fill(force_colorkey)
-        tile.blit(original, (0,0))
+        tile.blit(original, (0, 0))
         tile.set_colorkey(force_colorkey, RLEACCEL)
 
     # there are transparent pixels, and tiled set a colorkey
@@ -198,8 +212,11 @@ def pygame_convert(original, colorkey, force_colorkey, pixelalpha):
     return tile
 
 
-def load_images_pygame(tmxdata, mapping, *args, **kwargs):
+def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     """
+    Utility function to load images.
+
+
     due to the way the tiles are loaded, they will be in the same pixel format
     as the display when it is loaded.  take this into consideration if you
     intend to support different screen pixel formats.
@@ -223,18 +240,16 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
     TL;DR:
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
-
     """
     from itertools import product
-    from pygame import Surface
-    import pygame, os
-
+    import pygame
+    import os
 
     def handle_transformation(tile, flags):
         if flags:
             fx = flags & TRANS_FLIPX == TRANS_FLIPX
             fy = flags & TRANS_FLIPY == TRANS_FLIPY
-            r  = flags & TRANS_ROT == TRANS_ROT
+            r = flags & TRANS_ROT == TRANS_ROT
 
             if r:
                 # not sure why the flip is required...but it is.
@@ -247,15 +262,19 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             elif fx or fy:
                 newtile = pygame.transform.flip(tile, fx, fy)
 
-            # preserve any flags that may have been lost after the transformation
             return newtile
+
+            # preserve any flags that may have been lost after the transformation
             #return newtile.convert(tile)
 
         else:
             return tile
 
+    # change background color into something nice
+    if tmxdata.background_color:
+        tmxdata.background_color = pygame.Color(tmxdata.background_color)
 
-    pixelalpha     = kwargs.get("pixelalpha", False)
+    pixelalpha = kwargs.get("pixelalpha", False)
     force_colorkey = kwargs.get("force_colorkey", False)
 
     if force_colorkey:
@@ -263,10 +282,12 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
             force_colorkey = pygame.Color(*force_colorkey)
         except:
             msg = "Cannot understand color: {0}"
-            raise Exception, msg.format(force_colorkey)
+            print(msg.format(force_colorkey))
+            raise ValueError
 
     tmxdata.images = [0] * tmxdata.maxgid
 
+    real_gid = None
     for firstgid, t in sorted((t.firstgid, t) for t in tmxdata.tilesets):
         path = os.path.join(os.path.dirname(tmxdata.filename), t.source)
 
@@ -280,35 +301,56 @@ def load_images_pygame(tmxdata, mapping, *args, **kwargs):
         if t.trans:
             colorkey = pygame.Color("#{0}".format(t.trans))
 
-        # i dont agree with margins and spacing, but i'll support it anyway
-        # such is life.  okay.jpg
+        # margins and spacing
         tilewidth = t.tilewidth + t.spacing
         tileheight = t.tileheight + t.spacing
 
         # some tileset images may be slightly larger than the tile area
         # ie: may include a banner, copyright, ect.  this compensates for that
-        width = ((int((w-t.margin*2) + t.spacing) / tilewidth) * tilewidth) - t.spacing
-        height = ((int((h-t.margin*2) + t.spacing) / tileheight) * tileheight) - t.spacing
+        width = int(((int((w - t.margin * 2) + t.spacing) / tilewidth) * tilewidth) - t.spacing)
+        height = int(((int((h - t.margin * 2) + t.spacing) / tileheight) * tileheight) - t.spacing)
 
         # using product avoids the overhead of nested loops
-        p = product(xrange(t.margin, height+t.margin, tileheight),
-                    xrange(t.margin, width+t.margin, tilewidth))
+        p = product(range(t.margin, height + t.margin, tileheight),
+                    range(t.margin, width + t.margin, tilewidth))
 
         for (y, x) in p:
             real_gid += 1
-            gids = tmxdata.mapGID(real_gid)
-            if gids == []: continue
+            gids = tmxdata.map_gid(real_gid)
 
-            original = image.subsurface(((x,y), tile_size))
+            if not gids:
+                continue
+
+            original = image.subsurface(((x, y), tile_size))
 
             for gid, flags in gids:
                 tile = handle_transformation(original, flags)
-                tile = pygame_convert(tile, colorkey, force_colorkey, pixelalpha)
+                tile = smart_convert(tile, colorkey, force_colorkey, pixelalpha)
                 tmxdata.images[gid] = tile
 
+    for layer in tmxdata.layers:
+        if isinstance(layer, TiledImageLayer):
+            colorkey = None
+            if getattr(layer, 'trans', None):
+                colorkey = pygame.Color("#{0}".format(t.trans))
+
+            source = getattr(layer, 'source', None)
+            if source:
+                gid = tmxdata.register_gid(real_gid)
+                layer.gid = gid
+                path = os.path.join(os.path.dirname(tmxdata.filename), source)
+                image = pygame.image.load(path)
+                image = smart_convert(image, colorkey, force_colorkey, pixelalpha)
+                tmxdata.images.append(image)
+                real_gid = len(tmxdata.images)
 
 def load_pygame(filename, *args, **kwargs):
-    tmxdata = load_tmx(filename, *args, **kwargs)
-    load_images_pygame(tmxdata, None, *args, **kwargs)
+    """
+    PYGAME USERS: Use me.
 
+    Load a TMX file, load the images, and return a TiledMap class that is ready to use.
+    """
+    tmxdata = load_tmx(filename, *args, **kwargs)
+    _load_images_pygame(tmxdata, None, *args, **kwargs)
     return tmxdata
+
