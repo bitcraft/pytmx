@@ -1,4 +1,6 @@
 *.py[cod]
+.gitignore
+.DS_Store
 thumbs.db
 .idea
 .idea/*
