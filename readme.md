@@ -24,9 +24,18 @@ _______________________________________________________________________________
 ## Introduction
 _______________________________________________________________________________
 
-This map loader can be used to load maps created in the Tiled Map Editor.  It
-provides a simple way to get tile images and associated metadata so that you
-can draw a map onto the screen and do useful things with metadata.
+PyTMX is a map loader for python/pygame designed for games.  It provides smart
+tile loading with a fast and efficient storage base.  Not only will does it
+correctly handle most Tiled object types, it also will load meta data for
+them, so you can modify your maps and objects in Tiled, instead of modifying
+your source code.
+
+Because PyTMX was built with games in mind, it differs slightly from Tiled in
+a few minor aspects:
+
+- Layers not aligned to the grid are not supported.
+- Some object metadata attribute names are not supported (see docstrings)
+
 
 PyTMX strives to balance performance, flexibility, and performance.  Feel free
 to use the classes provided in pytmx.py as superclasses to your own maps, or
@@ -38,6 +47,10 @@ across all platforms.  test.py demonstrates loading a variety of maps and
 formats, and demo.py shows how you can create scrolling maps in a very simple
 fashion, while still retaining all the power of the Tiled Editor.
 
+Finally, there is no save feature.  Once the map is loaded, it will be up to
+you to provide a way to save changes to the map.  I've used the pickle module
+with good results.
+
 
 ## Design Goals:
 _______________________________________________________________________________
@@ -45,6 +58,7 @@ _______________________________________________________________________________
 * Simple API with many handy functions
 * Memory efficient and performant
 * Extensible and easy to understand
+
 
 ## Features:
 _______________________________________________________________________________
@@ -55,6 +69,7 @@ _______________________________________________________________________________
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
 * Image loading with pygame (will work without images as well)
+
 
 ## Why use PyTMX?
 _______________________________________________________________________________
