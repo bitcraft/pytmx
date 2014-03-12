@@ -4,7 +4,7 @@ _______________________________________________________________________________
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)   
-v2.15.2  - for python 2.6 and 2.7
+v2.15.2  - for python 2.6 and 2.7   
 *Use the python3 branch for python3 support*
 
 
@@ -19,7 +19,7 @@ _______________________________________________________________________________
 
 ##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
 ##### 02/06/14 - Python 3 support coming soon
-
+    
    
    
    
@@ -37,7 +37,7 @@ a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
 - Some object metadata attribute names are not supported (see docstrings)
-
+    
 
 PyTMX strives to balance performance, flexibility, and performance.  Feel free
 to use the classes provided in pytmx.py as superclasses to your own maps, or
@@ -51,7 +51,7 @@ fashion, while still retaining all the power of the Tiled Editor.
 
 Finally, there is no save feature.  Once the map is loaded, it will be up to
 you to provide a way to save changes to the map.  I've used the pickle module
-with good results.
+with good results.    
 
 
 ## Design Goals:
