@@ -16,7 +16,7 @@ setup(name="PyTMX",
         packages=['pytmx',],
         install_requires=['pygame'],
         license = "LGPLv3",
-        long_description=read('readme.md'),
+        long_description='see https://github.com/bitcraft/PyTMX',
         classifiers=[
             "Intended Audience :: Developers",
             "Development Status :: 4 - Beta",

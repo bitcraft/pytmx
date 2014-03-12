@@ -18,6 +18,7 @@ Tested with Tiled 0.8.1 for Mac.
 ## News
 _______________________________________________________________________________
 
+##### 03/11/14 - So, supporting pytmx with python 2 and 3 sucks. Keeping python3.
 ##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
 ##### 02/06/14 - Python 3 support coming soon
 
