@@ -40,7 +40,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             raise ValueError
 
     if isinstance(layer, int):
-        layer_data = tmxmap.get_layer_data(layer).data
+        layer_data = tmxmap.get_layer_data(layer)
     elif isinstance(layer, str):
         try:
             layer = [l for l in tmxmap.tilelayers if l.name == layer].pop()
