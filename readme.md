@@ -1,11 +1,10 @@
-# PyTMX v2.15.2 and v3.16
+# PyTMX v2.15.2
 _______________________________________________________________________________
 
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)   
 v2.15.2  - for python 2.6 and 2.7   
-v3.16    - for python 3.3   
 
 If you have any problems or suggestions, please contact me via email.
 Tested with Tiled 0.8.1 for Mac.
