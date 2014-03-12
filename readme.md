@@ -4,7 +4,9 @@ _______________________________________________________________________________
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)   
-v2.15.2  - for python 2.6 and 2.7   
+v2.15.2  - for python 2.6 and 2.7
+*Use the python3 branch for python3 support*
+
 
 If you have any problems or suggestions, please contact me via email.
 
