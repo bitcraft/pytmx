@@ -77,7 +77,7 @@ _______________________________________________________________________________
 * I have kept PyTMX current with new versions of Tiled since v.7
 
 ### PyTMX is usable:
-* Liberal LGPL license means you can use PyTMX any way you want
+* Liberal LGPL license means you can use PyTMX [almost] any way you want
 
 _______________________________________________________________________________
 
