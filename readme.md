@@ -1,12 +1,11 @@
-# PyTMX v2.15.2 and v3.16
+# PyTMX v3.16
 _______________________________________________________________________________
 
 ## Map loader for TMX Files
 ### Experimental Python 3 Branch
 
 
-bitcraft (leif dot theden at gmail.com)   
-v2.15.2  - for python 2.6 and 2.7   
+bitcraft (leif dot theden at gmail.com)
 v3.16    - for python 3.3   
 
 If you have any problems or suggestions, please contact me via email.
