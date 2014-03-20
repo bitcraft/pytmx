@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 #encoding: utf-8
 
-from setuptools import setup
 import os
+from setuptools import setup
 import pytmx
+
 
 def read(file_name):
     with open(os.path.join(os.path.dirname(__file__), file_name)) as fd:

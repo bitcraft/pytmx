@@ -3,6 +3,8 @@ from collections import defaultdict
 from xml.etree import ElementTree
 from .constants import *
 
+
+
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
 
 
@@ -425,6 +427,12 @@ class TiledMap(TiledElement):
         Return a list of the map's layers in drawing order.
         """
         return list(self.layers)
+
+    def get_object_by_name(self, name):
+        for obj in self.objects:
+            if obj.name == name:
+                return obj
+        raise ValueError
 
     @property
     def objects(self):

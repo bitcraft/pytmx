@@ -16,6 +16,7 @@ from pygame.locals import *
 from pytmx import *
 
 
+
 class TiledRenderer(object):
     """
     Super simple way to render a tiled map
