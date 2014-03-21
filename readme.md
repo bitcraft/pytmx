@@ -5,7 +5,9 @@ _______________________________________________________________________________
 
 bitcraft (leif dot theden at gmail.com)   
 v2.15.2  - for python 2.6 and 2.7   
-*Use the python3 branch for python3 support*
+  
+  
+#### *Use the python3 branch for python3 support*
 
 
 If you have any problems or suggestions, please contact me via email.
@@ -64,24 +66,30 @@ you can use any data structure you want, as long as it is PyGame.
 https://github.com/bitcraft/pyscroll
 
 
-## Design Goals:
+## Design Goals and Features
 _______________________________________________________________________________
 
 * Simple API with many handy functions
 * Memory efficient and performant
 * Extensible and easy to understand
-
-
-## Features:
-_______________________________________________________________________________
-
+    
+    
 * Loads data, "properties" metadata, and images from Tiled's TMX format
 * Supports base64, csv, gzip, zlib and uncompressed XML
 * Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
 * Image loading with pygame (will work without images as well)
+    
+    
+## Tile and Object Metadata ("Properties")
+_______________________________________________________________________________
 
+Tile properties is access through the map; see the getTileProperties methods
+        
+All other objects, including the map, layer, objects, etc.  are attributes:    
+  ie: map.name  //  layer.weather  // object.power    
+         
 
 ## Why use PyTMX?
 _______________________________________________________________________________
