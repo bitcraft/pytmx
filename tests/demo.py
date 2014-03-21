@@ -9,9 +9,9 @@ Known bugs:
 """
 import math
 import pygame
+import itertools
 from pygame.locals import *
-from itertools import product
-from pytmx import load_pygame
+from pytmx import *
 
 
 class TiledRenderer(object):
@@ -87,7 +87,7 @@ class ScrollingRenderer(TiledRenderer):
 
         for layer in self.tiledmap.visible_layers:
             if isinstance(layer, TiledTileLayer):
-                for x, y, in product(range(stw), range(sth)):
+                for x, y, in itertools.product(range(stw), range(sth)):
                     tile = gt(x + txf, y + tyf, layer)
                     if tile:
                         surface.blit(tile, (x * tw - pxf, y * th - pyf))
