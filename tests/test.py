@@ -5,16 +5,16 @@ bitcraft (leif dot theden at gmail.com)
 Rendering demo for the TMXLoader.
 
 Typically this is run to verify that any code changes do do break the loader.
-
-untested:
-    image layers
+Tests all Tiled features -except- terrains.
 """
-import os.path
-import glob
+
 import pygame
 from pygame.locals import *
 from pytmx import *
 
+
+def init_screen(width, height):
+    return pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
 
 class TiledRenderer(object):
@@ -22,22 +22,24 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
     def __init__(self, filename):
-        self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
+        tm = load_pygame(filename, pixelalpha=True)
+        self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
+        self.tmx_data = tm
 
     def render(self, surface):
         # not going for efficiency here
         # for demonstration purposes only
 
-        tw = self.tiledmap.tilewidth
-        th = self.tiledmap.tileheight
-        gt = self.tiledmap.get_tile_image
+        tw = self.tmx_data.tilewidth
+        th = self.tmx_data.tileheight
+        gt = self.tmx_data.get_tile_image
 
         # fill the background color
-        if self.tiledmap.background_color:
-            surface.fill(self.tiledmap.background_color)
+        if self.tmx_data.background_color:
+            surface.fill(self.tmx_data.background_color)
 
         # draw map tiles
-        for layer in self.tiledmap.visible_layers:
+        for layer in self.tmx_data.visible_layers:
             if isinstance(layer, TiledTileLayer):
                 for x, y, gid in layer:
                     tile = gt(x, y, layer)
@@ -48,84 +50,100 @@ class TiledRenderer(object):
                 pass
 
             elif isinstance(layer, TiledImageLayer):
-                image = self.tiledmap.get_tile_image_by_gid(layer.gid)
+                image = self.tmx_data.get_tile_image_by_gid(layer.gid)
                 if image:
                     surface.blit(image, (0, 0))
 
         # draw polygon and poly line objects
-        for o in self.tiledmap.objects:
+        for o in self.tmx_data.objects:
             if hasattr(o, 'points'):
                 points = [(i[0] + o.x, i[1] + o.y) for i in o.points]
                 pygame.draw.lines(surface, (255, 128, 128), o.closed, points, 2)
             elif hasattr(o, 'gid'):
-                tile = self.tiledmap.get_tile_image_by_gid(o.gid)
+                tile = self.tmx_data.get_tile_image_by_gid(o.gid)
                 if tile:
                     surface.blit(tile, (o.x, o.y))
 
 
-def init_screen(width, height):
-    return pygame.display.set_mode((width, height), pygame.RESIZABLE)
+class SimpleTest(object):
+    def __init__(self, filename):
+        self.renderer = None
+        self.running = False
+        self.dirty = False
+        self.exit_status = 0
+        self.load_map(filename)
 
+    def load_map(self, filename):
+        self.renderer = TiledRenderer(filename)
 
-def simple_test(filename):
-    print("Testing", filename)
+        print("Objects in map:")
+        for o in self.renderer.tmx_data.objects:
+            print(o)
+            for k, v in o.__dict__.items():
+                print("  ", k, v)
 
-    def draw():
-        sw, sh = screen.get_size()
-        screen_buf = pygame.Surface((sw/2, sh/2))
-        formosa.render(screen_buf)
-        pygame.transform.scale(screen_buf, screen.get_size(), screen)
-        f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render(filename, 1, (180, 180, 0))
-        screen.blit(i, (0, 0))
-        pygame.display.flip()
-
-    formosa = TiledRenderer(filename)
-    draw()
-
-    print("Objects in map:")
-    for o in formosa.tiledmap.objects:
-        print(o)
-        for k, v in o.__dict__.items():
+        print("GID (tile) properties:")
+        for k, v in self.renderer.tmx_data.tile_properties.items():
             print("  ", k, v)
 
-    print("GID (tile) properties:")
-    for k, v in formosa.tiledmap.tile_properties.items():
-        print("  ", k, v)
+    def draw(self, surface):
+        temp = pygame.Surface(self.renderer.size)
+        self.renderer.render(temp)
+        pygame.transform.smoothscale(temp, surface.get_size(), surface)
+        f = pygame.font.Font(pygame.font.get_default_font(), 20)
+        i = f.render('press any key for next map or ESC to quit', 1, (180, 180, 0))
+        surface.blit(i, (0, 0))
 
-    run = True
-    while run:
+    def handle_input(self):
         try:
             event = pygame.event.wait()
 
             if event.type == QUIT:
-                run = False
+                self.exit_status = 0
+                self.running = False
 
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    run = False
-
-                break
-
-            elif event.type == MOUSEBUTTONDOWN:
-                break
+                    self.exit_status = 0
+                    self.running = False
+                else:
+                    self.running = False
 
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
-                draw()
+                self.dirty = True
 
         except KeyboardInterrupt:
-            run = False
+            self.exit_status = 0
+            self.running = False
 
-    return run
+    def run(self):
+        self.dirty = True
+        self.running = True
+        self.exit_status = 1
+        while self.running:
+            self.handle_input()
+            if self.dirty:
+                self.draw(screen)
+                self.dirty = False
+                pygame.display.flip()
 
-pygame.init()
-pygame.font.init()
-screen = init_screen(600, 600)
-pygame.display.set_caption('TMXLoader Test')
+        return self.exit_status
 
-for filename in glob.glob(os.path.join('0.9.1', '*.tmx')):
-    if not simple_test(filename):
-        break
+if __name__ == '__main__':
+    import os.path
+    import glob
 
-pygame.quit()
+    pygame.init()
+    pygame.font.init()
+    screen = init_screen(600, 600)
+    pygame.display.set_caption('PyTMX Map Viewer')
+
+    try:
+        for filename in glob.glob(os.path.join('data/0.9.1', '*.tmx')):
+            print("Testing", filename)
+            if not SimpleTest(filename).run():
+                break
+    except:
+        pygame.quit()
+        raise

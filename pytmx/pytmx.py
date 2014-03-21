@@ -136,8 +136,8 @@ class TiledMap(TiledElement):
         # defaults from the TMX specification
         self.version = 0.0
         self.orientation = None
-        self.width = 0       # width of map in tiles
-        self.height = 0      # height of map in tiles
+        self.width = 0        # width of map in tiles
+        self.height = 0       # height of map in tiles
         self.tilewidth = 0   # width of a tile in pixels
         self.tileheight = 0  # height of a tile in pixels
         self.background_color = None
@@ -239,7 +239,7 @@ class TiledMap(TiledElement):
     def get_tile_properties(self, x, y, layer):
         """
         return the properties for the tile, if any
-        
+
         x and y must be integers and are in tile coordinates, not pixel
         x, y, and layer must be positive numbers
 
