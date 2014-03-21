@@ -10,8 +10,8 @@ Known bugs:
 import math
 import pygame
 from pygame.locals import *
-from pytmx import *
-
+from itertools import product
+from pytmx import load_pygame
 
 
 class TiledRenderer(object):
