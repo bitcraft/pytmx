@@ -114,7 +114,6 @@ class TiledMap(TiledElement):
     reserved = "version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
 
     def __init__(self, filename=None):
-        TiledElement.__init__(self)
         self.layers = []           # list of all layers in proper order
         self.tilesets = []         # list of TiledTileset objects
         self.objectgroups = []     # list of TiledObjectGroup objects
@@ -136,8 +135,8 @@ class TiledMap(TiledElement):
         # defaults from the TMX specification
         self.version = 0.0
         self.orientation = None
-        self.width = 0        # width of map in tiles
-        self.height = 0       # height of map in tiles
+        self.width = 0       # width of map in tiles
+        self.height = 0      # height of map in tiles
         self.tilewidth = 0   # width of a tile in pixels
         self.tileheight = 0  # height of a tile in pixels
         self.background_color = None
@@ -182,15 +181,11 @@ class TiledMap(TiledElement):
         except TypeError:
             assert(isinstance(layer, TiledTileLayer))
         except IndexError:
-            msg = "Coords: ({0},{1}) in layer {2} is not valid."
-            print(msg.format(x, y, layer))
             raise ValueError
 
         try:
             gid = layer.data[y][x]
         except (IndexError, ValueError):
-            msg = "Coords: ({0},{1}) in layer {2} is not valid."
-            print(msg.format(x, y, layer))
             raise ValueError
         except TypeError:
             msg = "Tiles must be specified in integers."
@@ -456,7 +451,6 @@ class TiledTileset(TiledElement):
     reserved = "firstgid source name tilewidth tileheight spacing margin image tile properties".split()
 
     def __init__(self, parent, node):
-        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -527,7 +521,6 @@ class TiledTileLayer(TiledElement):
     reserved = "name x y width height opacity properties data".split()
 
     def __init__(self, parent, node):
-        TiledElement.__init__(self)
         self.parent = parent
         self.data = []
 
@@ -623,7 +616,6 @@ class TiledObjectGroup(TiledElement, list):
     reserved = "name color x y width height opacity object properties".split()
 
     def __init__(self, parent, node):
-        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -649,7 +641,6 @@ class TiledObject(TiledElement):
     reserved = "name type x y width height gid properties polygon polyline image".split()
 
     def __init__(self, parent, node):
-        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -711,7 +702,6 @@ class TiledImageLayer(TiledElement):
     reserved = "source name width height opacity visible".split()
 
     def __init__(self, parent, node):
-        TiledElement.__init__(self)
         self.parent = parent
 
         # unify the structure of layers
