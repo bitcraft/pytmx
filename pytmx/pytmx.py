@@ -453,7 +453,7 @@ class TiledMap(TiledElement):
 
 
 class TiledTileset(TiledElement):
-    reserved = "vivisble firstgid source name tilewidth tileheight spacing margin image tile properties".split()
+    reserved = "visible firstgid source name tilewidth tileheight spacing margin image tile properties".split()
 
     def __init__(self, parent, node):
         super().__init__()
