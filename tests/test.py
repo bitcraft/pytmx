@@ -59,10 +59,12 @@ class TiledRenderer(object):
             if hasattr(o, 'points'):
                 points = [(i[0] + o.x, i[1] + o.y) for i in o.points]
                 pygame.draw.lines(surface, (255, 128, 128), o.closed, points, 2)
-            elif hasattr(o, 'gid'):
+            elif o.gid:
                 tile = self.tmx_data.get_tile_image_by_gid(o.gid)
                 if tile:
                     surface.blit(tile, (o.x, o.y))
+            else:
+                pygame.draw.rect(surface, (255, 128, 128), (o.x, o.y, o.width, o.height), 2)
 
 
 class SimpleTest(object):

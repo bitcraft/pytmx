@@ -1,11 +1,12 @@
 from itertools import chain, product, islice
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
+import re
 from .constants import *
 
-
-
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
+
+dotted_regex = re.compile('^(?P<name>.*?)\.(?P<value>.*?)')
 
 
 def decode_gid(raw_gid):
@@ -31,10 +32,10 @@ def handle_bool(text):
 
     try:
         text = str(text).lower()
-        if text == "true":   return True
-        if text == "yes":    return True
-        if text == "false":  return False
-        if text == "no":     return False
+        if text == "true":  return True
+        if text == "yes":   return True
+        if text == "false": return False
+        if text == "no":    return False
     except:
         pass
 
@@ -75,33 +76,57 @@ def parse_properties(node):
     the "properties" from tiled's tmx have an annoying quality that "name"
     and "value" is included. here we mangle it to get that junk out.
     """
+    def split_dot(string, index=0):
+        t = string.split('.')
+
     d = {}
     for child in node.findall('properties'):
         for subnode in child.findall('property'):
-            d[subnode.get('name')] = subnode.get('value')
+            name = subnode.get('name')
+            value = subnode.get('value')
+
+
     return d
 
 
 class TiledElement:
+    def __init__(self):
+        self.properties = {}
+
     def set_properties(self, node):
         """
         read the xml attributes and tiled "properties" from a xml node and fill
         in the values into the object's dictionary.  Names will be checked to
         make sure that they do not conflict with reserved names.
         """
-        # set the attributes reserved for tiled
+        # set the correct types
         [setattr(self, k, types[str(k)](v)) for (k, v) in node.items()]
 
+        prop = parse_properties(node)
+
         # set the attributes that are derived from tiled 'properties'
-        for k, v in parse_properties(node).items():
+        invalid = False
+        for k, v in prop.items():
             if k in self.reserved:
+                invalid = True
                 msg = '{0} "{1}" has a property called "{2}"'
                 print(msg.format(self.__class__.__name__, self.name, k, self.__class__.__name__))
-                msg = "This name is reserved for {0} objects and cannot be used."
-                print(msg.format(self.__class__.__name__))
-                print("Please change the name in Tiled and try again.")
-                raise ValueError
-            setattr(self, k, types[str(k)](v))
+
+        if invalid:
+            msg = "This name(s) is reserved for {0} objects and cannot be used."
+            print(msg.format(self.__class__.__name__))
+            print("Please change the name(s) in Tiled and try again.")
+            raise ValueError
+
+        self.properties = prop
+
+    def __getattr__(self, item):
+        try:
+            return self.properties[item]
+        except KeyError:
+            #msg = '{} object does not have property/attribute: {}'
+            #print(msg.format(self, item))
+            raise AttributeError
 
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
@@ -111,9 +136,10 @@ class TiledMap(TiledElement):
     """
     Contains the layers, objects, and images from a Tiled TMX map
     """
-    reserved = "version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
+    reserved = "visible version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
 
     def __init__(self, filename=None):
+        super().__init__()
         self.layers = []           # list of all layers in proper order
         self.tilesets = []         # list of TiledTileset objects
         self.objectgroups = []     # list of TiledObjectGroup objects
@@ -146,21 +172,6 @@ class TiledMap(TiledElement):
 
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
-
-    def draw_iterator(self):
-        """
-        return an iterator of all the visible map elements for drawing
-
-        meant to be quick, so some internal functions are duplicated here
-
-        incomplete
-        """
-        # TODO: need some optimizations
-        for layer in self.layers:
-            if isinstance(layer, TiledTileLayer):
-                for tile in layer:
-                    x, y, gid = tile
-                    yield x, y, self.images[gid]
 
     def get_tile_image(self, x, y, layer):
         """
@@ -201,7 +212,7 @@ class TiledMap(TiledElement):
             return self.images[gid]
         except (IndexError, ValueError, AssertionError):
             msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
-            print(msg.format(x, y, layer, gid))
+            print(msg.format(gid))
             raise TypeError
 
     def get_tile_gid(self, x, y, layer):
@@ -265,14 +276,9 @@ class TiledMap(TiledElement):
     def get_layer_data(self, layer):
         """
         Return the data for a layer.
-        layer must be positive
-
         Data is an array of arrays.
-
-        >>> pos = data[y][x]
         """
         try:
-            assert(layer >= 0)
             return self.layers[layer].data
         except (IndexError, AssertionError):
             msg = "Layer {0} does not exist."
@@ -373,7 +379,7 @@ class TiledMap(TiledElement):
 
         self.background_color = etree.get('backgroundcolor', self.background_color)
 
-        # *** do not change this load order!  mapping errors will occur if changed ***
+        # *** do not change this load order!  gid mapping errors will occur if changed ***
         for node in etree.findall('layer'):
             self.add_layer(TiledTileLayer(self, node))
 
@@ -439,18 +445,18 @@ class TiledMap(TiledElement):
     @property
     def visible_layers(self):
         """
-        Returns a list of TileLayer objects that are set 'visible'.
+        Returns a generator of TileLayer objects that are set 'visible'.
 
-        Layers have their visibility set in Tiled.  Optionally, you can over-
-        ride the Tiled visibility by creating a property named 'visible'.
+        Layers have their visibility set in Tiled.
         """
         return (l for l in self.layers if l.visible)
 
 
 class TiledTileset(TiledElement):
-    reserved = "firstgid source name tilewidth tileheight spacing margin image tile properties".split()
+    reserved = "vivisble firstgid source name tilewidth tileheight spacing margin image tile properties".split()
 
     def __init__(self, parent, node):
+        super().__init__()
         self.parent = parent
 
         # defaults from the specification
@@ -462,16 +468,12 @@ class TiledTileset(TiledElement):
         self.spacing = 0
         self.margin = 0
         self.tiles = {}
-
-        # TODO: TileOffset
+        self.trans = None
 
         self.parse(node)
 
     def parse(self, node):
         """
-        parse a tileset element and return a tileset object and properties for
-        tiles as a dict
-
         a bit of mangling is done here so that tilesets that have external
         TSX files appear the same as those that don't
         """
@@ -518,9 +520,10 @@ class TiledTileset(TiledElement):
 
 
 class TiledTileLayer(TiledElement):
-    reserved = "name x y width height opacity properties data".split()
+    reserved = "visible name x y width height opacity properties data".split()
 
     def __init__(self, parent, node):
+        super().__init__()
         self.parent = parent
         self.data = []
 
@@ -541,9 +544,6 @@ class TiledTileLayer(TiledElement):
             yield x, y, self.data[y][x]
 
     def parse(self, node):
-        """
-        parse a layer element
-        """
         from struct import unpack
         import array
 
@@ -590,7 +590,7 @@ class TiledTileLayer(TiledElement):
 
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
-        # TODO: this will probably raise an exception if there are no tiles
+        # TODO: this will/should probably raise an exception if there are no tiles
         if encoding == next_gid is None:
             def get_children(parent):
                 for child in parent.findall('tile'):
@@ -613,9 +613,10 @@ class TiledObjectGroup(TiledElement, list):
     """
     Stores TiledObjects.  Supports any operation of a normal list.
     """
-    reserved = "name color x y width height opacity object properties".split()
+    reserved = "visible name color x y width height opacity object properties".split()
 
     def __init__(self, parent, node):
+        super().__init__()
         self.parent = parent
 
         # defaults from the specification
@@ -627,9 +628,6 @@ class TiledObjectGroup(TiledElement, list):
         self.parse(node)
 
     def parse(self, node):
-        """
-        parse a objectgroup element and return an object group
-        """
         self.set_properties(node)
 
         for child in node.findall('object'):
@@ -638,9 +636,10 @@ class TiledObjectGroup(TiledElement, list):
 
 
 class TiledObject(TiledElement):
-    reserved = "name type x y width height gid properties polygon polyline image".split()
+    reserved = "visible name type x y width height gid properties polygon polyline image".split()
 
     def __init__(self, parent, node):
+        super().__init__()
         self.parent = parent
 
         # defaults from the specification
@@ -699,10 +698,13 @@ class TiledObject(TiledElement):
 
 
 class TiledImageLayer(TiledElement):
-    reserved = "source name width height opacity visible".split()
+    reserved = "visible source name width height opacity visible".split()
 
     def __init__(self, parent, node):
+        super().__init__()
         self.parent = parent
+        self.source = None
+        self.trans = None
 
         # unify the structure of layers
         self.gid = 0
@@ -715,9 +717,6 @@ class TiledImageLayer(TiledElement):
         self.parse(node)
 
     def parse(self, node):
-        """
-        basic implementation of imagelayers.
-        """
         self.set_properties(node)
 
         self.name = node.get('name', None)
@@ -727,4 +726,3 @@ class TiledImageLayer(TiledElement):
         image_node = node.find('image')
         self.source = image_node.get('source')
         self.trans = image_node.get('trans', None)
-

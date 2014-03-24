@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="150" height="15" tilewidth="70" tileheight="70" backgroundcolor="#aaffff">
+ <properties>
+  <property name="description" value="Same as before only with a|           little more description to|           see. How groovy."/>
+  <property name="name" value="Another"/>
+  <property name="thumbnail" value="testtrack-thumb"/>
+ </properties>
+ <tileset firstgid="1" source="tiles_spritesheet.tsx"/>
+ <tileset firstgid="157" source="control.tsx"/>
+ <layer name="background" width="150" height="15">
+  <data encoding="base64" compression="zlib">
+   eJztzkERAAAIA6DVsX9BU+x8CAlIAAAAAPrmOgAAAADAewsfmQAq
+  </data>
+ </layer>
+ <layer name="platforms" width="150" height="15">
+  <data encoding="base64" compression="zlib">
+   eJzt1LENgDAMRUG3DJAB2I6RyLYoHYWRU6RAyp30yrj6SgQAAAAA/NdVdBTvz4kb2q9edMf3tsam2sQNKSvblk1pRWNb73/OpiRJkvIeFChKew==
+  </data>
+ </layer>
+ <layer name="foreground" width="150" height="15">
+  <data encoding="base64" compression="zlib">
+   eJztyrEJADAMA7D8kA/6/5FdMmXqFFKQwBiMIwAAAAD2OJW+vX4B4AfZGgAAmHEBERoA0Q==
+  </data>
+ </layer>
+ <objectgroup name="control" width="150" height="15">
+  <object type="pymunktmx_poly" x="420" y="840">
+   <polygon points="0,0 -70,-70 0,-140 70,-70"/>
+  </object>
+  <object type="pymunktmx_box" x="0" y="910" width="140" height="140"/>
+  <object x="1190" y="1050"/>
+  <object type="pymunktmx_poly" x="280" y="980">
+   <polygon points="0,0 70,-70 140,-70 280,0 210,70 70,70"/>
+  </object>
+  <object type="pymunktmx_poly" x="140" y="700">
+   <polygon points="0,0 -70,70 0,140 70,70"/>
+  </object>
+ </objectgroup>
+</map>
