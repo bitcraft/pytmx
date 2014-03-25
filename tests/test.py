@@ -57,8 +57,7 @@ class TiledRenderer(object):
         # draw polygon and poly line objects
         for o in self.tmx_data.objects:
             if hasattr(o, 'points'):
-                points = [(i[0] + o.x, i[1] + o.y) for i in o.points]
-                pygame.draw.lines(surface, (255, 128, 128), o.closed, points, 2)
+                pygame.draw.lines(surface, (255, 128, 128), o.closed, o.points, 2)
             elif o.gid:
                 tile = self.tmx_data.get_tile_image_by_gid(o.gid)
                 if tile:
@@ -81,7 +80,7 @@ class SimpleTest(object):
         print("Objects in map:")
         for o in self.renderer.tmx_data.objects:
             print(o)
-            for k, v in o.__dict__.items():
+            for k, v in o.properties.items():
                 print("  ", k, v)
 
         print("GID (tile) properties:")
@@ -114,6 +113,9 @@ class SimpleTest(object):
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
                 self.dirty = True
+
+            #elif event.type == MOUSEBUTTONDOWN:
+            #    self.running = False
 
         except KeyboardInterrupt:
             self.exit_status = 0

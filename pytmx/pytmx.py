@@ -1,12 +1,12 @@
 from itertools import chain, product, islice
 from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
-import re
+import logging
 from .constants import *
 
-__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
+logger = logging.getLogger("pytmx")
 
-dotted_regex = re.compile('^(?P<name>.*?)\.(?P<value>.*?)')
+__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
 
 
 def decode_gid(raw_gid):
@@ -76,15 +76,16 @@ def parse_properties(node):
     the "properties" from tiled's tmx have an annoying quality that "name"
     and "value" is included. here we mangle it to get that junk out.
     """
-    def split_dot(string, index=0):
-        t = string.split('.')
+
+    def dottify(name, value):
+        for name in reversed(name.split('.')):
+            value = namedtuple('data', name)(value)
+        return value
 
     d = {}
     for child in node.findall('properties'):
         for subnode in child.findall('property'):
-            name = subnode.get('name')
-            value = subnode.get('value')
-
+            name =
 
     return d
 
@@ -230,7 +231,7 @@ class TiledMap(TiledElement):
             return self.layers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid"
-            print(msg.format(x, y, layer))
+            logger.debug(msg, (x, y, layer))
             raise ValueError
 
     def get_tile_images(self, r, layer):
@@ -469,6 +470,8 @@ class TiledTileset(TiledElement):
         self.margin = 0
         self.tiles = {}
         self.trans = None
+        self.width = 0
+        self.height = 0
 
         self.parse(node)
 
@@ -516,7 +519,9 @@ class TiledTileset(TiledElement):
 
         image_node = node.find('image')
         self.source = image_node.get('source')
-        self.trans = image_node.get("trans", None)
+        self.trans = image_node.get('trans', None)
+        self.width = int(image_node.get('width'))
+        self.height = int(image_node.get('height'))
 
 
 class TiledTileLayer(TiledElement):
@@ -670,31 +675,28 @@ class TiledObject(TiledElement):
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
 
+        points = None
+
         polygon = node.find('polygon')
         if polygon is not None:
-            x1 = x2 = y1 = y2 = 0
-            self.points = read_points(polygon.get('points'))
+            points = read_points(polygon.get('points'))
             self.closed = True
-            for x, y in self.points:
-                if x < x1: x1 = x
-                if x > x2: x2 = x
-                if y < y1: y1 = y
-                if y > y2: y2 = y
-            self.width = abs(x1) + abs(x2)
-            self.height = abs(y1) + abs(y2)
 
         polyline = node.find('polyline')
         if polyline is not None:
-            x1 = x2 = y1 = y2 = 0
-            self.points = read_points(polyline.get('points'))
+            points = read_points(polyline.get('points'))
             self.closed = False
-            for x, y in self.points:
+
+        if points:
+            x1 = x2 = y1 = y2 = 0
+            for x, y in points:
                 if x < x1: x1 = x
                 if x > x2: x2 = x
                 if y < y1: y1 = y
                 if y > y2: y2 = y
             self.width = abs(x1) + abs(x2)
             self.height = abs(y1) + abs(y2)
+            self.points = tuple([(i[0] + self.x, i[1] + self.y) for i in points])
 
 
 class TiledImageLayer(TiledElement):
