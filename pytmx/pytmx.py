@@ -77,15 +77,11 @@ def parse_properties(node):
     and "value" is included. here we mangle it to get that junk out.
     """
 
-    def dottify(name, value):
-        for name in reversed(name.split('.')):
-            value = namedtuple('data', name)(value)
-        return value
-
     d = {}
+
     for child in node.findall('properties'):
         for subnode in child.findall('property'):
-            name =
+            d[subnode.get('name')] = subnode.get('value')
 
     return d
 
@@ -125,8 +121,6 @@ class TiledElement:
         try:
             return self.properties[item]
         except KeyError:
-            #msg = '{} object does not have property/attribute: {}'
-            #print(msg.format(self, item))
             raise AttributeError
 
     def __repr__(self):
