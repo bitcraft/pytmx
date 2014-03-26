@@ -129,7 +129,7 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
     gid = None
     if real_gid:
         try:
-            gid, flags = tmxmap.mapGID(real_gid)[0]
+            gid, flags = tmxmap.map_gid(real_gid)[0]
         except IndexError:
             msg = "GID #{0} not found"
             raise ValueError, msg.format(real_gid)

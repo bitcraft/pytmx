@@ -1,6 +1,6 @@
-from tmxloader import load_tmx, load_pygame
-from pytmx import TiledElement, TiledMap, TiledTileset, TiledLayer, \
-                  TiledObjectGroup, TiledObject
-from utils import buildDistributionRects
+from .tmxloader import load_pygame
+from .utils import buildDistributionRects
+from .pytmx import *
 
-__version__ = '2.15.2'
+__version__ = '2.16.0'
+__author__ = 'Leif Theden (leif.theden@gmail.com'
