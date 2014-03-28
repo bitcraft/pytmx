@@ -11,8 +11,9 @@ def read(file_name):
 
 setup(name="PyTMX",
         version=pytmx.__version__,
-        description='Map loader for TMX Files',
+        description=pytmx.__description__,
         author=pytmx.__author__,
+        author_email=pytmx.__author_email__,
         packages=['pytmx',],
         install_requires=['pygame'],
         license = "LGPLv3",
