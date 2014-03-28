@@ -12,7 +12,7 @@ def read(file_name):
 setup(name="PyTMX",
         version=pytmx.__version__,
         description='Map loader for TMX Files',
-        author='bitcraft',
+        author=pytmx.__author__,
         packages=['pytmx',],
         install_requires=['pygame'],
         license = "LGPLv3",

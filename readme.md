@@ -3,10 +3,10 @@ _______________________________________________________________________________
 
 ## Map loader for TMX Files
 
-bitcraft (leif dot theden at gmail.com)   
-v2.15.2  - for python 2.6 and 2.7   
-  
-  
+bitcraft (leif dot theden at gmail.com)
+v2.65.1  - for python 2.6 and 2.7
+
+
 #### *Use the python3 branch for python3 support*
 
 
@@ -19,12 +19,13 @@ If you have any problems or suggestions, please contact me via email.
 ## News
 _______________________________________________________________________________
 
+##### 02/28/12 - Image Layer support, Object points changed, new test.py!
 ##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
 ##### 02/06/14 - Python 3 support coming soon
-    
-   
-   
-   
+
+
+
+
 ## Introduction
 _______________________________________________________________________________
 
@@ -39,7 +40,7 @@ a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
 - Some object metadata attribute names are not supported (see docstrings)
-    
+
 
 PyTMX strives to balance performance, flexibility, and performance.  Feel free
 to use the classes provided in pytmx.py as superclasses to your own maps, or
@@ -53,7 +54,7 @@ fashion, while still retaining all the power of the Tiled Editor.
 
 Finally, there is no save feature.  Once the map is loaded, it will be up to
 you to provide a way to save changes to the map.  I've used the pickle module
-with good results.    
+with good results.
 
 
 ## For the impatient!  =)
@@ -72,24 +73,24 @@ _______________________________________________________________________________
 * Simple API with many handy functions
 * Memory efficient and performant
 * Extensible and easy to understand
-    
-    
+
+
 * Loads data, "properties" metadata, and images from Tiled's TMX format
 * Supports base64, csv, gzip, zlib and uncompressed XML
 * Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
 * Image loading with pygame (will work without images as well)
-    
-    
+
+
 ## Tile and Object Metadata ("Properties")
 _______________________________________________________________________________
 
 Tile properties is access through the map; see the getTileProperties methods
-        
-All other objects, including the map, layer, objects, etc.  are attributes:    
-  ie: map.name  //  layer.weather  // object.power    
-         
+
+All other objects, including the map, layer, objects, etc.  are attributes:
+  ie: map.name  //  layer.weather  // object.power
+
 
 ## Why use PyTMX?
 _______________________________________________________________________________

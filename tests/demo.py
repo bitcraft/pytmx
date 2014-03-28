@@ -228,11 +228,13 @@ def scrollTest(filename):
 
 if __name__ == "__main__":
     import sys
+    import os
+
     try:
         filename = sys.argv[1]
     except:
         print "no TMX map specified, using default"
-        filename = "formosa-base64-gzip.tmx"
+        filename = os.path.join('data', 'legacy', 'formosa-base64-gzip.tmx')
 
     simpleTest(filename)
     scrollTest(filename)

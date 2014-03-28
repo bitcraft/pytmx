@@ -62,9 +62,9 @@ class TiledMap(TiledElement):
         # defaults from the TMX specification
         self.version = 0.0
         self.orientation = None
-        self.width = 0  # width of map in tiles
-        self.height = 0  # height of map in tiles
-        self.tilewidth = 0  # width of a tile in pixels
+        self.width = 0       # width of map in tiles
+        self.height = 0      # height of map in tiles
+        self.tilewidth = 0   # width of a tile in pixels
         self.tileheight = 0  # height of a tile in pixels
         self.background_color = None
 
@@ -86,10 +86,8 @@ class TiledMap(TiledElement):
         """
 
         try:
-            assert (isinstance(x, int))
-            assert (isinstance(y, int))
-            assert (isinstance(layer, int))
-        except AssertionError:
+            x, y, layer = map(int, (x, y, layer))
+        except TypeError:
             msg = "Tile indexes/layers must be specified as integers."
             print msg
             raise TypeError
@@ -298,21 +296,24 @@ class TiledMap(TiledElement):
         # initialize the gid mapping
         self.imagemap[(0, 0)] = 0
 
-        for node in etree.iter():
-            if node.tag == 'tileset':
-                self.tilesets.append(TiledTileset(self, node))
-            else:
-                if node.tag == 'layer':
-                    self.addTileLayer(TiledLayer(self, node))
-                elif node.tag == 'imagelayer':
-                    self.addImageLayer(TiledImageLayer(self, node))
-                elif node.tag == 'objectgroup':
-                    self.objectgroups.append(TiledObjectGroup(self, node))
-                    self.all_layers.append(self.objectgroups[-1])
+        self.background_color = etree.get('backgroundcolor', self.background_color)
+
+        # *** do not change this load order!  gid mapping errors will occur if changed ***
+        for node in etree.findall('layer'):
+            self.addTileLayer(TiledLayer(self, node))
+
+        for node in etree.findall('imagelayer'):
+            self.addImageLayer(TiledImageLayer(self, node))
+
+        for node in etree.findall('objectgroup'):
+            self.objectgroups.append(TiledObjectGroup(self, node))
+
+        for node in etree.findall('tileset'):
+            self.tilesets.append(TiledTileset(self, node))
 
         # "tile objects", objects with a GID, have need to have their
-        # attributes set after the tileset is loaded
-        for o in self.getObjects():
+        # attributes set after the tileset is loaded, so this step must be performed last
+        for o in self.objects:
             p = self.getTilePropertiesByGID(o.gid)
             if p:
                 o.__dict__.update(p)
@@ -373,6 +374,22 @@ class TiledMap(TiledElement):
 
         return [layer for layer in self.tilelayers if layer.visible]
 
+    @property
+    def objects(self):
+        """
+        Return iterator of all the objects associated with this map
+        """
+        return chain(*self.objectgroups)
+
+    @property
+    def visibleLayers(self):
+        """
+        Returns a generator of [Image/Tile]Layer objects that are set 'visible'.
+
+        Layers have their visibility set in Tiled.
+        """
+        return (l for l in self.all_layers if l.visible)
+
 
 class TiledTileset(TiledElement):
     reserved = "visible firstgid source name tilewidth tileheight spacing margin image tile properties".split()
@@ -390,6 +407,9 @@ class TiledTileset(TiledElement):
         self.spacing = 0
         self.margin = 0
         self.tiles = {}
+        self.trans = None
+        self.width = 0
+        self.height = 0
 
         self.parse(node)
 
@@ -458,6 +478,13 @@ class TiledLayer(TiledElement):
         self.visible = True
 
         self.parse(node)
+
+    def __iter__(self):
+        return self.iter_tiles()
+
+    def iter_tiles(self):
+        for y, x in product(range(self.height), range(self.width)):
+            yield x, y, self.data[y][x]
 
     def __repr__(self):
         return "<{0}: \"{1}\">".format(self.__class__.__name__, self.name)
@@ -547,7 +574,9 @@ class TiledObjectGroup(TiledElement, list):
 
         # defaults from the specification
         self.name = None
-
+        self.color = None
+        self.opacity = 1
+        self.visible = 1
         self.parse(node)
 
     def __repr__(self):
@@ -579,7 +608,9 @@ class TiledObject(TiledElement):
         self.y = 0
         self.width = 0
         self.height = 0
+        self.rotation = 0
         self.gid = 0
+        self.visible = 1
 
         self.parse(node)
 
@@ -593,32 +624,28 @@ class TiledObject(TiledElement):
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
 
+        points = None
+
         polygon = node.find('polygon')
         if polygon is not None:
-            x1 = x2 = y1 = y2 = 0
-            self.points = read_points(polygon.get('points'))
-            self.closed = 1
-            for x, y in self.points:
-                if x < x1: x1 = x
-                if x > x2: x2 = x
-                if y < y1: y1 = y
-                if y > y2: y2 = y
-            self.width = abs(x1) + abs(x2)
-            self.height = abs(y1) + abs(y2)
+            points = read_points(polygon.get('points'))
+            self.closed = True
 
         polyline = node.find('polyline')
         if polyline is not None:
+            points = read_points(polyline.get('points'))
+            self.closed = False
+
+        if points:
             x1 = x2 = y1 = y2 = 0
-            self.points = read_points(polyline.get('points'))
-            self.closed = 0
-            for x, y in self.points:
+            for x, y in points:
                 if x < x1: x1 = x
                 if x > x2: x2 = x
                 if y < y1: y1 = y
                 if y > y2: y2 = y
             self.width = abs(x1) + abs(x2)
             self.height = abs(y1) + abs(y2)
-
+            self.points = tuple([(i[0] + self.x, i[1] + self.y) for i in points])
 
 class TiledImageLayer(TiledElement):
     reserved = "visible source name width height opacity visible".split()
