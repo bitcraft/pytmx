@@ -1,13 +1,11 @@
-# PyTMX v2.15.2
+# PyTMX v2.16.1
 _______________________________________________________________________________
 
 ## Map loader for TMX Files
 
 bitcraft (leif dot theden at gmail.com)
-v2.65.1  - for python 2.6 and 2.7
 
-
-#### *Use the python3 branch for python3 support*
+#### *Use the python3 branch for python 3.3 support*
 
 
 If you have any problems or suggestions, please contact me via email.
@@ -88,7 +86,7 @@ _______________________________________________________________________________
 
 Tile properties is access through the map; see the getTileProperties methods
 
-All other objects, including the map, layer, objects, etc.  are attributes:
+All other objects, including the map, layer, objects, etc. are attributes:
   ie: map.name  //  layer.weather  // object.power
 
 
