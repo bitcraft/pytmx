@@ -1,4 +1,3 @@
-"""
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
 v2.16.2 - for python 2.6 and 2.7
@@ -164,4 +163,3 @@ object:      visible, name, type, x, y, width, height, gid, properties, polygon,
              polyline, image
 
 ***   Please see the TiledMap class for more api information.   ***
-"""
