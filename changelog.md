@@ -1,10 +1,6 @@
 Map loader for TMX Files
 bitcraft (leif dot theden at gmail.com)
-v2.16.2 - for python 2.6 and 2.7
 
-Tested with Tiled 0.9.1 for Mac.
-
-released under the LGPL v3
 
 ===============================================================================
 
@@ -72,69 +68,7 @@ New in .11:
     pygame: Tilesets no longer load with per-pixel alphas by default
     pygame: Colorkey transparency should be correctly handled now
 
-===============================================================================
-
-## Installation:
-
-    python.py setup.py install
-
-    or
-
-    pip install pytmx (for python 2 only!)
-
-## Basic usage sample:
-
-    >>> from pytmx import load_pygame
-    >>> tmxdata = load_pygame("map.tmx")
-
-
-## Alpha Channel Support:
-
-    >>> tmxdata = load_pygame("map.tmx", pixelalpha=True)
-
-The loader will correctly convert() or convert_alpha() each tile image, so you
-don't have to worry about that after you load the map.
-
-
-## Getting the Tile Surface
-
-    >>> image = tmxdata.getTileImage(x, y, layer)
-    >>> screen.blit(image, position)
-
-
-## Getting Object Metadata ("Properties")
-
-Maps, tilesets, layers, objectgroups, and objects all have a simple way to
-access metadata that was set inside tiled: they all become object attributes.
-
-    >>> layer = tmxdata.tilelayers[0]
-    >>> layer = tmxdata.getTileLayerByName("Background")
-
-    >>> print layer.tilewidth
-    32
-    >>> print layer.weather
-    'sunny'
-
-
-## EXCEPTIONS
-
-Tile properties are the exception here, and must be accessed through
-"getTileProperties".  The data is a regular Python dictionary:
-
-    >>> tile = tmxdata.getTileProperties(x, y, layer)
-    >>> tile["name"]
-    'CobbleStone'
-
-
 ===================================================================================
-IMPORTANT FOR PYGAME USERS!!
-The loader will correctly convert() or convert_alpha() each tile image, so you
-shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
-problems with images and transparency, pass "pixelalpha=True" while loading.
-
-ALSO FOR PYGAME USERS:  Load your map after initializing your display.
-===================================================================================
-
 NOTES:
 
 * The Tiled "properties" have reserved names.
