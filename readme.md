@@ -71,8 +71,6 @@ _______________________________________________________________________________
 * Simple API with many handy functions
 * Memory efficient and performant
 * Extensible and easy to understand
-
-
 * Loads data, "properties" metadata, and images from Tiled's TMX format
 * Supports base64, csv, gzip, zlib and uncompressed XML
 * Properties for all native Tiled object types
