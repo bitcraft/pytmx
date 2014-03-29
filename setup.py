@@ -5,10 +5,6 @@ from setuptools import setup
 import os
 import pytmx
 
-def read(file_name):
-    with open(os.path.join(os.path.dirname(__file__), file_name)) as fd:
-            return fd.read()
-
 setup(name="PyTMX",
         version=pytmx.__version__,
         description=pytmx.__description__,
@@ -17,7 +13,7 @@ setup(name="PyTMX",
         packages=['pytmx',],
         install_requires=['pygame'],
         license = "LGPLv3",
-        long_description=read('readme.md'),
+        long_description='https://github.com/bitcraft/PyTMX',
         classifiers=[
             "Intended Audience :: Developers",
             "Development Status :: 4 - Beta",
