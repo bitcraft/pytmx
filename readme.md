@@ -105,9 +105,9 @@ If you are using Python 2.7, you can install PyTMX using pip.
 
     pip install pytmx (for python 2.7 only!)
 
-For Python 3, you will have to manually install it.
+You can also manually install it
 
-    python3 python.py setup.py install
+    python setup.py install
 
 
 Basic use:
