@@ -17,8 +17,8 @@ bitcraft (leif dot theden at gmail.com)
 News
 ===============================================================================
 
-##### 02/28/12 - Image Layer support, Object points changed, new test.py!
-##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
+##### 02/28/12 - Image layer support, object points changed, new test.py!
+##### 02/24/14 - New Python 3 Support: see python3 branch
 ##### 02/06/14 - Python 3 support coming soon
 
 
@@ -98,15 +98,16 @@ Why use PyTMX?
 * Liberal LGPL license means you can use PyTMX for your project
 
 
-
 Installation
 ===============================================================================
 
-    python.py setup.py install
+If you are using Python 2.7, you can install PyTMX using pip.
 
-    or
+    pip install pytmx (for python 2.7 only!)
 
-    pip install pytmx (for python 2 only!)
+For Python 3, you will have to manually install it.
+
+    python3 python.py setup.py install
 
 
 Basic use:
