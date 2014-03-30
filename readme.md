@@ -1,7 +1,8 @@
-# PyTMX
-_______________________________________________________________________________
+PyTMX
+===============================================================================
 
-## Map loader for TMX Files
+### Map loader for TMX Files
+##### For Python 2.7
 ##### *Use the python3 branch for python 3.3 support*
 
 
@@ -13,8 +14,8 @@ bitcraft (leif dot theden at gmail.com)
 
 
 
-## News
-_______________________________________________________________________________
+News
+===============================================================================
 
 ##### 02/28/12 - Image Layer support, Object points changed, new test.py!
 ##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
@@ -23,12 +24,12 @@ _______________________________________________________________________________
 
 
 
-## Introduction
-_______________________________________________________________________________
+Introduction
+===============================================================================
 
 PyTMX is a map loader for python/pygame designed for games.  It provides smart
 tile loading with a fast and efficient storage base.  Not only will does it
-correctly handle most Tiled object types, it also will load meta data for
+correctly handle most Tiled object types, it also will load metadata for
 them, so you can modify your maps and objects in Tiled, instead of modifying
 your source code.
 
@@ -39,37 +40,23 @@ a few minor aspects:
 - Some object metadata attribute names are not supported (see docstrings)
 
 
-PyTMX strives to balance performance, flexibility, and performance.  Feel free
-to use the classes provided in pytmx.py as superclasses to your own maps, or
-simply load the data with PyTMX and copy the data into your own classes with
-the simple api.
+PyTMX strives to balance performance and flexibility.  Feel free to use the
+classes provided in pytmx.py as superclasses for your own maps, or simply
+load the data with PyTMX and copy the data into your own classes with the api.
 
-I've included a test suite and demo in the 'tests' folder.  It should work
-across all platforms.  test.py demonstrates loading a variety of maps and
-formats, and demo.py shows how you can create scrolling maps in a very simple
-fashion, while still retaining all the power of the Tiled Editor.
+I've included a test suite in the 'tests' folder.  It should work across all
+platforms.  test.py demonstrates loading a variety of maps and formats.
 
 Finally, there is no save feature.  Once the map is loaded, it will be up to
 you to provide a way to save changes to the map.  I've used the pickle module
 with good results.
 
 
-## For the impatient!  =)
-_______________________________________________________________________________
+Design Goals and Features
+===============================================================================
 
-I have another repo with a working demo of a proper scrolling map using Tiled
-maps.  Please feel free to test drive it.  It isn't limited to Tiled maps,
-you can use any data structure you want, as long as it is PyGame.
-
-https://github.com/bitcraft/pyscroll
-
-
-## Design Goals and Features
-_______________________________________________________________________________
-
-* Simple API with many handy functions
+* API with many handy functions
 * Memory efficient and performant
-* Extensible and easy to understand
 * Loads data, "properties" metadata, and images from Tiled's TMX format
 * Supports base64, csv, gzip, zlib and uncompressed XML
 * Properties for all native Tiled object types
@@ -78,17 +65,17 @@ _______________________________________________________________________________
 * Image loading with pygame (will work without images as well)
 
 
-## Tile and Object Metadata ("Properties")
-_______________________________________________________________________________
+Tile and Object Metadata ("Properties")
+===============================================================================
 
 Tile properties is access through the map; see the getTileProperties methods
 
-All other objects, including the map, layer, objects, etc. are attributes:
+All other objects, including the map, layer, objects, etc. are attributes:     
   ie: map.name  //  layer.weather  // object.power
 
 
-## Why use PyTMX?
-_______________________________________________________________________________
+Why use PyTMX?
+===============================================================================
 
 ### PyTMX is efficient:
 * Only the tiles used on a map are loaded into memory
@@ -108,12 +95,12 @@ _______________________________________________________________________________
 * I have kept PyTMX current with new versions of Tiled since v.7
 
 ### PyTMX is usable:
-* Liberal LGPL license means you can use PyTMX [almost] any way you want
+* Liberal LGPL license means you can use PyTMX for your project
 
 
 
-## Installation
-_______________________________________________________________________________
+Installation
+===============================================================================
 
     python.py setup.py install
 
@@ -122,8 +109,8 @@ _______________________________________________________________________________
     pip install pytmx (for python 2 only!)
 
 
-## Basic use:
-_______________________________________________________________________________
+Basic use:
+===============================================================================
 
     >>> from pytmx import load_pygame
     >>> tmxdata = load_pygame("map.tmx")
@@ -157,8 +144,8 @@ access metadata that was set inside tiled: they all become object attributes.
     'sunny'
 
 
-## EXCEPTIONS
-_______________________________________________________________________________
+EXCEPTIONS
+===============================================================================
 Tile properties are the exception here, and must be accessed through
 "getTileProperties".  The data is a regular Python dictionary:
 
@@ -167,18 +154,30 @@ Tile properties are the exception here, and must be accessed through
     'CobbleStone'
 
 
-_______________________________________________________________________________
-# IMPORTANT FOR PYGAME USERS!!
+Scrolling Demo
+===============================================================================
+
+I have another repo with a working demo of a proper scrolling map using Tiled
+maps.  Please feel free to test drive it.  It isn't limited to Tiled maps,
+you can use any data structure you want, as long as it is PyGame.    
+
+https://github.com/bitcraft/pyscroll
+
+*PyScroll is Python 3 project, but has a Python 2 branch.
+
+
+===============================================================================
+## IMPORTANT FOR PYGAME USERS!!
+
 The loader will correctly convert() or convert_alpha() each tile image, so you
 shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
-problems with images and transparency, pass "pixelalpha=True" while loading.
+problems with images and transparency, pass "pixelalpha=True" while loading.    
+Load your map after initializing your display.
 
-ALSO FOR PYGAME USERS:  Load your map after initializing your display.
-_______________________________________________________________________________    
-
+===============================================================================
 
 Please see tmxloader.py's docstring for version information and sample usage.
 Check tests/test.py and tests/demo.py for examples on how to use the library.
 
-_______________________________________________________________________________
+===============================================================================
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
