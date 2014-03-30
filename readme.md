@@ -1,14 +1,13 @@
-# PyTMX v2.16.2
+# PyTMX
 _______________________________________________________________________________
 
 ## Map loader for TMX Files
-
-bitcraft (leif dot theden at gmail.com)
-
-#### *Use the python3 branch for python 3.3 support*
+##### *Use the python3 branch for python 3.3 support*
 
 
 If you have any problems or suggestions, please contact me via email.
+
+bitcraft (leif dot theden at gmail.com)
 
 *Released under the LGPL v3*
 
@@ -111,7 +110,72 @@ _______________________________________________________________________________
 ### PyTMX is usable:
 * Liberal LGPL license means you can use PyTMX [almost] any way you want
 
+
+
+## Installation
 _______________________________________________________________________________
+
+    python.py setup.py install
+
+    or
+
+    pip install pytmx (for python 2 only!)
+
+
+## Basic use:
+_______________________________________________________________________________
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+### Alpha Channel Support:
+
+    >>> tmxdata = load_pygame("map.tmx", pixelalpha=True)
+
+The loader will correctly convert() or convert_alpha() each tile image, so you
+don't have to worry about that after you load the map.
+
+
+### Getting the Tile Surface
+
+    >>> image = tmxdata.getTileImage(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+### Getting Object Metadata ("Properties")
+
+Maps, tilesets, layers, objectgroups, and objects all have a simple way to
+access metadata that was set inside tiled: they all become object attributes.
+
+    >>> layer = tmxdata.tilelayers[0]
+    >>> layer = tmxdata.getTileLayerByName("Background")
+
+    >>> print layer.tilewidth
+    32
+    >>> print layer.weather
+    'sunny'
+
+
+## EXCEPTIONS
+_______________________________________________________________________________
+Tile properties are the exception here, and must be accessed through
+"getTileProperties".  The data is a regular Python dictionary:
+
+    >>> tile = tmxdata.getTileProperties(x, y, layer)
+    >>> tile["name"]
+    'CobbleStone'
+
+
+_______________________________________________________________________________
+# IMPORTANT FOR PYGAME USERS!!
+The loader will correctly convert() or convert_alpha() each tile image, so you
+shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
+problems with images and transparency, pass "pixelalpha=True" while loading.
+
+ALSO FOR PYGAME USERS:  Load your map after initializing your display.
+_______________________________________________________________________________    
+
 
 Please see tmxloader.py's docstring for version information and sample usage.
 Check tests/test.py and tests/demo.py for examples on how to use the library.
