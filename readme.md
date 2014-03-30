@@ -113,13 +113,21 @@ You can also manually install it
 Basic use:
 ===============================================================================
 
+### Just data:
+    >>> import pytmx
+    >>> tmx_data = pytmx.TiledMap("map.tmx")
+
+
+### Load with Pygame Images:
+
     >>> from pytmx import load_pygame
-    >>> tmxdata = load_pygame("map.tmx")
+    >>> tmx_data = load_pygame("map.tmx")
 
 
 ### Alpha Channel Support:
 
-    >>> tmxdata = load_pygame("map.tmx", pixelalpha=True)
+    >>> from pytmx import load_pygame
+    >>> tmx_data = load_pygame("map.tmx", pixelalpha=True)
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
 don't have to worry about that after you load the map.
@@ -127,7 +135,7 @@ don't have to worry about that after you load the map.
 
 ### Getting the Tile Surface
 
-    >>> image = tmxdata.getTileImage(x, y, layer)
+    >>> image = tmx_data.getTileImage(x, y, layer)
     >>> screen.blit(image, position)
 
 
@@ -136,8 +144,11 @@ don't have to worry about that after you load the map.
 Maps, tilesets, layers, objectgroups, and objects all have a simple way to
 access metadata that was set inside tiled: they all become object attributes.
 
-    >>> layer = tmxdata.tilelayers[0]
-    >>> layer = tmxdata.getTileLayerByName("Background")
+    >>> layer = tmx_data.tilelayers[0]
+
+or
+
+    >>> layer = tmx_data.getTileLayerByName("Background")
 
     >>> print layer.tilewidth
     32
@@ -150,7 +161,7 @@ EXCEPTIONS
 Tile properties are the exception here, and must be accessed through
 "getTileProperties".  The data is a regular Python dictionary:
 
-    >>> tile = tmxdata.getTileProperties(x, y, layer)
+    >>> tile = tmx_data.getTileProperties(x, y, layer)
     >>> tile["name"]
     'CobbleStone'
 

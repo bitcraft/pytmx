@@ -4,7 +4,7 @@ import pygame
 import pytmx
 from .constants import *
 
-__all__ = ['load_pygame']
+__all__ = ['load_pygame', 'load_tmx']
 
 
 def handle_transformation(tile, flags):
@@ -189,3 +189,5 @@ def load_pygame(filename, *args, **kwargs):
     _load_images_pygame(tmxdata, None, *args, **kwargs)
     return tmxdata
 
+
+load_tmx = pytmx.TiledMap
