@@ -30,9 +30,10 @@ class TiledRenderer(object):
         # not going for efficiency here
         # for demonstration purposes only
 
+        # deref these heavily used variables for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        gt = self.tmx_data.get_tile_image
+        gt = self.tmx_data.get_tile_image_by_gid
 
         # fill the background color
         if self.tmx_data.background_color:
@@ -42,28 +43,26 @@ class TiledRenderer(object):
         for layer in self.tmx_data.visible_layers:
             if isinstance(layer, TiledTileLayer):
                 for x, y, gid in layer:
-                    tile = gt(x, y, layer)
+                    tile = gt(gid)
                     if tile:
                         surface.blit(tile, (x * tw, y * th))
 
             elif isinstance(layer, TiledObjectGroup):
-                pass
+                for o in layer:
+                    print(o)
+                    if hasattr(o, 'points'):
+                        pygame.draw.lines(surface, (255, 128, 128), o.closed, o.points, 2)
+                    elif o.gid:
+                        tile = self.tmx_data.get_tile_image_by_gid(o.gid)
+                        if tile:
+                            surface.blit(tile, (o.x, o.y))
+                    else:
+                        pygame.draw.rect(surface, (255, 128, 128), (o.x, o.y, o.width, o.height), 2)
 
             elif isinstance(layer, TiledImageLayer):
-                image = self.tmx_data.get_tile_image_by_gid(layer.gid)
+                image = gt(layer.gid)
                 if image:
                     surface.blit(image, (0, 0))
-
-        # draw polygon and poly line objects
-        for o in self.tmx_data.objects:
-            if hasattr(o, 'points'):
-                pygame.draw.lines(surface, (255, 128, 128), o.closed, o.points, 2)
-            elif o.gid:
-                tile = self.tmx_data.get_tile_image_by_gid(o.gid)
-                if tile:
-                    surface.blit(tile, (o.x, o.y))
-            else:
-                pygame.draw.rect(surface, (255, 128, 128), (o.x, o.y, o.width, o.height), 2)
 
 
 class SimpleTest(object):

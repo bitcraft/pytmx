@@ -10,6 +10,10 @@ released under the LGPL v3
 
 ===============================================================================
 
+New in 3.18:
+     pytmx: Maps can now be loaded from pytmx.TiledMap.fromstring(xml_string)
+      core: Sphinx documentation created
+
 New in 3.17:
     loader: removed legacy load_tmx function: just call TiledMap() instead
     loader: added test to correct tilesheets that include non-tile graphics

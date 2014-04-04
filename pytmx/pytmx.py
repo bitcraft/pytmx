@@ -128,12 +128,16 @@ class TiledElement:
 
 
 class TiledMap(TiledElement):
-    """
-    Contains the layers, objects, and images from a Tiled TMX map
+    """Contains the layers, objects, and images from a Tiled TMX map
+
+    This class is meant to handle most of the work you need to do to use a map.
     """
     reserved = "visible version orientation width height tilewidth tileheight properties tileset layer objectgroup".split()
 
     def __init__(self, filename=None):
+        """
+        :param filename: filename of tiled map to load
+        """
         super().__init__()
         self.layers = []           # list of all layers in proper order
         self.tilesets = []         # list of TiledTileset objects
@@ -162,6 +166,9 @@ class TiledMap(TiledElement):
         self.tileheight = 0  # height of a tile in pixels
         self.background_color = None
 
+        # initialize the gid mapping
+        self.imagemap[(0, 0)] = 0
+
         if filename:
             self.load()
 
@@ -169,13 +176,12 @@ class TiledMap(TiledElement):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
 
     def get_tile_image(self, x, y, layer):
-        """
-        return the tile image for this location
-        x and y must be integers and are in tile coordinates, not pixel
-        x, y, and layer must be positive numbers
+        """Return the tile image for this location
 
-        return value will be 0 if there is no tile with that location.
-        exception will be thrown is coordinates are illegal
+        :param x: x coordinate
+        :param y: y coordinate
+        :param layer: layer number
+        :rtype: pygame surface if found, otherwise 0
         """
         try:
             assert(x >= 0 and y >= 0)
@@ -202,19 +208,31 @@ class TiledMap(TiledElement):
             return self.get_tile_image_by_gid(gid)
 
     def get_tile_image_by_gid(self, gid):
+        """Return the tile image for this location
+
+        :param gid: GID of image
+        :rtype: pygame surface if found, otherwise ValueError or TypeError
+        """
         try:
-            assert(gid >= 0)
+            assert(int(gid) >= 0)
             return self.images[gid]
-        except (IndexError, ValueError, AssertionError):
+        except (TypeError):
             msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
             print(msg.format(gid))
             raise TypeError
+        except (AssertionError, IndexError):
+            msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
+            print(msg.format(gid))
+            raise ValueError
+
 
     def get_tile_gid(self, x, y, layer):
-        """
-        return GID of a tile in this location
-        x and y must be integers and are in tile coordinates, not pixel
-        x, y, and layer must be positive numbers
+        """Return the tile image GID for this location
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :param layer: layer number
+        :rtype: pygame surface if found, otherwise ValueError
         """
         try:
             assert(x >= 0 and y >= 0 and layer >= 0)
@@ -229,22 +247,22 @@ class TiledMap(TiledElement):
             raise ValueError
 
     def get_tile_images(self, r, layer):
-        """
-        return a group of tiles in an area
-        expects a pygame rect or rect-like list/tuple
+        """Return iterator of images (not complete)
 
-        useful if you don't want to repeatedly call getTileImage
+        :param x: x coordinate
+        :param y: y coordinate
+        :param layer: layer number
+        :rtype: pygame surface if found, otherwise ValueError
         """
         raise NotImplementedError
 
     def get_tile_properties(self, x, y, layer):
-        """
-        return the properties for the tile, if any
+        """Return the tile image GID for this location
 
-        x and y must be integers and are in tile coordinates, not pixel
-        x, y, and layer must be positive numbers
-
-        returns a dict of there are properties, otherwise will be None
+        :param x: x coordinate
+        :param y: y coordinate
+        :param layer: layer number
+        :rtype: python dict if found, otherwise None
         """
         try:
             assert(x >= 0 and y >= 0 and layer >= 0)
@@ -269,9 +287,10 @@ class TiledMap(TiledElement):
                 return None
 
     def get_layer_data(self, layer):
-        """
-        Return the data for a layer.
-        Data is an array of arrays.
+        """Return the data for a layer.
+
+        :param layer: layer number
+        :rtype: layer data if found, otherwise ValueError
         """
         try:
             return self.layers[layer].data
@@ -281,37 +300,48 @@ class TiledMap(TiledElement):
             raise ValueError
 
     def get_tile_location(self, gid):
+        """Search map for tile locations by the GID
+
+        :param gid: GID to be searched for
+        :rtype: generator of tile locations
         """
-        experimental way to find locations of a tile by the GID
-        """
+
+        # use this func to make sure GID is valid
+        try:
+            self.get_tile_image_by_gid(gid)
+        except:
+            raise
+
         p = product(range(self.width),
                     range(self.height),
                     range(len(self.layers)))
 
-        return [(x, y, l) for (x, y, l) in p
-                if self.layers[l].data[y][x] == gid]
+        return ((x, y, l) for (x, y, l) in p if self.layers[l].data[y][x] == gid)
 
     def get_tile_properties_by_gid(self, gid):
+        """Get the tile properties of a tile GID
+
+        :param gid: GID
+        :rtype: python dict if found, otherwise None
+        """
         try:
             return self.tile_properties[gid]
         except KeyError:
             return None
 
-    def set_tile_properties(self, gid, d):
+    def set_tile_properties(self, gid, properties):
+        """Get the tile properties of a tile GID
+
+        :param gid: GID
+        :param properties: python dict of properties for GID
         """
-        set the properties of a tile by GID.
-        must use a standard python dict as d
-        """
-        try:
-            self.tile_properties[gid] = d
-        except KeyError:
-            msg = "GID #{0} does not exist."
-            print(msg.format(gid))
-            raise ValueError
+        self.tile_properties[gid] = properties
 
     def get_tile_properties_by_layer(self, layer):
-        """
-        Generator of tile properties in this tile layer
+        """Get the tile properties of each GID in layer
+
+        :param layer: layer number
+        rtype: iterator of (gid, properties) tuples for each tile gid with properties in the tile layer
         """
         try:
             assert(int(layer) >= 0)
@@ -330,31 +360,33 @@ class TiledMap(TiledElement):
             except KeyError:
                 continue
 
-    def register_gid(self, real_gid, flags=0):
-        """
-        used to manage the mapping of GIDs between the tmx file and the internal data
+    def register_gid(self, tiled_gid, flags=0):
+        """Used to manage the mapping of GIDs between the tmx file and the internal data
 
-        return internal gid
+        :param tiled_gid: GID that is found in TMX data
+        rtype: GID that pytmx uses for the the GID passed
         """
-        if real_gid:
+        if tiled_gid:
             try:
-                return self.imagemap[(real_gid, flags)][0]
+                return self.imagemap[(tiled_gid, flags)][0]
             except KeyError:
                 gid = self.maxgid
                 self.maxgid += 1
-                self.imagemap[(real_gid, flags)] = (gid, flags)
-                self.gidmap[real_gid].append((gid, flags))
+                self.imagemap[(tiled_gid, flags)] = (gid, flags)
+                self.gidmap[tiled_gid].append((gid, flags))
                 return gid
 
         else:
             return 0
 
-    def map_gid(self, real_gid):
-        """
-        used to lookup a GID read from a TMX file's data
+    def map_gid(self, tiled_gid):
+        """Used to lookup a GID read from a TMX file's data
+
+        :param tiled_gid: GID that is found in TMX data
+        rtype: (GID, flags) that pytmx uses for the the GID passed
         """
         try:
-            return self.gidmap[int(real_gid)]
+            return self.gidmap[int(tiled_gid)]
         except KeyError:
             return None
         except TypeError:
@@ -363,29 +395,44 @@ class TiledMap(TiledElement):
             raise TypeError
 
     def load(self):
+        """Parse a map node from a tiled tmx file
         """
-        parse a map node from a tiled tmx file
+        node = ElementTree.parse(self.filename).getroot()
+        self.parse(node)
+
+    @classmethod
+    def fromstring(cls, xml_string):
+        """Return a TileMap object from a xml string
+
+        :param xml_string: string containing xml data
+        rtype: TiledMap instance
         """
-        etree = ElementTree.parse(self.filename).getroot()
-        self.set_properties(etree)
+        new = cls()
+        node = ElementTree.fromstring(xml_string)
+        new.parse(node)
+        return new
 
-        # initialize the gid mapping
-        self.imagemap[(0, 0)] = 0
+    def parse(self, node):
+        """Parse a map from ElementTree xml node
 
-        self.background_color = etree.get('backgroundcolor', self.background_color)
+        :param node: ElementTree xml node
+        """
+        self.set_properties(node)
+
+        self.background_color = node.get('backgroundcolor', self.background_color)
 
         # *** do not change this load order!  gid mapping errors will occur if changed ***
-        for node in etree.findall('layer'):
-            self.add_layer(TiledTileLayer(self, node))
+        for subnode in node.findall('layer'):
+            self.add_layer(TiledTileLayer(self, subnode))
 
-        for node in etree.findall('imagelayer'):
-            self.add_layer(TiledImageLayer(self, node))
+        for subnode in node.findall('imagelayer'):
+            self.add_layer(TiledImageLayer(self, subnode))
 
-        for node in etree.findall('objectgroup'):
-            self.objectgroups.append(TiledObjectGroup(self, node))
+        for subnode in node.findall('objectgroup'):
+            self.add_layer(TiledObjectGroup(self, subnode))
 
-        for node in etree.findall('tileset'):
-            self.tilesets.append(TiledTileset(self, node))
+        for subnode in node.findall('tileset'):
+            self.tilesets.append(TiledTileset(self, subnode))
 
         # "tile objects", objects with a GID, have need to have their
         # attributes set after the tileset is loaded, so this step must be performed last
@@ -395,10 +442,13 @@ class TiledMap(TiledElement):
                 o.__dict__.update(p)
 
     def add_layer(self, layer, position=None):
+        """Add a layer (TileTileLayer, TiledImageLayer, TiledObjectGroupp) to the map
+
+        :param layer: TileTileLayer, TiledImageLayer, TiledObjectGroup object
+        :param position: Optional position in the layer order
         """
-        add a layer (TileTileLayer or TiledImageLayer) to the map
-        """
-        assert(isinstance(layer, (TiledTileLayer, TiledImageLayer)))
+        assert(isinstance(layer, (TiledTileLayer, TiledImageLayer, TiledObjectGroup)))
+
 
         if position is None:
             self.layers.append(layer)
@@ -408,8 +458,10 @@ class TiledMap(TiledElement):
         self.layernames[layer.name] = layer
 
     def get_layer_by_name(self, name):
-        """
-        This is case-sensitive.
+        """Return a layer by name
+
+        :param name: Name of layer.  Case-sensitive.
+        :rtype: Layer object if found, otherwise ValueError
         """
         try:
             return self.layernames[name]
@@ -419,12 +471,16 @@ class TiledMap(TiledElement):
             raise ValueError
 
     def get_layer_order(self):
-        """
-        Return a list of the map's layers in drawing order.
+        """Return a list of the map's layers in drawing order.
         """
         return list(self.layers)
 
     def get_object_by_name(self, name):
+        """Find an object
+
+        :param name: Name of object.  Case-sensitive.
+        :rtype: Object if found, otherwise ValueError
+        """
         for obj in self.objects:
             if obj.name == name:
                 return obj
@@ -432,17 +488,17 @@ class TiledMap(TiledElement):
 
     @property
     def objects(self):
-        """
-        Return iterator of all the objects associated with this map
+        """Return iterator of all the objects associated with this map
+
+        :rtype: Iterator
         """
         return chain(*self.objectgroups)
 
     @property
     def visible_layers(self):
-        """
-        Returns a generator of TileLayer objects that are set 'visible'.
+        """Return iterator of TileLayer objects that are set 'visible'
 
-        Layers have their visibility set in Tiled.
+        :rtype: Iterator
         """
         return (l for l in self.layers if l.visible)
 
@@ -470,9 +526,12 @@ class TiledTileset(TiledElement):
         self.parse(node)
 
     def parse(self, node):
-        """
-        a bit of mangling is done here so that tilesets that have external
+        """Parse a Tileset from ElementTree xml node
+
+        A bit of mangling is done here so that tilesets that have external
         TSX files appear the same as those that don't
+
+        :param node: ElementTree xml node
         """
         import os
 
@@ -543,6 +602,10 @@ class TiledTileLayer(TiledElement):
             yield x, y, self.data[y][x]
 
     def parse(self, node):
+        """Parse a Tile Layer from ElementTree xml node
+
+        :param node: ElementTree xml node
+        """
         from struct import unpack
         import array
 
@@ -627,6 +690,10 @@ class TiledObjectGroup(TiledElement, list):
         self.parse(node)
 
     def parse(self, node):
+        """Parse an Object Group from ElementTree xml node
+
+        :param node: ElementTree xml node
+        """
         self.set_properties(node)
 
         for child in node.findall('object'):
@@ -652,11 +719,13 @@ class TiledObject(TiledElement):
         self.gid = 0
         self.visible = 1
 
-        # TODO: ellipse
-
         self.parse(node)
 
     def parse(self, node):
+        """Parse an Object from ElementTree xml node
+
+        :param node: ElementTree xml node
+        """
         def read_points(text):
             """
             parse a text string of integer tuples and return [(x,...),...]
@@ -668,6 +737,11 @@ class TiledObject(TiledElement):
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
+            # tiled stores the origin of GID objects by the lower right corner
+            # this is different for all other types, so i just adjust it here
+            # so all types loaded with pytmx are uniform.
+            # TODO: map the gid to the tileset to get the correct height
+            self.y -= self.parent.tileheight
 
         points = None
 
@@ -713,6 +787,10 @@ class TiledImageLayer(TiledElement):
         self.parse(node)
 
     def parse(self, node):
+        """Parse an Image Layer from ElementTree xml node
+
+        :param node: ElementTree xml node
+        """
         self.set_properties(node)
 
         self.name = node.get('name', None)
