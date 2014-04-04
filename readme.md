@@ -12,12 +12,23 @@ bitcraft (leif dot theden at gmail.com)
 
 *Released under the LGPL v3*
 
+PyTMX users:  I'm developing a new branch that uses the six module so I won't
+have to really worry about porting/backporting features between the python2
+and python3 branch.  Now is the time to let me know if there is a feature that
+you want added:  open an issue as a feature request.  I estimate the new branch
+will be ready in a month or so.
+
+Thanks again to everyone who has been sending me emails and helping to make
+PyTMX a great addition to python and pygame!
+
+--leif
 
 
 News
 ===============================================================================
 
-##### 02/28/12 - Image layer support, object points changed, new test.py!
+##### 04/04/14 - New Six Branch created
+##### 02/28/14 - Image layer support, object points changed, new test.py!
 ##### 02/24/14 - New Python 3 Support: see python3 branch
 ##### 02/06/14 - Python 3 support coming soon
 
