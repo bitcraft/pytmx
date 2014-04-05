@@ -2,6 +2,8 @@ from itertools import chain, product, islice
 from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
 import logging
+import six
+from six.moves import zip, map
 from .constants import *
 
 logger = logging.getLogger("pytmx")
@@ -86,7 +88,7 @@ def parse_properties(node):
     return d
 
 
-class TiledElement:
+class TiledElement(object):
     def __init__(self):
         self.properties = {}
 
@@ -138,7 +140,7 @@ class TiledMap(TiledElement):
         """
         :param filename: filename of tiled map to load
         """
-        super().__init__()
+        TiledElement.__init__(self)
         self.layers = []           # list of all layers in proper order
         self.tilesets = []         # list of TiledTileset objects
         self.objectgroups = []     # list of TiledObjectGroup objects
@@ -507,7 +509,7 @@ class TiledTileset(TiledElement):
     reserved = "visible firstgid source name tilewidth tileheight spacing margin image tile properties".split()
 
     def __init__(self, parent, node):
-        super().__init__()
+        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -581,7 +583,7 @@ class TiledTileLayer(TiledElement):
     reserved = "visible name x y width height opacity properties data".split()
 
     def __init__(self, parent, node):
-        super().__init__()
+        TiledElement.__init__(self)
         self.parent = parent
         self.data = []
 
@@ -619,34 +621,34 @@ class TiledTileLayer(TiledElement):
 
         data_node = node.find('data')
 
-        encoding = data_node.get("encoding", None)
-        if encoding == "base64":
+        encoding = data_node.get('encoding', None)
+        if encoding == 'base64':
             from base64 import b64decode
-            data = b64decode(bytes(data_node.text.strip(), 'ascii'))
+            data = bytearray(b64decode(data_node.text.strip()))
 
-        elif encoding == "csv":
+        elif encoding == 'csv':
             next_gid = map(int, "".join(
                 line.strip() for line in data_node.text.strip()
             ).split(","))
 
         elif encoding:
-            msg = "TMX encoding type: {0} is not supported."
+            msg = 'TMX encoding type: {0} is not supported.'
             print(msg.format(encoding))
             raise Exception
 
-        compression = data_node.get("compression", None)
-        if compression == "gzip":
+        compression = data_node.get('compression', None)
+        if compression == 'gzip':
             from io import BytesIO
             import gzip
-            with gzip.GzipFile(fileobj=BytesIO(data)) as fh:
-                data = fh.read()
+            with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
+                data = bytearray(fh.read())
 
-        elif compression == "zlib":
+        elif compression == 'zlib':
             import zlib
-            data = zlib.decompress(data)
+            data = bytearray(zlib.decompress(data))
 
         elif compression:
-            msg = "TMX compression type: {0} is not supported."
+            msg = 'TMX compression type: {0} is not supported.'
             print(msg.format(compression))
             raise Exception
 
@@ -660,13 +662,14 @@ class TiledTileLayer(TiledElement):
             next_gid = get_children(data_node)
 
         elif data:
-            # data is cast as 32-bit ints - this is the case after encoding or compression
+            print(type(data))
+            # return a long integer (32-bit) from the data
             def u(i):
-                return unpack("<L", bytes(i))[0]
+                return unpack("<L", i)[0]
             next_gid = map(u, group(data, 4))
 
-        # may be a limitation for very detailed maps
-        self.data = tuple(array.array("H") for i in range(self.height))
+        # H may be a limitation for very detailed maps
+        self.data = tuple(array.array('H') for i in range(self.height))
         for (y, x) in product(range(self.height), range(self.width)):
             self.data[y].append(self.parent.register_gid(*decode_gid(next(next_gid))))
 
@@ -678,7 +681,7 @@ class TiledObjectGroup(TiledElement, list):
     reserved = "visible name color x y width height opacity object properties".split()
 
     def __init__(self, parent, node):
-        super().__init__()
+        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -705,7 +708,7 @@ class TiledObject(TiledElement):
     reserved = "visible name type x y width height gid properties polygon polyline image".split()
 
     def __init__(self, parent, node):
-        super().__init__()
+        TiledElement.__init__(self)
         self.parent = parent
 
         # defaults from the specification
@@ -771,7 +774,7 @@ class TiledImageLayer(TiledElement):
     reserved = "visible source name width height opacity visible".split()
 
     def __init__(self, parent, node):
-        super().__init__()
+        TiledElement.__init__(self)
         self.parent = parent
         self.source = None
         self.trans = None
