@@ -1,20 +1,34 @@
-"""
-This is tested on pygame 1.9 and python 3.3.
-bitcraft (leif dot theden at gmail.com)
+""" Test / Demo / Tutorial of pyscroll and PyTMX
 
-Advanced rendering demo for the TMXLoader3.
+This file is heavily commented to provide useful examples and information how
+to build your own game with python, pygame, pyscroll, and pytmx.
+
+- Tested with pygame 1.9 and python 2.7 & 3.3.
+- bitcraft (leif dot theden at gmail.com)
 """
+
 import math
-import pygame
 import itertools
+import pygame
 from pygame.locals import *
-from pytmx import *
+import pytmx
+import logging
 
+# pyscroll is a python 2.7/3.3 project
+# using the logging module simplifies "print" statements and has nice output.
+# the following sets the logger up for this app.
+# NOTE: it is not necessary for your app to do this, but it is a good practice.
+logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
 
 ZOOM_SPEED = 100
 MOVE_SPEED = 100
 
 
+# simple wrapper to keep the screen resizeable
 def init_screen(width, height):
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
 

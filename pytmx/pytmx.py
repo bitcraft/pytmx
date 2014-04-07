@@ -6,9 +6,21 @@ import six
 from six.moves import zip, map
 from .constants import *
 
-logger = logging.getLogger("pytmx")
+logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
 
-__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
+
+__all__ = [
+    'TiledMap',
+    'TiledTileset',
+    'TiledTileLayer',
+    'TiledObject',
+    'TiledObjectGroup',
+    'TiledImageLayer'
+]
 
 
 def decode_gid(raw_gid):
@@ -43,7 +55,7 @@ def handle_bool(text):
 
     raise ValueError
 
-# used to change the unicode string returned from xml to proper python variable types.
+# used to change the unicode string returned from xml to proper python types.
 types = defaultdict(lambda: str)
 types.update({
     "version": float,
@@ -93,10 +105,10 @@ class TiledElement(object):
         self.properties = {}
 
     def set_properties(self, node):
-        """
-        read the xml attributes and tiled "properties" from a xml node and fill
-        in the values into the object's dictionary.  Names will be checked to
-        make sure that they do not conflict with reserved names.
+        """ read values from the XML data and apply them to objects
+
+        Names will be checked to make sure that they do not conflict with
+        reserved names.
         """
         # set the correct types
         [setattr(self, k, types[str(k)](v)) for (k, v) in node.items()]
@@ -130,7 +142,7 @@ class TiledElement(object):
 
 
 class TiledMap(TiledElement):
-    """Contains the layers, objects, and images from a Tiled TMX map
+    """ Contains the layers, objects, and images from a Tiled TMX map
 
     This class is meant to handle most of the work you need to do to use a map.
     """
@@ -608,11 +620,7 @@ class TiledTileLayer(TiledElement):
 
         :param node: ElementTree xml node
         """
-        from struct import unpack
         import array
-
-        def group(l, n):
-            return zip(*(islice(l, i, None, n) for i in range(n)))
 
         self.set_properties(node)
 
@@ -624,7 +632,7 @@ class TiledTileLayer(TiledElement):
         encoding = data_node.get('encoding', None)
         if encoding == 'base64':
             from base64 import b64decode
-            data = bytearray(b64decode(data_node.text.strip()))
+            data = b64decode(data_node.text.strip())
 
         elif encoding == 'csv':
             next_gid = map(int, "".join(
@@ -638,14 +646,13 @@ class TiledTileLayer(TiledElement):
 
         compression = data_node.get('compression', None)
         if compression == 'gzip':
-            from io import BytesIO
             import gzip
             with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
-                data = bytearray(fh.read())
+                data = fh.read()
 
         elif compression == 'zlib':
             import zlib
-            data = bytearray(zlib.decompress(data))
+            data = zlib.decompress(data)
 
         elif compression:
             msg = 'TMX compression type: {0} is not supported.'
@@ -662,16 +669,12 @@ class TiledTileLayer(TiledElement):
             next_gid = get_children(data_node)
 
         elif data:
-            print(type(data))
-            # return a long integer (32-bit) from the data
-            def u(i):
-                return unpack("<L", i)[0]
-            next_gid = map(u, group(data, 4))
+            next_gid = iter(array.array('L', data))
 
-        # H may be a limitation for very detailed maps
-        self.data = tuple(array.array('H') for i in range(self.height))
+        init = [0] * self.width
+        self.data = tuple(array.array('H', init) for i in range(self.height))
         for (y, x) in product(range(self.height), range(self.width)):
-            self.data[y].append(self.parent.register_gid(*decode_gid(next(next_gid))))
+            self.data[y][x] = self.parent.register_gid(*decode_gid(next(next_gid)))
 
 
 class TiledObjectGroup(TiledElement, list):
