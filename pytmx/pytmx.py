@@ -254,10 +254,10 @@ class TiledMap(TiledElement):
 
         try:
             layer = self.layers[layer]
-        except TypeError:
-            assert (isinstance(layer, TiledTileLayer))
         except IndexError:
             raise ValueError
+
+        assert (isinstance(layer, TiledTileLayer))
 
         try:
             gid = layer.data[y][x]
@@ -467,11 +467,20 @@ class TiledMap(TiledElement):
 
     @property
     def visible_layers(self):
-        """Return iterator of TileLayer objects that are set 'visible'
+        """Return iterator of Layer objects that are set 'visible'
 
         :rtype: Iterator
         """
         return (l for l in self.layers if l.visible)
+
+    @property
+    def visible_tile_layers(self):
+        """Return iterator of layer indexes that are set 'visible'
+
+        :rtype: Iterator
+        """
+        return (i for (i, l) in enumerate(self.layers)
+                if l.visible and isinstance(l, TiledTileLayer))
 
     def register_gid(self, tiled_gid, flags=0):
         """Used to manage the mapping of GIDs between the tmx and pytmx
