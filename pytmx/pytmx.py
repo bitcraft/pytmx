@@ -1,4 +1,4 @@
-from itertools import chain, product, islice
+from itertools import chain, product, islice, groupby
 from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
 import logging
@@ -7,6 +7,34 @@ from .constants import *
 logger = logging.getLogger("pytmx")
 
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject', 'TiledObjectGroup', 'TiledImageLayer']
+
+
+def index_split(s, c=' '):
+    p = 0
+    for k, g in groupby(s, lambda x:x==c):
+        q = p + sum(1 for i in g)
+        if not k:
+            yield s[p:q], q
+        p = q
+
+
+def bake(sub, factory=dict):
+    mapping = dict()
+    ret = factory()
+
+    for key, value in sub.items():
+        for name, index in reversed(list(index_split(key, '.'))):
+            root = key[:index]
+
+            if index > len(name):
+                new = mapping.get(root, factory())
+                new[name] = value
+                mapping[root] = value
+                value = new
+
+        ret[root] = value
+
+    return ret
 
 
 def decode_gid(raw_gid):
@@ -76,6 +104,7 @@ def parse_properties(node):
     the "properties" from tiled's tmx have an annoying quality that "name"
     and "value" is included. here we mangle it to get that junk out.
     """
+
 
     def dottify(name, value):
         for name in reversed(name.split('.')):
@@ -212,7 +241,11 @@ class TiledMap(TiledElement):
             assert(gid >= 0)
             return self.images[gid]
         except (IndexError, ValueError, AssertionError):
-            msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
+            msg = "Invalid GID specified: {}"
+            print(msg.format(gid))
+            raise ValueError
+        except TypeError:
+            msg = "GID must be specified as integer: {}"
             print(msg.format(gid))
             raise TypeError
 
