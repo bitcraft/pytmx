@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 #encoding: utf-8
 
-import os
 from setuptools import setup
-import pytmx
-
-
-def read(file_name):
-    with open(os.path.join(os.path.dirname(__file__), file_name)) as fd:
-        return fd.read()
 
 
 setup(name="PyTMX",
-      version=pytmx.__version__,
-      description=pytmx.__description__,
-      author=pytmx.__author__,
-      author_email=pytmx.__author_email__,
+      version='2.18.1',
+      description='loads tiles tmx maps.  for python 2.7 and 3.3',
+      author='bitcraft',
+      author_email='leif.theden@gmail.com',
       packages=['pytmx'],
       install_requires=['pygame', 'six'],
       license="LGPLv3",

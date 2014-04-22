@@ -237,6 +237,7 @@ def smart_convert(original, colorkey, force_colorkey, pixelalpha):
 
     # there are transparent pixels, and set for perpixel alpha
     elif pixelalpha:
+        print('alpha!')
         tile = original.convert_alpha()
 
     # there are transparent pixels, and we won't handle them
@@ -250,14 +251,16 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     """
     Utility function to load images.
 
+    this utility has 'smart' tile loading.  by default any tile without
+    transparent pixels will be loaded for quick blitting.  if the tile has
+    transparent pixels, then it will be loaded with per-pixel alpha.  this is
+    a per-tile check.
 
-    due to the way the tiles are loaded, they will be in the same pixel format
-    as the display when it is loaded.  take this into consideration if you
-    intend to support different screen pixel formats.
+    if a color key is specified in the loader, in the tmx data, or forced, then
+    per-pixel alpha will not be used at all.
 
-    by default, the images will not have per-pixel alphas.  this can be
-    changed by including "pixelalpha=True" in the keywords.  this will result
-    in much slower blitting speeds.
+    it is generall y same to leave the defaults unless the tileset makes heavy
+    use of per-pixel alphas.
 
     if the tileset's image has colorkey transparency set in Tiled, the loader
     will return images that have their transparency already set.  using a
@@ -268,14 +271,14 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     tileset image and to fill in the missing areas with a color, then use that
     new color as a colorkey.  the resulting tiles will render much faster, but
     will not preserve the transparency of the tile if it uses partial
-    transparency (which you shouldn't be doing anyway, this is SDL).
+    transparency.
 
     TL;DR:
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
 
-    pixelalpha = kwargs.get('pixelalpha', False)
+    pixelalpha = kwargs.get('pixelalpha', True)
     force_colorkey = kwargs.get('force_colorkey', False)
 
     if force_colorkey:
