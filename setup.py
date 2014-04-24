@@ -5,12 +5,12 @@ from setuptools import setup
 
 
 setup(name="PyTMX",
-      version='2.18.1',
+      version='3.18.2',
       description='loads tiles tmx maps.  for python 2.7 and 3.3',
       author='bitcraft',
       author_email='leif.theden@gmail.com',
       packages=['pytmx'],
-      install_requires=['pygame', 'six'],
+      install_requires=['six'],
       license="LGPLv3",
       long_description='https://github.com/bitcraft/PyTMX',
       classifiers=[

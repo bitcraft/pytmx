@@ -11,6 +11,7 @@ Tests all Tiled features -except- terrains.
 import pygame
 from pygame.locals import *
 from pytmx import *
+from pytmx.tmxloader import load_pygame
 
 
 def init_screen(width, height):
@@ -22,7 +23,7 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
     def __init__(self, filename):
-        tm = load_pygame(filename, pixelalpha=True)
+        tm = load_pygame(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
@@ -51,13 +52,15 @@ class TiledRenderer(object):
                 for o in layer:
                     print(o)
                     if hasattr(o, 'points'):
-                        pygame.draw.lines(surface, (255, 128, 128), o.closed, o.points, 2)
+                        pygame.draw.lines(surface, (0, 255, 0),
+                                          o.closed, o.points, 3)
                     elif o.gid:
                         tile = self.tmx_data.get_tile_image_by_gid(o.gid)
                         if tile:
                             surface.blit(tile, (o.x, o.y))
                     else:
-                        pygame.draw.rect(surface, (255, 128, 128), (o.x, o.y, o.width, o.height), 2)
+                        pygame.draw.rect(surface, (255, 0, 0),
+                                         (o.x, o.y, o.width, o.height), 3)
 
             elif isinstance(layer, TiledImageLayer):
                 image = gt(layer.gid)
@@ -91,7 +94,8 @@ class SimpleTest(object):
         self.renderer.render(temp)
         pygame.transform.smoothscale(temp, surface.get_size(), surface)
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit', 1, (180, 180, 0))
+        i = f.render('press any key for next map or ESC to quit',
+                     1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self):

@@ -1,4 +1,3 @@
-from pygame import Rect
 from itertools import product
 
 
@@ -101,8 +100,9 @@ def simplify(all_points, tilewidth, tileheight):
     there may be cases where the number of rectangles is not as low as possible,
     but I haven't found that it is excessively bad.  certainly much better than
     making a list of rects, one for each tile on the map!
-
     """
+    from pygame import Rect
+
 
     def pick_rect(points, rects):
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
