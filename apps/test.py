@@ -35,33 +35,45 @@ class TiledRenderer(object):
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         gt = self.tmx_data.get_tile_image_by_gid
+        surface_blit = surface.blit
 
         # fill the background color
         if self.tmx_data.background_color:
             surface.fill(self.tmx_data.background_color)
 
-        # draw map tiles
+        # iterate over all the visible layers, then draw them
+        # according to the type of layer they are.
         for layer in self.tmx_data.visible_layers:
+
+            # draw map tile layers
             if isinstance(layer, TiledTileLayer):
                 for x, y, gid in layer:
                     tile = gt(gid)
                     if tile:
-                        surface.blit(tile, (x * tw, y * th))
+                        surface_blit(tile, (x * tw, y * th))
 
+            # draw objects
             elif isinstance(layer, TiledObjectGroup):
                 for o in layer:
                     print(o)
+
+                    # objects with points are polygons or lines
                     if hasattr(o, 'points'):
                         pygame.draw.lines(surface, (0, 255, 0),
                                           o.closed, o.points, 3)
+
+                    # if the object has a gid, then use a tile image to draw
                     elif o.gid:
-                        tile = self.tmx_data.get_tile_image_by_gid(o.gid)
+                        tile = gt(o.gid)
                         if tile:
-                            surface.blit(tile, (o.x, o.y))
+                            surface_blit(tile, (o.x, o.y))
+
+                    # draw a rect for everything else
                     else:
                         pygame.draw.rect(surface, (255, 0, 0),
                                          (o.x, o.y, o.width, o.height), 3)
 
+            # draw image layers
             elif isinstance(layer, TiledImageLayer):
                 image = gt(layer.gid)
                 if image:
