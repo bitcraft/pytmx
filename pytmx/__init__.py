@@ -1,5 +1,5 @@
-from tmxloader import load_pygame, load_tmx
-from utils import buildDistributionRects
+# from tmxloader import load_pygame, load_tmx
+# from utils import buildDistributionRects
 from pytmx import *
 
 __version__ = '2.16.4'
