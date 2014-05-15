@@ -1,6 +1,5 @@
 import itertools
 import os
-import pygame
 import pytmx
 from .constants import *
 
@@ -98,6 +97,7 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
+    import pygame
 
     pixelalpha = kwargs.get("pixelalpha", False)
     force_colorkey = kwargs.get("force_colorkey", False)

@@ -1,4 +1,4 @@
-from pygame import Rect
+# from pygame import Rect
 from itertools import tee, islice, izip, product
 from collections import defaultdict
 from .constants import *
