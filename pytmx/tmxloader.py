@@ -7,6 +7,7 @@ __all__ = ['load_pygame', 'load_tmx']
 
 
 def handle_transformation(tile, flags):
+    import pygame
     if flags:
         fx = flags & TRANS_FLIPX == TRANS_FLIPX
         fy = flags & TRANS_FLIPY == TRANS_FLIPY
@@ -37,6 +38,7 @@ def smart_convert(original, colorkey, force_colorkey, pixelalpha):
     this is done for the best rendering speeds and removes the need to
     convert() the images on your own
     """
+    import pygame
     tile_size = original.get_size()
 
     # count the number of pixels in the tile that are not transparent

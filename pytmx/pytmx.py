@@ -100,8 +100,8 @@ class TiledMap(TiledElement):
         try:
             gid = self.tilelayers[layer].data[y][x]
         except IndexError:
-            msg = "Coords: ({0},{1}) in layer {2} is not valid."
-            print msg.format(x, y, layer)
+            #msg = "Coords: ({0},{1}) in layer {2} is not valid."
+            #print msg.format(x, y, layer)
             raise ValueError
 
         return self.getTileImageByGid(gid)
@@ -128,8 +128,9 @@ class TiledMap(TiledElement):
         try:
             return self.tilelayers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
-            msg = "Coords: ({0},{1}) in layer {2} is invalid"
-            raise Exception, msg.format(x, y, layer)
+            #msg = "Coords: ({0},{1}) in layer {2} is invalid"
+            #print msg.format(x, y, layer)
+            raise Exception
 
     def getDrawOrder(self):
         """
@@ -170,15 +171,17 @@ class TiledMap(TiledElement):
         try:
             gid = self.tilelayers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
-            msg = "Coords: ({0},{1}) in layer {2} is invalid."
-            raise Exception, msg.format(x, y, layer)
+            #msg = "Coords: ({0},{1}) in layer {2} is invalid."
+            #print msg.format(x, y, layer)
+            raise Exception
 
         else:
             try:
                 return self.tile_properties[gid]
             except (IndexError, ValueError):
-                msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
-                raise Exception, msg.format(x, y, layer, gid)
+                #msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
+                #print msg.format(x, y, layer, gid)
+                raise Exception
             except KeyError:
                 return None
 
