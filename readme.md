@@ -32,6 +32,14 @@ News
 ##### 02/24/14 - New Python 3 Support: see python3 branch
 ##### 02/06/14 - Python 3 support coming soon
 
+## 2.16.1
+Attention pytmx users!  Starting from 2.16.1,  pytmx has changed the way shape
+'points' are stored.  Rather than points being relative to the object's origin,
+they are now relative to the map's origin.  This change was made since it is
+closer to the way many 3rd party libraries expect object coordinates, and it
+makes drawing shapes to the screen more straightforward.
+
+Sorry about any confusion that this change may have caused!
 
 
 
