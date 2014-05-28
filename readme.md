@@ -71,6 +71,12 @@ you to provide a way to save changes to the map.  I've used the pickle module
 with good results.
 
 
+Documentation
+=============
+
+http://pytmx.readthedocs.org/
+
+
 Design Goals and Features
 ===============================================================================
 
