@@ -1,5 +1,5 @@
 """
-This is tested on pygame 1.9 and python 3.3.
+This is tested on pygame 1.9 and python 3.3 amd 2.7.
 bitcraft (leif dot theden at gmail.com)
 
 Rendering demo for the TMXLoader.
@@ -11,6 +11,7 @@ Tests all Tiled features -except- terrains.
 import pygame
 from pygame.locals import *
 from pytmx import *
+from pytmx.tmxloader import load_pygame
 
 
 def init_screen(width, height):
@@ -22,7 +23,7 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
     def __init__(self, filename):
-        tm = load_pygame(filename, pixelalpha=True)
+        tm = load_pygame(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
@@ -30,40 +31,53 @@ class TiledRenderer(object):
         # not going for efficiency here
         # for demonstration purposes only
 
+        # deref these heavily used variables for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        gt = self.tmx_data.get_tile_image
+        gt = self.tmx_data.get_tile_image_by_gid
+        surface_blit = surface.blit
 
         # fill the background color
         if self.tmx_data.background_color:
             surface.fill(self.tmx_data.background_color)
 
-        # draw map tiles
+        # iterate over all the visible layers, then draw them
+        # according to the type of layer they are.
         for layer in self.tmx_data.visible_layers:
+
+            # draw map tile layers
             if isinstance(layer, TiledTileLayer):
                 for x, y, gid in layer:
-                    tile = gt(x, y, layer)
+                    tile = gt(gid)
                     if tile:
-                        surface.blit(tile, (x * tw, y * th))
+                        surface_blit(tile, (x * tw, y * th))
 
+            # draw objects
             elif isinstance(layer, TiledObjectGroup):
-                pass
+                for o in layer:
+                    print(o)
 
+                    # objects with points are polygons or lines
+                    if hasattr(o, 'points'):
+                        pygame.draw.lines(surface, (0, 255, 0),
+                                          o.closed, o.points, 3)
+
+                    # if the object has a gid, then use a tile image to draw
+                    elif o.gid:
+                        tile = gt(o.gid)
+                        if tile:
+                            surface_blit(tile, (o.x, o.y))
+
+                    # draw a rect for everything else
+                    else:
+                        pygame.draw.rect(surface, (255, 0, 0),
+                                         (o.x, o.y, o.width, o.height), 3)
+
+            # draw image layers
             elif isinstance(layer, TiledImageLayer):
-                image = self.tmx_data.get_tile_image_by_gid(layer.gid)
+                image = gt(layer.gid)
                 if image:
                     surface.blit(image, (0, 0))
-
-        # draw polygon and poly line objects
-        for o in self.tmx_data.objects:
-            if hasattr(o, 'points'):
-                pygame.draw.lines(surface, (255, 128, 128), o.closed, o.points, 2)
-            elif o.gid:
-                tile = self.tmx_data.get_tile_image_by_gid(o.gid)
-                if tile:
-                    surface.blit(tile, (o.x, o.y))
-            else:
-                pygame.draw.rect(surface, (255, 128, 128), (o.x, o.y, o.width, o.height), 2)
 
 
 class SimpleTest(object):
@@ -92,7 +106,8 @@ class SimpleTest(object):
         self.renderer.render(temp)
         pygame.transform.smoothscale(temp, surface.get_size(), surface)
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit', 1, (180, 180, 0))
+        i = f.render('press any key for next map or ESC to quit',
+                     1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self):
@@ -144,7 +159,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('PyTMX Map Viewer')
 
     try:
-        for filename in glob.glob(os.path.join('data/0.9.1', '*.tmx')):
+        for filename in glob.glob(os.path.join('data', '0.9.1', '*.tmx')):
             print("Testing", filename)
             if not SimpleTest(filename).run():
                 break

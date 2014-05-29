@@ -1,92 +1,38 @@
-# PyTMX v3.16
-_______________________________________________________________________________
-
-## Map loader for TMX Files
-### Experimental Python 3 Branch
+## PyTMX - Six
 
 
-bitcraft (leif dot theden at gmail.com)
-v3.16    - for python 3.3   
+This experimental branch is a testbed for new features for the version that will
+work cleanly on python2 and 3 with no changes to the source code.
 
-If you have any problems or suggestions, please contact me via email.
-Tested with Tiled 0.8.1 for Mac.
+Working!
 
-*Released under the LGPL v3*
+## See the "apps" folder for example use!  (used to be "test")
 
+## Key Differences
 
+I've tweaked many small things for a cleaner, more 'pythonic' library.
 
-## News
-_______________________________________________________________________________
+- Better pep8 compliance
+- More use of iterators
+- More functions to find layers
 
-##### 03/11/14 - So, supporting pytmx with python 2 and 3 sucks. Keeping python3.
-##### 02/24/14 - New Python 3 Support: see tmxloader.py docstring
-##### 02/06/14 - Python 3 support coming soon
+### Objects have all property metadata stored in "properties" attribute.
+This means no more object.__dict__ hacks.  I really didn't think that through
+before.  Now you can just access properties like this:
+>>> object.properties['key']
+"value"
 
-   
-   
-   
-## Introduction
-_______________________________________________________________________________
+...and finally...
 
-This map loader can be used to load maps created in the Tiled Map Editor.  It
-provides a simple way to get tile images and associated metadata so that you
-can draw a map onto the screen and do useful things with metadata.
+# New method names  D:
 
-PyTMX strives to balance performance, flexibility, and performance.  Feel free
-to use the classes provided in pytmx.py as superclasses to your own maps, or
-simply load the data with PyTMX and copy the data into your own classes with
-the simple api.
+To have pep8 compatibility, I've made the choice to change the method names from
+CamelCase to under_score.  Fortunately, it is just a cosmetic change.
 
-I've included a test suite and demo in the 'tests' folder.  It should work
-across all platforms.  test.py demonstrates loading a variety of maps and
-formats, and demo.py shows how you can create scrolling maps in a very simple
-fashion, while still retaining all the power of the Tiled Editor.
+If you have used pytmx for python2 and you are starting a new project in python
+3.x, then you can simply use the new 'six' branch.
 
+Don't worry, I will still continue to support the older code, although, it may
+not get any cool new features.
 
-## Design Goals:
-_______________________________________________________________________________
-
-* Simple API with many handy functions
-* Memory efficient and performant
-* Extensible and easy to understand
-
-## Features:
-_______________________________________________________________________________
-
-* Loads data, "properties" metadata, and images from Tiled's TMX format
-* Supports base64, csv, gzip, zlib and uncompressed XML
-* Properties for all native Tiled object types
-* Point data for polygon and polyline objects
-* Automatic flipping and rotation of tiles
-* Image loading with pygame (will work without images as well)
-
-## Why use PyTMX?
-_______________________________________________________________________________
-
-### PyTMX is efficient:
-* Only the tiles used on a map are loaded into memory
-* Map information is stored as integers (8-16 bit), not python objects (32+kb)
-* Extensive use of generators and iterators make it easy on memory
-* Code is designed for compact size and readability
-
-### PyTMX is flexible:
-* Supports all major Tiled features and object types
-* Built-in pygame image loading
-* PyTMX data classes can be extended
-* Does not force you to render data in any particular way
-* Includes many checks to give useful debugging information
-
-### PyTMX is supported:
-* GitHub hosting allows for community participation
-* I have kept PyTMX current with new versions of Tiled since v.7
-
-### PyTMX is usable:
-* Liberal LGPL license means you can use PyTMX any way you want
-
-_______________________________________________________________________________
-
-Please see tmxloader.py's docstring for version information and sample usage.
-Check tests/test.py and tests/demo.py for examples on how to use the library.
-
-_______________________________________________________________________________
-The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
+### Have Fun!
