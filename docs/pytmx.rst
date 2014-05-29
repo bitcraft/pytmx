@@ -4,26 +4,35 @@ PyTMX package
 Submodules
 ----------
 
-pytmx module
-------------
+pytmx.pytmx
+-----------
 
 .. automodule:: pytmx.pytmx
     :members:
     :undoc-members:
     :show-inheritance:
 
-utils module
-------------
+pytmx.utils
+-----------
 
 .. automodule:: pytmx.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-tmxloader module
-----------------
+pytmx.tmxloader
+---------------
 
 .. automodule:: pytmx.tmxloader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pytmx
     :members:
     :undoc-members:
     :show-inheritance:

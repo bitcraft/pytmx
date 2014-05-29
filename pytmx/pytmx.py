@@ -71,9 +71,10 @@ types.update({
     "compression": str,
     "gid": int,
     "type": str,
-    "x": int,
-    "y": int,
+    "x": float,
+    "y": float,
     "value": str,
+    "rotation": float,
 })
 
 
