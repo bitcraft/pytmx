@@ -4,7 +4,7 @@
 from setuptools import setup
 
 setup(name="PyTMX",
-      version='2.16.5',
+      version='2.16.6',
       description='Map loader for TMX Files - Python 2.7',
       author='bitcraft',
       author_email='leif.theden@gmail.com',

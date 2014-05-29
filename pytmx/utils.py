@@ -5,8 +5,8 @@ from .constants import *
 
 
 def read_points(text):
-    return [ tuple(map(lambda x: int(x), i.split(',')))
-         for i in text.split() ]
+    return [tuple(map(lambda x: float(x), i.split(',')))
+            for i in text.split()]
 
 
 def parse_properties(node):
@@ -82,9 +82,10 @@ types.update({
     "compression": str,
     "gid": int,
     "type": str,
-    "x": int,
-    "y": int,
+    "x": float,
+    "y": float,
     "value": str,
+    "rotation": float,
 })
 
 
@@ -117,7 +118,7 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
 
     elif isinstance(tileset, str):
         try:
-            tileset = [ t for t in tmxmap.tilesets if t.name == tileset ].pop()
+            tileset = [t for t in tmxmap.tilesets if t.name == tileset].pop()
         except IndexError:
             msg = "Tileset \"{0}\" not found in map {1}."
             raise ValueError, msg.format(tileset, tmxmap)
@@ -138,7 +139,7 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
         layer_data = tmxmap.getLayerData(layer).data
     elif isinstance(layer, str):
         try:
-            layer = [ l for l in tmxmap.tilelayers if l.name == layer ].pop()
+            layer = [l for l in tmxmap.tilelayers if l.name == layer].pop()
             layer_data = layer.data
         except IndexError:
             msg = "Layer \"{0}\" not found in map {1}."
@@ -146,9 +147,9 @@ def buildDistributionRects(tmxmap, layer, tileset=None, real_gid=None):
 
     p = product(xrange(tmxmap.width), xrange(tmxmap.height))
     if gid:
-        points = [ (x,y) for (x,y) in p if layer_data[y][x] == gid ]
+        points = [(x, y) for (x, y) in p if layer_data[y][x] == gid]
     else:
-        points = [ (x,y) for (x,y) in p if layer_data[y][x] ]
+        points = [(x, y) for (x, y) in p if layer_data[y][x]]
 
     rects = simplify(points, tmxmap.tilewidth, tmxmap.tileheight)
     return rects
@@ -199,7 +200,7 @@ def simplify(all_points, tilewidth, tileheight):
     """
 
     def pick_rect(points, rects):
-        ox, oy = sorted([ (sum(p), p) for p in points ])[0][1]
+        ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox
         y = oy
         ex = None
@@ -210,8 +211,8 @@ def simplify(all_points, tilewidth, tileheight):
                 if ex is None:
                     ex = x - 1
 
-                if ((ox, y+1) in points):
-                    if x == ex + 1 :
+                if ((ox, y + 1) in points):
+                    if x == ex + 1:
                         y += 1
                         x = ox
 
@@ -219,17 +220,17 @@ def simplify(all_points, tilewidth, tileheight):
                         y -= 1
                         break
                 else:
-                    if x <= ex: y-= 1
+                    if x <= ex: y -= 1
                     break
 
-        c_rect = Rect(ox*tilewidth,oy*tileheight,\
-                     (ex-ox+1)*tilewidth,(y-oy+1)*tileheight)
+        c_rect = Rect(ox * tilewidth, oy * tileheight, \
+                      (ex - ox + 1) * tilewidth, (y - oy + 1) * tileheight)
 
         rects.append(c_rect)
 
-        rect = Rect(ox,oy,ex-ox+1,y-oy+1)
-        kill = [ p for p in points if rect.collidepoint(p) ]
-        [ points.remove(i) for i in kill ]
+        rect = Rect(ox, oy, ex - ox + 1, y - oy + 1)
+        kill = [p for p in points if rect.collidepoint(p)]
+        [points.remove(i) for i in kill]
 
         if points:
             pick_rect(points, rects)
