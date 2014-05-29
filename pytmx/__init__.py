@@ -1,5 +1,5 @@
 from pytmx import *
-from tmxloader import load_pygame
+from tmxloader import load_pygame, load_tmx
 
 __version__ = '2.16.6'
 __author__ = 'bitcraft'
