@@ -27,6 +27,8 @@ PyTMX a great addition to python and pygame!
 News
 ===============================================================================
 
+##### 05/29/14 - Added support for rotated objects and floating point
+##### sometime - Merged six branch into python 3 branch.  Use this for Py3.
 ##### 04/04/14 - New Six Branch created
 ##### 02/28/14 - Image layer support, object points changed, new test.py!
 ##### 02/24/14 - New Python 3 Support: see python3 branch
