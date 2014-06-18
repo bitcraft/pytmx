@@ -1,9 +1,9 @@
 import logging
 import six
-from itertools import chain, product, islice
+from itertools import chain, product
 from collections import defaultdict
 from xml.etree import ElementTree
-from six.moves import zip, map
+from six.moves import map
 from .constants import *
 
 logger = logging.getLogger(__name__)
@@ -22,9 +22,12 @@ def decode_gid(raw_gid):
     # as of 0.8.0 bit 30 determines if GID is rotated
 
     flags = 0
-    if raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX: flags += TRANS_FLIPX
-    if raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY: flags += TRANS_FLIPY
-    if raw_gid & GID_TRANS_ROT == GID_TRANS_ROT: flags += TRANS_ROT
+    if raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX:
+        flags += TRANS_FLIPX
+    if raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY:
+        flags += TRANS_FLIPY
+    if raw_gid & GID_TRANS_ROT == GID_TRANS_ROT:
+        flags += TRANS_ROT
     gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
 
     return gid, flags
@@ -39,10 +42,10 @@ def handle_bool(text):
 
     try:
         text = str(text).lower()
-        if text == "true":  return True
-        if text == "yes":   return True
-        if text == "false": return False
-        if text == "no":    return False
+        if text in ("true", "yes"):
+            return True
+        if text in ("false", "no"):
+            return False
     except:
         pass
 
@@ -93,6 +96,18 @@ def parse_properties(node):
             d[subnode.get('name')] = subnode.get('value')
 
     return d
+
+
+def parse_image(node):
+    image = node.find('image')
+    if image is not None:
+        return {
+            'width': image.get('width'),
+            'height': image.get('height'),
+            'trans': image.get('trans'),
+            'source': image.get('source'),
+        }
+    return None
 
 
 class TiledElement(object):
@@ -165,6 +180,7 @@ class TiledMap(TiledElement):
         self.layers = []           # list of all layers in proper order
         self.tilesets = []         # list of TiledTileset objects
         self.tile_properties = {}  # dict of tiles that have metadata
+        self.tile_images = {}
         self.filename = filename
 
         self.layernames = {}
@@ -382,6 +398,9 @@ class TiledMap(TiledElement):
         """
         self.tile_properties[gid] = properties
 
+    def set_tile_image(self, gid, image):
+        self.tile_images[gid] = image
+
     def get_tile_properties_by_layer(self, layer):
         """Get the tile properties of each GID in layer
 
@@ -597,14 +616,18 @@ class TiledTileset(TiledElement):
             p = parse_properties(child)
             p['width'] = self.tilewidth
             p['height'] = self.tileheight
+            image = parse_image(child)
             for gid, flags in self.parent.map_gid(real_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
+                if image is not None:
+                    self.parent.set_tile_image(gid, image)
 
         image_node = node.find('image')
-        self.source = image_node.get('source')
-        self.trans = image_node.get('trans', None)
-        self.width = int(image_node.get('width'))
-        self.height = int(image_node.get('height'))
+        if image_node is not None:
+            self.source = image_node.get('source')
+            self.trans = image_node.get('trans', None)
+            self.width = int(image_node.get('width'))
+            self.height = int(image_node.get('height'))
 
 
 class TiledTileLayer(TiledElement):
@@ -750,7 +773,7 @@ class TiledObject(TiledElement):
 
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
-            self.gid = self.parent.register_gid(self.gid)
+            self.gid = self.parent.register_gid(*(decode_gid(self.gid)))
             # tiled stores the origin of GID objects by the lower right corner
             # this is different for all other types, so i just adjust it here
             # so all types loaded with pytmx are uniform.
@@ -772,10 +795,14 @@ class TiledObject(TiledElement):
         if points:
             x1 = x2 = y1 = y2 = 0
             for x, y in points:
-                if x < x1: x1 = x
-                if x > x2: x2 = x
-                if y < y1: y1 = y
-                if y > y2: y2 = y
+                if x < x1:
+                    x1 = x
+                if x > x2:
+                    x2 = x
+                if y < y1:
+                    y1 = y
+                if y > y2:
+                    y2 = y
             self.width = abs(x1) + abs(x2)
             self.height = abs(y1) + abs(y2)
             self.points = tuple(
