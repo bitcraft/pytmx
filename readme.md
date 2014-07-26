@@ -25,9 +25,6 @@ Take a look at the wiki for more info on changes
 https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
 
 
-Please see tmxloader.py's docstring for version information.
-
-
 News
 ===============================================================================
 
@@ -38,6 +35,8 @@ __04/04/14__ - New Six Branch created
 __02/28/14__ - Image layer support, object points changed, new test.py!   
 __02/24/14__ - New Python 3 Support: see python3 branch    
 __02/06/14__ - Python 3 support coming soon   
+
+_Please see tmxloader.py's docstring for version history._
 
 
 Introduction
@@ -54,7 +53,6 @@ a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
 - Some object metadata attribute names are not supported (see docstrings)
-
 
 PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
@@ -97,6 +95,7 @@ Why use PyTMX?
 * Code is designed for compact size and readability
 
 ### PyTMX is flexible:
+* Does not require PyGame, but it is supported
 * Supports all major Tiled features and object types
 * Built-in pygame image loading
 * PyTMX data classes can be extended
@@ -114,7 +113,7 @@ Why use PyTMX?
 Installation
 ===============================================================================
 
-You msut manually install it
+You must manually install it
 
     python setup.py install
 
@@ -162,7 +161,6 @@ dict attribute called "properties":
         layer.properties['movement_speed']
 
 
-
 Scrolling Demo
 ===============================================================================
 
@@ -172,20 +170,18 @@ you can use any data structure you want, as long as PyGame is used.
 
 https://github.com/bitcraft/pyscroll
 
-*PyScroll is Python 3 project, but has a Python 2 branch.
 
-
-===============================================================================
-## IMPORTANT FOR PYGAME USERS!!
+Import Notice for PyGame Users
+================================================================================
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
 shouldn't attempt to circumvent the loading mechanisms.
 
 ================================================================================
 
-NOTES:
 
-* The Tiled "properties" have reserved names.
+Reserved Names
+================================================================================
 
 If you use "properties" for any of the following object types, you cannot use
 any of these words as a name for your property.  A ValueError will be raised
@@ -216,11 +212,14 @@ object:      name, type, x, y, width, height, gid, properties, polygon,
 Version Numbering
 ================================================================================
 
-X.Y.Z
+Example version: X.Y.Z
 
-X: 2 for python 2, 3 for python 3 and 2
-Y: major release. for new features or api change
-Z: minor release.  for bug fixes related to last release
+- X: 2 for python 2, 3 for python 3 and 2
+- Y: major release. for new features or api change
+- Z: minor release.  for bug fixes related to last release
 
+Artwork Attributions
 ===============================================================================
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
+
+* If I missed your attribution, please let me know.
