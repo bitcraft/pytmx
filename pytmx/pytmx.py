@@ -199,6 +199,10 @@ class TiledMap(TiledElement):
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
 
+    # iterate over layers and objects in map
+    def __iter__(self):
+        return chain(self.layers, self.objects)
+
     def parse(self, node):
         """Parse a map from ElementTree xml node
 
@@ -517,6 +521,8 @@ class TiledMap(TiledElement):
 
         :param tiled_gid: GID that is found in TMX data
         rtype: (GID, flags) that pytmx uses for the the GID passed
+
+        returns None if the tile is not used in the map:
         """
         try:
             return self.gidmap[int(tiled_gid)]
@@ -595,16 +601,34 @@ class TiledTileset(TiledElement):
         for child in node.getiterator('tile'):
             real_gid = int(child.get("id"))
             p = parse_properties(child)
-            p['width'] = self.tilewidth
-            p['height'] = self.tileheight
+
+            # handle tiles that have their own image
+            image = child.find('image')
+            if image is None:
+                p['width'] = self.tilewidth
+                p['height'] = self.tileheight
+            else:
+                p['source'] = image.get('source')
+                p['trans'] = image.get('trans', None)
+                p['width'] = image.get('width')
+                p['height'] = image.get('height')
+
             for gid, flags in self.parent.map_gid(real_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
 
+        # handle the optional 'tileoffset' node
+        self.offset = node.find('tileoffset')
+        if self.offset is None:
+            self.offset = (0, 0)
+        else:
+            self.offset = (self.offset.get('x', 0), self.offset.get('y', 0))
+
         image_node = node.find('image')
-        self.source = image_node.get('source')
-        self.trans = image_node.get('trans', None)
-        self.width = int(image_node.get('width'))
-        self.height = int(image_node.get('height'))
+        if image_node is not None:
+            self.source = image_node.get('source')
+            self.trans = image_node.get('trans', None)
+            self.width = int(image_node.get('width'))
+            self.height = int(image_node.get('height'))
 
 
 class TiledTileLayer(TiledElement):
@@ -742,9 +766,9 @@ class TiledObject(TiledElement):
 
         def read_points(text):
             """
-            parse a text string of integer tuples and return [(x,...),...]
+            parse a text string of float tuples and return [(x,...),...]
             """
-            return tuple(tuple(map(int, i.split(','))) for i in text.split())
+            return tuple(tuple(map(float, i.split(','))) for i in text.split())
 
         self.set_properties(node)
 
