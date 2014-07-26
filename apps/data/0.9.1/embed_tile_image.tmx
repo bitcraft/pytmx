@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="10" height="15" tilewidth="128" tileheight="64">
+ <tileset firstgid="1" name="house" tilewidth="452" tileheight="385">
+  <tile id="0">
+   <image width="452" height="385" source="test-house-01.png"/>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="10" height="15">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFAwUYB9oBNAQAAzQAAg==
+  </data>
+ </layer>
+</map>

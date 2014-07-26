@@ -3,7 +3,7 @@ PyTMX
 
 ### Map loader for TMX Files
 ##### For Python 2.7
-##### *Use the python3 branch for python 3.3 support*
+##### *Use the python3 branch for python 3.3 support and new projects*
 
 
 If you have any problems or suggestions, please contact me via email.
@@ -12,14 +12,18 @@ bitcraft (leif dot theden at gmail.com)
 
 *Released under the LGPL v3*
 
-PyTMX users:  I'm developing a new branch that uses the six module so I won't
-have to really worry about porting/backporting features between the python2
-and python3 branch.  Now is the time to let me know if there is a feature that
-you want added:  open an issue as a feature request.  I estimate the new branch
-will be ready in a month or so.
+#### Out of date notice
+This branch is a few versions behind python3.  The python3 branch brings in new
+feature parity with Tiled, new iterators, and python 2+3 compatibility from the
+same code!
+Please see the migration guide on the wiki and use the python3 branch for all
+new projects.  I will merge the python3 branch with master in the future, and it
+will break a few things, but it won't be a difficult process.  If you have an
+existing project and would like to use new features from Tiled 0.9.0+ then you
+will have to migrate.
 
-Thanks again to everyone who has been sending me emails and helping to make
-PyTMX a great addition to python and pygame!
+Thanks again to everyone who has been sending me emails, opening issues, and
+helping to make PyTMX a great addition to python and pygame!
 
 --leif
 
@@ -27,6 +31,7 @@ PyTMX a great addition to python and pygame!
 News
 ===============================================================================
 
+##### 07/26/14 - New python3/2 release.  Check it out in the python3 branch.
 ##### 05/29/14 - Added support for rotated objects and floating point
 ##### sometime - Merged six branch into python 3 branch.  Use this for Py3.
 ##### 04/04/14 - New Six Branch created
@@ -97,7 +102,7 @@ Tile and Object Metadata ("Properties")
 
 Tile properties is access through the map; see the getTileProperties methods
 
-All other objects, including the map, layer, objects, etc. are attributes:     
+All other objects, including the map, layer, objects, etc. are attributes:
   ie: map.name  //  layer.weather  // object.power
 
 
@@ -198,7 +203,7 @@ Scrolling Demo
 
 I have another repo with a working demo of a proper scrolling map using Tiled
 maps.  Please feel free to test drive it.  It isn't limited to Tiled maps,
-you can use any data structure you want, as long as it is PyGame.    
+you can use any data structure you want, as long as it is PyGame.
 
 https://github.com/bitcraft/pyscroll
 
@@ -210,7 +215,7 @@ https://github.com/bitcraft/pyscroll
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
 shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
-problems with images and transparency, pass "pixelalpha=True" while loading.    
+problems with images and transparency, pass "pixelalpha=True" while loading.
 Load your map after initializing your display.
 
 ===============================================================================
