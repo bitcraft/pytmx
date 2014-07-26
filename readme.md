@@ -1,4 +1,4 @@
-## PyTMX - Six
+## PyTMX - Python 3+2
 
 
 This experimental branch is a testbed for new features for the version that will
@@ -6,7 +6,7 @@ work cleanly on python2 and 3 with no changes to the source code.
 
 Working!
 
-## See the "apps" folder for example use!  (used to be "test")
+#### See the "apps" folder for example use!  (used to be "test")
 
 ## Key Differences
 
@@ -16,7 +16,7 @@ I've tweaked many small things for a cleaner, more 'pythonic' library.
 - More use of iterators
 - More functions to find layers
 
-### Objects have all property metadata stored in "properties" attribute.
+#### Objects have all property metadata stored in "properties" attribute.
 This means no more object.__dict__ hacks.  I really didn't think that through
 before.  Now you can just access properties like this:
 >>> object.properties['key']
