@@ -221,8 +221,8 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
 
         # some tileset images may be slightly larger than the tile area
         # ie: may include a banner, copyright, ect.  this compensates for that
-        width = int((((w - ts.margin * 2 + ts.spacing) / tilewidth) * tilewidth) - ts.spacing)
-        height = int((((h - ts.margin * 2 + ts.spacing) / tileheight) * tileheight) - ts.spacing)
+        width = int((((w - ts.margin * 2 + ts.spacing) // tilewidth) * tilewidth) - ts.spacing)
+        height = int((((h - ts.margin * 2 + ts.spacing) // tileheight) * tileheight) - ts.spacing)
 
         # trim off any pixels on the right side that isn't a tile.
         # this happens if extra stuff is included on the left, like a logo or
