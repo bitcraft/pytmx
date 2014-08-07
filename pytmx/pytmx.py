@@ -300,6 +300,9 @@ class TiledMap(TiledElement):
         self.imagemap[(0, 0)] = 0
 
         self.background_color = etree.get('backgroundcolor', self.background_color)
+        
+        # parse map properties
+        self.map_properties = parse_properties(etree)
 
         # *** do not change this load order!  gid mapping errors will occur if changed ***
         for node in etree.findall('layer'):
