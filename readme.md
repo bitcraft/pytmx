@@ -28,15 +28,15 @@ https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
 News
 ===============================================================================
 
-__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.
-__05/29/14__ - Added support for rotated objects and floating point
-__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.
-__04/04/14__ - New Six Branch created
-__02/28/14__ - Image layer support, object points changed, new test.py!
-__02/24/14__ - New Python 3 Support: see python3 branch
-__02/06/14__ - Python 3 support coming soon
+__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
+__05/29/14__ - Added support for rotated objects and floating point  
+__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.  
+__04/04/14__ - New Six Branch created  
+__02/28/14__ - Image layer support, object points changed, new test.py!  
+__02/24/14__ - New Python 3 Support: see python3 branch  
+__02/06/14__ - Python 3 support coming soon  
 
-_Please see tmxloader.py's docstring for version history._
+_Please see tmxloader.py's docstring for version history._  
 
 
 Introduction
@@ -70,6 +70,13 @@ Documentation
 =============
 
 http://pytmx.readthedocs.org/
+
+
+Getting Help
+============
+
+For bugs or feature requests, please use the issues feature of github.  For
+all other general questions, join me on IRC at freennode.net #pygame.
 
 
 Design Goals and Features
@@ -191,19 +198,19 @@ In summary: don't use the following names when adding metadata in Tiled.
 
 As of 0.8.1, these values are:
 
-map:         version, orientation, width, height, tilewidth, tileheight
-             properties, tileset, layer, objectgroup
+map:         version, orientation, width, height, tilewidth, tileheight  
+             properties, tileset, layer, objectgroup  
 
-tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,
-             image, tile, properties
+tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,  
+             image, tile, properties  
 
-tile:        id, image, properties
+tile:        id, image, properties  
 
-layer:       name, x, y, width, height, opacity, properties, data
+layer:       name, x, y, width, height, opacity, properties, data  
 
-objectgroup: name, color, x, y, width, height, opacity, object, properties
+objectgroup: name, color, x, y, width, height, opacity, object, properties  
 
-object:      name, type, x, y, width, height, gid, properties, polygon,
+object:      name, type, x, y, width, height, gid, properties, polygon,  
              polyline, image
 
 ***   Please see the TiledMap class source for more api information.   ***
@@ -212,7 +219,7 @@ object:      name, type, x, y, width, height, gid, properties, polygon,
 Version Numbering
 ================================================================================
 
-Example version: X.Y.Z
+Example version: X.Y.Z  
 
 - X: 2 for python 2, 3 for python 3 and 2
 - Y: major release. for new features or api change
