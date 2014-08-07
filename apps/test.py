@@ -98,6 +98,9 @@ class SimpleTest(object):
     def load_map(self, filename):
         self.renderer = TiledRenderer(filename)
 
+        print("map properties")
+        print self.renderer.tmx_data.properties
+
         print("Objects in map:")
         for o in self.renderer.tmx_data.objects:
             print(o)

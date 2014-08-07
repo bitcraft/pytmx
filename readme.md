@@ -28,13 +28,13 @@ https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
 News
 ===============================================================================
 
-__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.   
-__05/29/14__ - Added support for rotated objects and floating point   
-__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.   
-__04/04/14__ - New Six Branch created   
-__02/28/14__ - Image layer support, object points changed, new test.py!   
-__02/24/14__ - New Python 3 Support: see python3 branch    
-__02/06/14__ - Python 3 support coming soon   
+__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.
+__05/29/14__ - Added support for rotated objects and floating point
+__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.
+__04/04/14__ - New Six Branch created
+__02/28/14__ - Image layer support, object points changed, new test.py!
+__02/24/14__ - New Python 3 Support: see python3 branch
+__02/06/14__ - Python 3 support coming soon
 
 _Please see tmxloader.py's docstring for version history._
 
@@ -141,7 +141,7 @@ don't have to worry about that after you load the map.
     >>> screen.blit(image, position)
 
 
-Tile and Object Metadata ("Properties")
+Tile, Object, and Map Properties
 ===============================================================================
 
 Properties are any key/value data added to an object/map/layer in Tiled
