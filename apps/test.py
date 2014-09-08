@@ -6,6 +6,9 @@ Rendering demo for the TMXLoader.
 
 Typically this is run to verify that any code changes do do break the loader.
 Tests all Tiled features -except- terrains.
+
+Missing tests:
+- object rotation
 """
 
 import pygame
@@ -31,7 +34,7 @@ class TiledRenderer(object):
         # not going for efficiency here
         # for demonstration purposes only
 
-        # deref these heavily used variables for speed
+        # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         gt = self.tmx_data.get_tile_image_by_gid
@@ -47,13 +50,17 @@ class TiledRenderer(object):
 
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
+
+                # iterate over the tiles in the layer
                 for x, y, gid in layer:
                     tile = gt(gid)
                     if tile:
                         surface_blit(tile, (x * tw, y * th))
 
-            # draw objects
+            # draw object layers
             elif isinstance(layer, TiledObjectGroup):
+
+                # iterate over all the objects in the layer
                 for o in layer:
                     print(o)
 
@@ -90,6 +97,9 @@ class SimpleTest(object):
 
     def load_map(self, filename):
         self.renderer = TiledRenderer(filename)
+
+        print("map properties")
+        print self.renderer.tmx_data.properties
 
         print("Objects in map:")
         for o in self.renderer.tmx_data.objects:

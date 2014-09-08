@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff">
+ <properties>
+  <property name="custom0" value="value"/>
+  <property name="custom1" value="value"/>
+  <property name="custom2" value="value"/>
+ </properties>
  <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16">
   <properties>
    <property name="overworld" value="test"/>

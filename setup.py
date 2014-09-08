@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #encoding: utf-8
-
+#python setup.py sdist upload -r pypi
 from setuptools import setup
 
 
 setup(name="PyTMX",
-      version='3.18.5',
+      version='3.19.2',
       description='loads tiles tmx maps.  for python 2.7 and 3.3',
       author='bitcraft',
       author_email='leif.theden@gmail.com',
