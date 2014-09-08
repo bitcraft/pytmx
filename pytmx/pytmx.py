@@ -166,6 +166,7 @@ class TiledMap(TiledElement):
         self.tilesets = []         # list of TiledTileset objects
         self.tile_properties = {}  # dict of tiles that have metadata
         self.filename = filename
+
         self.layernames = {}
 
         # only used tiles are actually loaded, so there will be a difference
@@ -191,6 +192,7 @@ class TiledMap(TiledElement):
         self.imagemap[(0, 0)] = 0
 
         if filename:
+            # Parse a map node from a tiled tmx file
             node = ElementTree.parse(self.filename).getroot()
             self.parse(node)
 
