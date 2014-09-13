@@ -113,10 +113,8 @@ New in .11:
 """
 import itertools
 import os
-import pygame
 import pytmx
 import logging
-from pygame.transform import flip, rotate
 from .constants import *
 
 logger = logging.getLogger(__name__)
@@ -313,7 +311,11 @@ def load_pygame(filename, *args, **kwargs):
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
+    # import pygame only when needed:
+    global pygame, flip, rotate
+    import pygame
+    from pygame.transform import flip, rotate
+
     tmxdata = pytmx.TiledMap(filename)
     _load_images_pygame(tmxdata, None, *args, **kwargs)
     return tmxdata
-
