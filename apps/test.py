@@ -1,5 +1,5 @@
 """
-This is tested on pygame 1.9 and python 3.3 amd 2.7.
+This is tested on pygame 1.9 and python 3.3+ and 2.7.
 bitcraft (leif dot theden at gmail.com)
 
 Rendering demo for the TMXLoader.
@@ -15,6 +15,13 @@ import pygame
 from pygame.locals import *
 from pytmx import *
 from pytmx.tmxloader import load_pygame
+
+import logging
+logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
 
 
 def init_screen(width, height):
@@ -62,7 +69,7 @@ class TiledRenderer(object):
 
                 # iterate over all the objects in the layer
                 for o in layer:
-                    print(o)
+                    logger.info(o)
 
                     # objects with points are polygons or lines
                     if hasattr(o, 'points'):
@@ -98,18 +105,15 @@ class SimpleTest(object):
     def load_map(self, filename):
         self.renderer = TiledRenderer(filename)
 
-        print("map properties")
-        print self.renderer.tmx_data.properties
-
-        print("Objects in map:")
+        logger.info("Objects in map:")
         for o in self.renderer.tmx_data.objects:
-            print(o)
+            logger.info(o)
             for k, v in o.properties.items():
-                print("  ", k, v)
+                logger.info("%s\t%s", k, v)
 
-        print("GID (tile) properties:")
+        logger.info("GID (tile) properties:")
         for k, v in self.renderer.tmx_data.tile_properties.items():
-            print("  ", k, v)
+            logger.info("%s\t%s", k, v)
 
     def draw(self, surface):
         temp = pygame.Surface(self.renderer.size)
@@ -139,9 +143,6 @@ class SimpleTest(object):
                 init_screen(event.w, event.h)
                 self.dirty = True
 
-            #elif event.type == MOUSEBUTTONDOWN:
-            #    self.running = False
-
         except KeyboardInterrupt:
             self.exit_status = 0
             self.running = False
@@ -170,7 +171,7 @@ if __name__ == '__main__':
 
     try:
         for filename in glob.glob(os.path.join('data', '0.9.1', '*.tmx')):
-            print("Testing", filename)
+            logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break
     except:

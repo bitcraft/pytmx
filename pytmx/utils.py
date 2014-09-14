@@ -1,4 +1,11 @@
 from itertools import product
+import logging
+
+logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
 
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):
@@ -13,7 +20,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             tileset = tmxmap.tilesets[tileset]
         except IndexError:
             msg = "Tileset #{0} not found in map {1}."
-            print(msg.format(tileset, tmxmap))
+            logger.debug(msg.format(tileset, tmxmap))
             raise IndexError
 
     elif isinstance(tileset, str):
@@ -21,12 +28,12 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             tileset = [t for t in tmxmap.tilesets if t.name == tileset].pop()
         except IndexError:
             msg = "Tileset \"{0}\" not found in map {1}."
-            print(msg.format(tileset, tmxmap))
+            logger.debug(msg.format(tileset, tmxmap))
             raise ValueError
 
     elif tileset:
         msg = "Tileset must be either a int or string. got: {0}"
-        print(msg.format(type(tileset)))
+        logger.debug(msg.format(type(tileset)))
         raise TypeError
 
     gid = None
@@ -35,7 +42,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             gid, flags = tmxmap.map_gid(real_gid)[0]
         except IndexError:
             msg = "GID #{0} not found"
-            print(msg.format(real_gid))
+            logger.debug(msg.format(real_gid))
             raise ValueError
 
     if isinstance(layer, int):
@@ -46,7 +53,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             layer_data = layer.data
         except IndexError:
             msg = "Layer \"{0}\" not found in map {1}."
-            print(msg.format(layer, tmxmap))
+            logger.debug(msg.format(layer, tmxmap))
             raise ValueError
 
     p = product(range(tmxmap.width), range(tmxmap.height))

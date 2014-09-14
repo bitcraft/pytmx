@@ -16,6 +16,7 @@ New in 3.19:
       core: polygon/polyline and all other shapes return coordinates as float
       core: pytmx respects tiles that specify external image: stored in metadata
       core: tileoffsets are loaded stored in tileset.offset: tuple: (x, y)
+      core: logging module used everywhere
     pygame: tilesets can be loaded even if they don't specify an image
     pygame: loader has new logger...more descriptive error messages
     pygame: loading of tiles that specify an external image is supported
@@ -197,16 +198,13 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     optional_gids = kwargs.get('optional_gids', None)
     load_all_tiles = kwargs.get('load_all', False)
 
-    # change background color into something nice
     if tmxdata.background_color:
         tmxdata.background_color = pygame.Color(tmxdata.background_color)
 
-    # initialize the array of images
     tmxdata.images = [0] * tmxdata.maxgid
 
     # load tileset image
     for ts in tmxdata.tilesets:
-        # skip the tileset if it doesn't include a source image
         if ts.source is None:
             continue
 
@@ -214,7 +212,6 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
         image = pygame.image.load(path)
         w, h = image.get_size()
 
-        # margins and spacing
         tilewidth = ts.tilewidth + ts.spacing
         tileheight = ts.tileheight + ts.spacing
         tile_size = ts.tilewidth, ts.tileheight
@@ -241,10 +238,7 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
             if x + ts.tilewidth-ts.spacing > width:
                 continue
 
-            # map_gid returns a list of internal pytmx gids to load
             gids = tmxdata.map_gid(real_gid)
-
-            # user may specify to load all gids, or to load a specific one
             if gids is None:
                 if load_all_tiles or real_gid in optional_gids:
                     # TODO: handle flags? - might never be an issue, though
