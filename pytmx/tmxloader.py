@@ -199,11 +199,10 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     load_all_tiles = kwargs.get('load_all', False)
 
     if tmxdata.background_color:
+        print(tmxdata.background_color)
         tmxdata.background_color = pygame.Color(tmxdata.background_color)
 
-    # change background color into something nice
-    if tmxdata.background_color:
-        tmxdata.background_color = pygame.Color(tmxdata.background_color)
+    tmxdata.images = [None] * tmxdata.maxgid
 
     # load tileset image
     for ts in tmxdata.tilesets:
@@ -312,4 +311,3 @@ def load_pygame(filename, *args, **kwargs):
     tmxdata = pytmx.TiledMap(filename)
     _load_images_pygame(tmxdata, None, *args, **kwargs)
     return tmxdata
-
