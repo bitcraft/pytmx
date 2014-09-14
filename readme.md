@@ -23,7 +23,7 @@ I've tweaked many small things for a cleaner, more 'pythonic' library.
 - More functions to find layers
 
 Take a look at the wiki for more info on changes
-https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
+https://github.com/bitcraft/PyTMX/wiki/Migration-to-version-3.x
 
 
 News
@@ -32,7 +32,6 @@ News
 __09/14/12__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
 __05/29/14__ - Added support for rotated objects and floating point  
-__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.  
 __04/04/14__ - New Six Branch created  
 __02/28/14__ - Image layer support, object points changed, new test.py!  
 __02/24/14__ - New Python 3 Support: see python3 branch  
@@ -69,13 +68,13 @@ with good results.
 
 
 Documentation
-=============
+===============================================================================
 
 http://pytmx.readthedocs.org/
 
 
 Getting Help
-============
+===============================================================================
 
 For bugs or feature requests, please use the issues feature of github.  For
 all other general questions, join me on IRC at freennode.net #pygame.
