@@ -1,22 +1,22 @@
 """
-This is tested on pygame 1.9 and python 3.3+ and 2.7.
-bitcraft (leif dot theden at gmail.com)
+This is tested on pygame 1.9 and python 2.7 and 3.3+.
+Leif Thedem "bitcraft", 2012-2014
 
 Rendering demo for the TMXLoader.
 
 Typically this is run to verify that any code changes do do break the loader.
-Tests all Tiled features -except- terrains.
+Tests all Tiled features -except- terrains and object rotation.
 
 Missing tests:
 - object rotation
 """
-
+import logging
 import pygame
 from pygame.locals import *
-from pytmx import *
-from pytmx.tmxloader import load_pygame
 
-import logging
+from pytmx import *
+from pytmx.util_pygame import load_pygame
+
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
@@ -44,12 +44,16 @@ class TiledRenderer(object):
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        gt = self.tmx_data.get_tile_image_by_gid
         surface_blit = surface.blit
+        draw_rect = pygame.draw.rect
+        draw_lines = pygame.draw.lines
+
+        rect_color = (255, 0, 0)
+        poly_color = (0, 255, 0)
 
         # fill the background color
         if self.tmx_data.background_color:
-            surface.fill(self.tmx_data.background_color)
+            surface.fill(pygame.Color(self.tmx_data.background_color))
 
         # iterate over all the visible layers, then draw them
         # according to the type of layer they are.
@@ -59,39 +63,34 @@ class TiledRenderer(object):
             if isinstance(layer, TiledTileLayer):
 
                 # iterate over the tiles in the layer
-                for x, y, gid in layer:
-                    tile = gt(gid)
-                    if tile:
-                        surface_blit(tile, (x * tw, y * th))
+                for x, y, image in layer.tiles():
+                    surface_blit(image, (x * tw, y * th))
 
             # draw object layers
             elif isinstance(layer, TiledObjectGroup):
 
                 # iterate over all the objects in the layer
-                for o in layer:
-                    logger.info(o)
+                for obj in layer:
+                    logger.info(obj)
 
                     # objects with points are polygons or lines
-                    if hasattr(o, 'points'):
-                        pygame.draw.lines(surface, (0, 255, 0),
-                                          o.closed, o.points, 3)
+                    if hasattr(obj, 'points'):
+                        draw_lines(surface, poly_color,
+                                   obj.closed, obj.points, 3)
 
-                    # if the object has a gid, then use a tile image to draw
-                    elif o.gid:
-                        tile = gt(o.gid)
-                        if tile:
-                            surface_blit(tile, (o.x, o.y))
+                    # some object have an image
+                    elif obj.image:
+                        surface_blit(obj.image, (obj.x, obj.y))
 
                     # draw a rect for everything else
                     else:
-                        pygame.draw.rect(surface, (255, 0, 0),
-                                         (o.x, o.y, o.width, o.height), 3)
+                        draw_rect(surface, rect_color,
+                                  (obj.x, obj.y, obj.width, obj.height), 3)
 
             # draw image layers
             elif isinstance(layer, TiledImageLayer):
-                image = gt(layer.gid)
-                if image:
-                    surface.blit(image, (0, 0))
+                if layer.image:
+                    surface.blit(layer.image, (0, 0))
 
 
 class SimpleTest(object):
@@ -106,9 +105,9 @@ class SimpleTest(object):
         self.renderer = TiledRenderer(filename)
 
         logger.info("Objects in map:")
-        for o in self.renderer.tmx_data.objects:
-            logger.info(o)
-            for k, v in o.properties.items():
+        for obj in self.renderer.tmx_data.objects:
+            logger.info(obj)
+            for k, v in obj.properties.items():
                 logger.info("%s\t%s", k, v)
 
         logger.info("GID (tile) properties:")
