@@ -1,53 +1,43 @@
-PyTMX
-===============================================================================
+## PyTMX
+##### For Python 2.7 and 3.3+
 
-### Map loader for TMX Files
-##### For Python 2.7
-##### *Use the python3 branch for python 3.3 support and new projects*
+This is the most up-to-date version of PyTMX available and works with Python 2.7 and 3.3
+with no changes to the source code.  Please use this branch for all new PyTMX projects.
 
-
-If you have any problems or suggestions, please contact me via email.
-
-bitcraft (leif dot theden at gmail.com)
+If you have any problems or suggestions, please open an issue.
+I am also often lurking #pygame on freenode.  Feel free to contact me.
 
 *Released under the LGPL v3*
 
-#### Out of date notice
-This branch is a few versions behind python3.  The python3 branch brings in new
-feature parity with Tiled, new iterators, and python 2+3 compatibility from the
-same code!
-Please see the migration guide on the wiki and use the python3 branch for all
-new projects.  I will merge the python3 branch with master in the future, and it
-will break a few things, but it won't be a difficult process.  If you have an
-existing project and would like to use new features from Tiled 0.9.0+ then you
-will have to migrate.
-
-Thanks again to everyone who has been sending me emails, opening issues, and
-helping to make PyTMX a great addition to python and pygame!
+#### See the "apps" folder for example use.
 
 --leif
+
+===============================================================================
+## Key Differences from 2.x versions
+
+I've tweaked many small things for a cleaner, more 'pythonic' library.
+
+- Better pep8 compliance
+- More use of iterators
+- More functions to find layers
+
+Take a look at the wiki for more info on changes
+https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
 
 
 News
 ===============================================================================
 
-##### 07/26/14 - New python3/2 release.  Check it out in the python3 branch.
-##### 05/29/14 - Added support for rotated objects and floating point
-##### sometime - Merged six branch into python 3 branch.  Use this for Py3.
-##### 04/04/14 - New Six Branch created
-##### 02/28/14 - Image layer support, object points changed, new test.py!
-##### 02/24/14 - New Python 3 Support: see python3 branch
-##### 02/06/14 - Python 3 support coming soon
+__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
+__05/29/14__ - Added support for rotated objects and floating point  
+__sometime__ - Merged six branch into python 3 branch.  Use this for Py3.  
+__04/04/14__ - New Six Branch created  
+__02/28/14__ - Image layer support, object points changed, new test.py!  
+__02/24/14__ - New Python 3 Support: see python3 branch  
+__02/06/14__ - Python 3 support coming soon  
 
-## 2.16.1
-Attention pytmx users!  Starting from 2.16.1,  pytmx has changed the way shape
-'points' are stored.  Rather than points being relative to the object's origin,
-they are now relative to the map's origin.  This change was made since it is
-closer to the way many 3rd party libraries expect object coordinates, and it
-makes drawing shapes to the screen more straightforward.
-
-Sorry about any confusion that this change may have caused!
-
+_Please see tmxloader.py's docstring for version history._  
 
 
 Introduction
@@ -64,7 +54,6 @@ a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
 - Some object metadata attribute names are not supported (see docstrings)
-
 
 PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
@@ -104,15 +93,6 @@ Design Goals and Features
 * Image loading with pygame (will work without images as well)
 
 
-Tile and Object Metadata ("Properties")
-===============================================================================
-
-Tile properties is access through the map; see the getTileProperties methods
-
-All other objects, including the map, layer, objects, etc. are attributes:
-  ie: map.name  //  layer.weather  // object.power
-
-
 Why use PyTMX?
 ===============================================================================
 
@@ -123,6 +103,7 @@ Why use PyTMX?
 * Code is designed for compact size and readability
 
 ### PyTMX is flexible:
+* Does not require PyGame, but it is supported
 * Supports all major Tiled features and object types
 * Built-in pygame image loading
 * PyTMX data classes can be extended
@@ -140,11 +121,7 @@ Why use PyTMX?
 Installation
 ===============================================================================
 
-If you are using Python 2.7, you can install PyTMX using pip.
-
-    pip install pytmx (for python 2.7 only!)
-
-You can also manually install it
+You must manually install it
 
     python setup.py install
 
@@ -152,57 +129,44 @@ You can also manually install it
 Basic use:
 ===============================================================================
 
-### Just data:
+#### Just data:
     >>> import pytmx
-    >>> tmx_data = pytmx.TiledMap("map.tmx")
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
 
 
-### Load with Pygame Images:
-
-    >>> from pytmx import load_pygame
-    >>> tmx_data = load_pygame("map.tmx")
-
-
-### Alpha Channel Support:
+#### Load with Pygame Images:
 
     >>> from pytmx import load_pygame
-    >>> tmx_data = load_pygame("map.tmx", pixelalpha=True)
+    >>> tmxdata = load_pygame("map.tmx")
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
 don't have to worry about that after you load the map.
 
 
-### Getting the Tile Surface
+#### Getting the Tile Surface
 
-    >>> image = tmx_data.getTileImage(x, y, layer)
+    >>> image = tmx_data.get_tile_image(x, y, layer)
     >>> screen.blit(image, position)
 
 
-### Getting Object Metadata ("Properties")
-
-Maps, tilesets, layers, objectgroups, and objects all have a simple way to
-access metadata that was set inside tiled: they all become object attributes.
-
-    >>> layer = tmx_data.tilelayers[0]
-
-or
-
-    >>> layer = tmx_data.getTileLayerByName("Background")
-
-    >>> print layer.tilewidth
-    32
-    >>> print layer.weather
-    'sunny'
-
-
-EXCEPTIONS
+Tile, Object, and Map Properties
 ===============================================================================
-Tile properties are the exception here, and must be accessed through
-"getTileProperties".  The data is a regular Python dictionary:
 
-    >>> tile = tmx_data.getTileProperties(x, y, layer)
-    >>> tile["name"]
-    'CobbleStone'
+Properties are any key/value data added to an object/map/layer in Tiled
+through the properties dialog.  Tile properties are accessed through the the
+parent map object:
+
+    tmxdata = TiledMap('level1.tmx')
+    props = txmdata.get_tile_properties(x, y, layer)
+    props = tmxdata.get_tile_properties_by_gid(tile_gid)
+
+All other objects, including the map, layer, objects, etc. are in an
+dict attribute called "properties":
+
+    tmxdata = TiledMap('level1.tmx')
+    tmxdata.properties['name']
+    for layer in tmxdata.visible_layers:
+        layer.properties['movement_speed']
 
 
 Scrolling Demo
@@ -210,25 +174,60 @@ Scrolling Demo
 
 I have another repo with a working demo of a proper scrolling map using Tiled
 maps.  Please feel free to test drive it.  It isn't limited to Tiled maps,
-you can use any data structure you want, as long as it is PyGame.
+you can use any data structure you want, as long as PyGame is used.
 
 https://github.com/bitcraft/pyscroll
 
-*PyScroll is Python 3 project, but has a Python 2 branch.
 
-
-===============================================================================
-## IMPORTANT FOR PYGAME USERS!!
+Import Notice for PyGame Users
+================================================================================
 
 The loader will correctly convert() or convert_alpha() each tile image, so you
-shouldn't attempt to circumvent the loading mechanisms.  If you are experiencing
-problems with images and transparency, pass "pixelalpha=True" while loading.
-Load your map after initializing your display.
+shouldn't attempt to circumvent the loading mechanisms.
 
-===============================================================================
+================================================================================
 
-Please see tmxloader.py's docstring for version information and sample usage.
-Check tests/test.py and tests/demo.py for examples on how to use the library.
 
+Reserved Names
+================================================================================
+
+If you use "properties" for any of the following object types, you cannot use
+any of these words as a name for your property.  A ValueError will be raised
+if a Tile Object attempts to use a reserved name.
+
+In summary: don't use the following names when adding metadata in Tiled.
+
+As of 0.8.1, these values are:
+
+map:         version, orientation, width, height, tilewidth, tileheight  
+             properties, tileset, layer, objectgroup  
+
+tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,  
+             image, tile, properties  
+
+tile:        id, image, properties  
+
+layer:       name, x, y, width, height, opacity, properties, data  
+
+objectgroup: name, color, x, y, width, height, opacity, object, properties  
+
+object:      name, type, x, y, width, height, gid, properties, polygon,  
+             polyline, image
+
+***   Please see the TiledMap class source for more api information.   ***
+
+
+Version Numbering
+================================================================================
+
+Example version: X.Y.Z  
+
+- X: 2 for python 2, 3 for python 3 and 2
+- Y: major release. for new features or api change
+- Z: minor release.  for bug fixes related to last release
+
+Artwork Attributions
 ===============================================================================
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
+
+* If I missed your attribution, please let me know.

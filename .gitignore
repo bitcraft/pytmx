@@ -4,3 +4,5 @@
 thumbs.db
 .idea
 .idea/*
+build
+dist

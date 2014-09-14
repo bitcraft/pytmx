@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pytmx.tmxloader &mdash; PyTMX 6.18.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '6.18.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyTMX 6.18.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyTMX 6.18.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pytmx.tmxloader</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Map loader for TMX Files</span>
+<span class="sd">bitcraft (leif dot theden at gmail.com)</span>
+<span class="sd">v3.17 - for python 3.3</span>
+
+<span class="sd">If you have any problems or suggestions, please contact me via email.</span>
+<span class="sd">Tested with Tiled 0.8.1 for Mac.</span>
+
+<span class="sd">released under the LGPL v3</span>
+
+<span class="sd">===============================================================================</span>
+
+<span class="sd">New in 3.18:</span>
+<span class="sd">     pytmx: Maps can now be loaded from pytmx.TiledMap.fromstring(xml_string)</span>
+<span class="sd">      core: Sphinx documentation created</span>
+
+<span class="sd">New in 3.17:</span>
+<span class="sd">    loader: removed legacy load_tmx function: just call TiledMap() instead</span>
+<span class="sd">    loader: added test to correct tilesheets that include non-tile graphics</span>
+<span class="sd">     pytmx: polygon objects now return absolute coordinates in points</span>
+<span class="sd">     pytmx: tiled properties are now available through dictionary &quot;properties&quot;</span>
+<span class="sd">      core: tested with the mana world maps...it works!</span>
+<span class="sd">      demo: simplified the demo/test for easier readability</span>
+<span class="sd">      test: maps now render and are scaled inside the window to show entire map</span>
+
+
+<span class="sd">New in 3.16:</span>
+<span class="sd">    ***    jumped to version 3.x to reflect new python 3.3 compatibility    ***</span>
+
+<span class="sd">       all: python 3 support</span>
+<span class="sd">      pep8: changed method/function names to lowercase with underscore spacing</span>
+<span class="sd">      pep8: modified various style infractions</span>
+<span class="sd">      core: simplified file structure</span>
+<span class="sd">      core: added __all__ to some modules for less clutter</span>
+<span class="sd">      demo: added ability to resize preview window</span>
+<span class="sd">      test: mouse clicks now advance the test</span>
+<span class="sd">      test: added ability to resize preview window</span>
+<span class="sd">      test: tile objects are drawn (previously supported, but not shown in test)</span>
+<span class="sd">     utils: renamed buildDistributionRects to build_rects</span>
+<span class="sd">     pytmx: bumped up gid limit from 255 to 65535 (16-bit)</span>
+<span class="sd">     pytmx: removed get_objects(), replaces with objects property</span>
+<span class="sd">     pytmx: removed get_draw_order(), replaced with visible_layers property</span>
+<span class="sd">    loader: added ImageLayer support</span>
+<span class="sd">    loader: minor documentation fixes</span>
+<span class="sd">    loader: small optimizations</span>
+<span class="sd">    loader: possible [ultra minor] optimization: using iterator on etree to load</span>
+
+<span class="sd">New in .15:</span>
+<span class="sd">    loader: new getTileLayerByName(name) method</span>
+<span class="sd">    loader: python 2.6 support</span>
+<span class="sd">    loader: fixed issue where objects with tile gid did not load properties</span>
+<span class="sd">    loader: polygon and polyline objects</span>
+<span class="sd">    loader: new lookup methods use iterators</span>
+<span class="sd">    loader: loading function moved into classes</span>
+<span class="sd">    loader: data/images can be reloaded on the fly</span>
+<span class="sd">    loader: uses etree for faster xml parsing</span>
+
+<span class="sd">New in .14:</span>
+<span class="sd">    loader: Fixed gid lookup for &quot;buildDistributionRects&quot;</span>
+<span class="sd">    loader: Added useful output to a few classes &quot;__repr__&quot;</span>
+<span class="sd">    loader: Fixed a gid mapping issue that broke rotated tiles</span>
+<span class="sd">    pygame: fixed colorkey handling</span>
+<span class="sd">    pygame: correctly handles margins and spacing between tiles in tilesets</span>
+<span class="sd">    pygame: b/c of changes, now correctly renders tiled&#39;s example maps</span>
+<span class="sd">    added scrolling demo</span>
+
+<span class="sd">New in .13:</span>
+<span class="sd">    loader: Renamed &quot;get_tile_image&quot; to &quot;getTileImage&quot;</span>
+<span class="sd">    loader: Removed duplicates returned from getTilePropertiesByLayer</span>
+<span class="sd">    loader: Modified confusing messages for GID errors</span>
+<span class="sd">    loader: Fixed bug where transformed tile properties are not available</span>
+<span class="sd">    loader: No longer loads metadata for tiles that are not used</span>
+<span class="sd">    loader: Reduced tile cache to 256 unique tiles</span>
+<span class="sd">    loader: Removed &#39;visible&#39; from list of reserved words</span>
+<span class="sd">    loader: Added &#39;buildDistributionRects&#39; and maputils module</span>
+<span class="sd">    loader: Added some misc. functions for retrieving properties</span>
+<span class="sd">    pygame: Smarter tile management made tile loading cache useless; removed it</span>
+<span class="sd">    pygame: pygame.RLEACCEL flag added when appropriate</span>
+
+<span class="sd">New in .12:</span>
+<span class="sd">    loader: Fixed bug where tile properties could contain reserved words</span>
+<span class="sd">    loader: Reduced size of image index by only allocating space for used tiles</span>
+
+<span class="sd">New in .11:</span>
+<span class="sd">    loader: Added support for tileset properties</span>
+<span class="sd">    loader: Now checks for property names that are reserved for internal use</span>
+<span class="sd">    loader: Added support for rotated tiles</span>
+<span class="sd">    pygame: Only the tiles that are used in the map will be loaded into memory</span>
+<span class="sd">    pygame: Added support for rotated tiles</span>
+<span class="sd">    pygame: Added option to force a bitsize (depth) for surfaces</span>
+<span class="sd">    pygame: Added option to convert alpha transparency to colorkey transparency</span>
+<span class="sd">    pygame: Tilesets no longer load with per-pixel alphas by default</span>
+<span class="sd">    pygame: Colorkey transparency should be correctly handled now</span>
+
+
+<span class="sd">Includes a scrolling/zooming renderer.  They are for demonstration purposes,</span>
+<span class="sd">and may not be suitable for all projects.  Use at your own risk.</span>
+
+<span class="sd">===============================================================================</span>
+
+<span class="sd">Installation:</span>
+
+<span class="sd">    There is no install script.  To use PyTMX in your projects, just copy</span>
+<span class="sd">    the folder into your project directory and follow the guide below.</span>
+
+
+<span class="sd">Basic usage sample:</span>
+
+<span class="sd">    &gt;&gt;&gt; from pytmx import tmxloader</span>
+<span class="sd">    &gt;&gt;&gt; tmxdata = tmxloader.load_pygame(&quot;map.tmx&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; tmxdata = tmxloader.load_pygame(&quot;map.tmx&quot;, pixelalpha=True)</span>
+
+
+<span class="sd">When you want to draw tiles, you simply call &quot;getTileImage&quot;:</span>
+
+<span class="sd">    &gt;&gt;&gt; image = tmxdata.get_tile_image(x, y, layer)</span>
+<span class="sd">    &gt;&gt;&gt; screen.blit(image, position)</span>
+
+<span class="sd">Maps, tilesets, layers, objectgroups, and objects all have a simple way to</span>
+<span class="sd">access metadata that was set inside tiled: they all become object attributes.</span>
+
+<span class="sd">    &gt;&gt;&gt; layer = tmxdata.tilelayers[0]</span>
+<span class="sd">    &gt;&gt;&gt; layer = tmxdata.get_tile_layer_by_name(&quot;Background&quot;)</span>
+
+<span class="sd">    &gt;&gt;&gt; print layer.tilewidth</span>
+<span class="sd">    32</span>
+<span class="sd">    &gt;&gt;&gt; print layer.weather</span>
+<span class="sd">    &#39;sunny&#39;</span>
+
+<span class="sd">Tiles properties are the exception here*, and must be accessed through</span>
+<span class="sd">&quot;getTileProperties&quot;.  The data is a regular Python dictionary:</span>
+
+<span class="sd">    &gt;&gt;&gt; tile = tmxdata.get_tile_properties(x, y, layer)</span>
+<span class="sd">    &gt;&gt;&gt; tile[&quot;name&quot;]</span>
+<span class="sd">    &#39;CobbleStone&#39;</span>
+
+<span class="sd">* this is compromise in the API delivers great memory saving</span>
+
+<span class="sd">===================================================================================</span>
+<span class="sd">IMPORTANT FOR PYGAME USERS!!</span>
+<span class="sd">The loader will correctly convert() or convert_alpha() each tile image, so you</span>
+<span class="sd">shouldn&#39;t attempt to circumvent the loading mechanisms.  If you are experiencing</span>
+<span class="sd">problems with images and transparency, pass &quot;pixelalpha=True&quot; while loading.</span>
+
+<span class="sd">ALSO FOR PYGAME USERS:  Load your map after initializing your display.</span>
+<span class="sd">===================================================================================</span>
+
+<span class="sd">NOTES:</span>
+
+<span class="sd">* The Tiled &quot;properties&quot; have reserved names.</span>
+
+<span class="sd">If you use &quot;properties&quot; for any of the following object types, you cannot use</span>
+<span class="sd">any of these words as a name for your property.  A ValueError will be raised</span>
+<span class="sd">if a Tile Object attempts to use a reserved name.</span>
+
+<span class="sd">In summary: don&#39;t use the following names when adding metadata in Tiled.</span>
+
+<span class="sd">As of 0.8.1, these values are:</span>
+
+<span class="sd">map:         version, orientation, width, height, tilewidth, tileheight</span>
+<span class="sd">             properties, tileset, layer, objectgroup</span>
+
+<span class="sd">tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,</span>
+<span class="sd">             image, tile, properties</span>
+
+<span class="sd">tile:        id, image, properties</span>
+
+<span class="sd">layer:       name, x, y, width, height, opacity, properties, data</span>
+
+<span class="sd">objectgroup: name, color, x, y, width, height, opacity, object, properties</span>
+
+<span class="sd">object:      name, type, x, y, width, height, gid, properties, polygon,</span>
+<span class="sd">             polyline, image</span>
+
+<span class="sd">***   Please see the TiledMap class for more api information.   ***</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pygame</span>
+<span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;load_pygame&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">handle_transformation</span><span class="p">(</span><span class="n">tile</span><span class="p">,</span> <span class="n">flags</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">flags</span><span class="p">:</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">TRANS_FLIPX</span> <span class="o">==</span> <span class="n">TRANS_FLIPX</span>
+        <span class="n">fy</span> <span class="o">=</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">TRANS_FLIPY</span> <span class="o">==</span> <span class="n">TRANS_FLIPY</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">TRANS_ROT</span> <span class="o">==</span> <span class="n">TRANS_ROT</span>
+
+        <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+            <span class="c"># not sure why the flip is required...but it is.</span>
+            <span class="n">newtile</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">tile</span><span class="p">,</span> <span class="mi">270</span><span class="p">)</span>
+            <span class="n">newtile</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">newtile</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fx</span> <span class="ow">or</span> <span class="n">fy</span><span class="p">:</span>
+                <span class="n">newtile</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">newtile</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">fx</span> <span class="ow">or</span> <span class="n">fy</span><span class="p">:</span>
+            <span class="n">newtile</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">tile</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">newtile</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tile</span>
+
+
+<span class="k">def</span> <span class="nf">smart_convert</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">colorkey</span><span class="p">,</span> <span class="n">force_colorkey</span><span class="p">,</span> <span class="n">pixelalpha</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this method does several tests on a surface to determine the optimal</span>
+<span class="sd">    flags and pixel format for each tile surface.</span>
+
+<span class="sd">    this is done for the best rendering speeds and removes the need to</span>
+<span class="sd">    convert() the images on your own</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tile_size</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span>
+
+    <span class="c"># count the number of pixels in the tile that are not transparent</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">from_surface</span><span class="p">(</span><span class="n">original</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+    <span class="c"># there are no transparent pixels in the image</span>
+    <span class="k">if</span> <span class="n">px</span> <span class="o">==</span> <span class="n">tile_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">tile_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+
+    <span class="c"># there are transparent pixels, and set to force a colorkey</span>
+    <span class="k">elif</span> <span class="n">force_colorkey</span><span class="p">:</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="n">tile_size</span><span class="p">)</span>
+        <span class="n">tile</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">force_colorkey</span><span class="p">)</span>
+        <span class="n">tile</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">tile</span><span class="o">.</span><span class="n">set_colorkey</span><span class="p">(</span><span class="n">force_colorkey</span><span class="p">,</span> <span class="n">pygame</span><span class="o">.</span><span class="n">RLEACCEL</span><span class="p">)</span>
+
+    <span class="c"># there are transparent pixels, and tiled set a colorkey</span>
+    <span class="k">elif</span> <span class="n">colorkey</span><span class="p">:</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+        <span class="n">tile</span><span class="o">.</span><span class="n">set_colorkey</span><span class="p">(</span><span class="n">colorkey</span><span class="p">,</span> <span class="n">pygame</span><span class="o">.</span><span class="n">RLEACCEL</span><span class="p">)</span>
+
+    <span class="c"># there are transparent pixels, and set for perpixel alpha</span>
+    <span class="k">elif</span> <span class="n">pixelalpha</span><span class="p">:</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">convert_alpha</span><span class="p">()</span>
+
+    <span class="c"># there are transparent pixels, and we won&#39;t handle them</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">tile</span>
+
+
+<span class="k">def</span> <span class="nf">_load_images_pygame</span><span class="p">(</span><span class="n">tmxdata</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility function to load images.</span>
+
+
+<span class="sd">    due to the way the tiles are loaded, they will be in the same pixel format</span>
+<span class="sd">    as the display when it is loaded.  take this into consideration if you</span>
+<span class="sd">    intend to support different screen pixel formats.</span>
+
+<span class="sd">    by default, the images will not have per-pixel alphas.  this can be</span>
+<span class="sd">    changed by including &quot;pixelalpha=True&quot; in the keywords.  this will result</span>
+<span class="sd">    in much slower blitting speeds.</span>
+
+<span class="sd">    if the tileset&#39;s image has colorkey transparency set in Tiled, the loader</span>
+<span class="sd">    will return images that have their transparency already set.  using a</span>
+<span class="sd">    tileset with colorkey transparency will greatly increase the speed of</span>
+<span class="sd">    rendering the map.</span>
+
+<span class="sd">    optionally, you can force the loader to strip the alpha channel of the</span>
+<span class="sd">    tileset image and to fill in the missing areas with a color, then use that</span>
+<span class="sd">    new color as a colorkey.  the resulting tiles will render much faster, but</span>
+<span class="sd">    will not preserve the transparency of the tile if it uses partial</span>
+<span class="sd">    transparency (which you shouldn&#39;t be doing anyway, this is SDL).</span>
+
+<span class="sd">    TL;DR:</span>
+<span class="sd">    Don&#39;t attempt to convert() or convert_alpha() the individual tiles.  It is</span>
+<span class="sd">    already done for you.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pixelalpha</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pixelalpha&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="n">force_colorkey</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;force_colorkey&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">force_colorkey</span><span class="p">:</span>
+        <span class="n">pixelalpha</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="n">force_colorkey</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">force_colorkey</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="o">*</span><span class="n">force_colorkey</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Cannot understand color: {0}&#39;</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">force_colorkey</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+
+    <span class="c"># change background color into something nice</span>
+    <span class="k">if</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">background_color</span><span class="p">:</span>
+        <span class="n">tmxdata</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="n">tmxdata</span><span class="o">.</span><span class="n">background_color</span><span class="p">)</span>
+
+    <span class="c"># initialize the array of images</span>
+    <span class="n">tmxdata</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">maxgid</span>
+
+    <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">tilesets</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">tmxdata</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span> <span class="n">ts</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span>
+
+        <span class="c"># margins and spacing</span>
+        <span class="n">tilewidth</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">tilewidth</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span>
+        <span class="n">tileheight</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">tileheight</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span>
+        <span class="n">tile_size</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">tilewidth</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">tileheight</span>
+
+        <span class="c"># some tileset images may be slightly larger than the tile area</span>
+        <span class="c"># ie: may include a banner, copyright, ect.  this compensates for that</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((((</span><span class="n">w</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">margin</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span> <span class="o">/</span> <span class="n">tilewidth</span><span class="p">)</span> <span class="o">*</span> <span class="n">tilewidth</span><span class="p">)</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((((</span><span class="n">h</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">margin</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span> <span class="o">/</span> <span class="n">tileheight</span><span class="p">)</span> <span class="o">*</span> <span class="n">tileheight</span><span class="p">)</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span>
+
+        <span class="c"># trim off any pixels on the right side that isn&#39;t a tile</span>
+        <span class="c"># this happens if extra graphics are included on the left, but they are not actually part of the tileset</span>
+        <span class="n">width</span> <span class="o">-=</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">margin</span><span class="p">)</span> <span class="o">%</span> <span class="n">tilewidth</span>
+
+        <span class="c"># using product avoids the overhead of nested loops</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="n">height</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="n">tileheight</span><span class="p">),</span>
+                              <span class="nb">range</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="n">width</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">margin</span><span class="p">,</span> <span class="n">tilewidth</span><span class="p">))</span>
+
+        <span class="n">colorkey</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="s">&#39;trans&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">colorkey</span><span class="p">:</span>
+            <span class="n">colorkey</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s">&#39;#{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colorkey</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">real_gid</span><span class="p">,</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">firstgid</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">+</span> <span class="n">ts</span><span class="o">.</span><span class="n">tilewidth</span><span class="o">-</span><span class="n">ts</span><span class="o">.</span><span class="n">spacing</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">gids</span> <span class="o">=</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">map_gid</span><span class="p">(</span><span class="n">real_gid</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">gids</span><span class="p">:</span>
+                <span class="n">original</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">subsurface</span><span class="p">(((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">tile_size</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">gid</span><span class="p">,</span> <span class="n">flags</span> <span class="ow">in</span> <span class="n">gids</span><span class="p">:</span>
+                    <span class="n">tile</span> <span class="o">=</span> <span class="n">handle_transformation</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+                    <span class="n">tile</span> <span class="o">=</span> <span class="n">smart_convert</span><span class="p">(</span><span class="n">tile</span><span class="p">,</span> <span class="n">colorkey</span><span class="p">,</span> <span class="n">force_colorkey</span><span class="p">,</span> <span class="n">pixelalpha</span><span class="p">)</span>
+                    <span class="n">tmxdata</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">gid</span><span class="p">]</span> <span class="o">=</span> <span class="n">tile</span>
+
+    <span class="c"># load image layer images</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledImageLayer</span><span class="p">):</span>
+            <span class="n">colorkey</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s">&#39;trans&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">colorkey</span><span class="p">:</span>
+                <span class="n">colorkey</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s">&quot;#{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colorkey</span><span class="p">))</span>
+
+            <span class="n">source</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s">&#39;source&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
+                <span class="n">real_gid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmxdata</span><span class="o">.</span><span class="n">images</span><span class="p">)</span>
+                <span class="n">gid</span> <span class="o">=</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">register_gid</span><span class="p">(</span><span class="n">real_gid</span><span class="p">)</span>
+                <span class="n">layer</span><span class="o">.</span><span class="n">gid</span> <span class="o">=</span> <span class="n">gid</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">tmxdata</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span> <span class="n">source</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">smart_convert</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">colorkey</span><span class="p">,</span> <span class="n">force_colorkey</span><span class="p">,</span> <span class="n">pixelalpha</span><span class="p">)</span>
+                <span class="n">tmxdata</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_pygame"><a class="viewcode-back" href="../../pymunktmx.html#pytmx.tmxloader.load_pygame">[docs]</a><span class="k">def</span> <span class="nf">load_pygame</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PYGAME USERS: Use me.</span>
+
+<span class="sd">    Load a TMX file, load the images, and return a TiledMap class that is ready to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">_load_images_pygame</span><span class="p">(</span><span class="n">tmxdata</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tmxdata</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyTMX 6.18.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, bitcraft.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
