@@ -29,6 +29,7 @@ https://github.com/bitcraft/PyTMX/wiki/Migration-to-the-Python-3-branch
 News
 ===============================================================================
 
+__09/14/12__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
 __05/29/14__ - Added support for rotated objects and floating point  
 __sometime__ - Merged six branch into python 3 branch.  Use this for Py3.  
@@ -121,7 +122,12 @@ Why use PyTMX?
 Installation
 ===============================================================================
 
-You must manually install it
+Install from pip
+
+    pip install pytmx
+
+
+You can also manually install it
 
     python setup.py install
 
