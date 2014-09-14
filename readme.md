@@ -9,12 +9,10 @@ I am also often lurking #pygame on freenode.  Feel free to contact me.
 
 *Released under the LGPL v3*
 
-#### See the "apps" folder for example use.
-
---leif
+#### See the "apps" folder for example use.  
 
 ===============================================================================
-## Key Differences from 2.x versions
+### Key Differences from 2.x versions
 
 I've tweaked many small things for a cleaner, more 'pythonic' library.
 
@@ -53,14 +51,11 @@ Because PyTMX was built with games in mind, it differs slightly from Tiled in
 a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
-- Some object metadata attribute names are not supported (see docstrings)
+- Some object metadata attribute names are not supported (see below)
 
 PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
 load the data with PyTMX and copy the data into your own classes with the api.
-
-I've included a test suite in the 'tests' folder.  It should work across all
-platforms.  test.py demonstrates loading a variety of maps and formats.
 
 Finally, there is no save feature.  Once the map is loaded, it will be up to
 you to provide a way to save changes to the map.  I've used the pickle module
