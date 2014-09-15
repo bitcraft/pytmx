@@ -11,11 +11,11 @@ Missing tests:
 - object rotation
 """
 import logging
-import pygame
-from pygame.locals import *
 
 from pytmx import *
 from pytmx.util_pygame import load_pygame
+import pygame
+from pygame.locals import *
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()

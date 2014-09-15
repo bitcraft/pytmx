@@ -1,6 +1,4 @@
 import logging
-import itertools
-import pytmx
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -13,7 +11,10 @@ try:
     import pygame
 except ImportError:
     logger.debug('cannot import pygame (is it installed?)')
-    raise
+    pass
+
+import itertools
+import pytmx
 
 __all__ = ['load_pygame', 'pygame_image_loader', 'simplify', 'build_rects']
 
