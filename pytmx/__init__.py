@@ -1,5 +1,17 @@
+import logging
+
+logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
+
 from .pytmx import *
-from .tmxloader import load_pygame
+try:
+    from .tmxloader import load_pygame
+except ImportError:
+    logger.debug('cannot import pygame tools')
+
 
 __version__ = (3, 19, 3)
 __author__ = 'bitcraft'
