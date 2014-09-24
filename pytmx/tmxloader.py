@@ -199,7 +199,6 @@ def _load_images_pygame(tmxdata, mapping, *args, **kwargs):
     load_all_tiles = kwargs.get('load_all', False)
 
     if tmxdata.background_color:
-        print(tmxdata.background_color)
         tmxdata.background_color = pygame.Color(tmxdata.background_color)
 
     tmxdata.images = [None] * tmxdata.maxgid

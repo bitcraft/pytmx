@@ -4,6 +4,7 @@ from itertools import chain, product, islice
 from collections import defaultdict
 from xml.etree import ElementTree
 from six.moves import zip, map
+from operator import attrgetter
 from .constants import *
 
 logger = logging.getLogger(__name__)
@@ -168,6 +169,7 @@ class TiledMap(TiledElement):
         # object and the layers.  This dictionary keeps track of that.
         self.gidmap = defaultdict(list)
         self.imagemap = dict()  # mapping of gid and trans flags to real gids
+        self.tiledgidmap = dict() # mapping of tiledgid to pytmx gid
         self.maxgid = 1
 
         # should be filled in by a loader function
@@ -222,10 +224,21 @@ class TiledMap(TiledElement):
         # "tile objects", objects with a GID, have need to have their
         # attributes set after the tileset is loaded,
         # so this step must be performed last
-        for o in self.objects:
+        for o in [o for o in self.objects if o.gid]:
             p = self.get_tile_properties_by_gid(o.gid)
             if p:
                 o.properties.update(p)
+
+            # tiled stores the origin of GID objects by the lower right corner
+            # this is different for all other types, so i just adjust it here
+            # so all types loaded with pytmx are uniform.
+            try:
+                tileset = self.get_tileset_from_gid(o.gid)
+            except ValueError:
+                msg = 'attempted to lookup invalid gid %s in object %s'
+                logger.error(msg, o.gid, o)
+            else:
+                o.y -= tileset.tileheight
 
         return self
 
@@ -435,6 +448,31 @@ class TiledMap(TiledElement):
                 return obj
         raise ValueError
 
+    def get_tileset_from_gid(self, gid):
+        """Return tileset that owns the gid
+
+        Note: this is a slow operation, so if you are expecting to do this
+              often, it would be worthwhile to cache the results of this.
+
+        :param gid: gid of tile image
+        :rtype: TiledTileset if found, otherwise ValueError
+        """
+        try:
+            tiled_gid = self.tiledgidmap[gid]
+        except KeyError:
+            raise ValueError
+
+        prev_tileset = None
+        for tileset in sorted(self.tilesets, key=attrgetter('firstgid')):
+            if tiled_gid < tileset.firstgid:
+                return prev_tileset
+            prev_tileset = tileset
+
+        if tiled_gid > prev_tileset.firstgid:
+            return prev_tileset
+
+        raise ValueError
+
     @property
     def objectgroups(self):
         """Return iterator of all object groups
@@ -492,6 +530,7 @@ class TiledMap(TiledElement):
                 self.maxgid += 1
                 self.imagemap[(tiled_gid, flags)] = (gid, flags)
                 self.gidmap[tiled_gid].append((gid, flags))
+                self.tiledgidmap[gid] = tiled_gid
                 return gid
 
         else:
@@ -581,7 +620,7 @@ class TiledTileset(TiledElement):
         # since tile objects [probably] don't have a lot of metadata,
         # we store it separately in the parent (a TiledMap instance)
         for child in node.getiterator('tile'):
-            real_gid = int(child.get("id"))
+            tiled_gid = int(child.get("id"))
             p = parse_properties(child)
 
             # handle tiles that have their own image
@@ -595,7 +634,7 @@ class TiledTileset(TiledElement):
                 p['width'] = image.get('width')
                 p['height'] = image.get('height')
 
-            for gid, flags in self.parent.map_gid(real_gid + self.firstgid):
+            for gid, flags in self.parent.map_gid(tiled_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
 
         # handle the optional 'tileoffset' node
@@ -761,11 +800,6 @@ class TiledObject(TiledElement):
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
-            # tiled stores the origin of GID objects by the lower right corner
-            # this is different for all other types, so i just adjust it here
-            # so all types loaded with pytmx are uniform.
-            # TODO: map the gid to the tileset to get the correct height
-            self.y -= self.parent.tileheight
 
         points = None
         polygon = node.find('polygon')
