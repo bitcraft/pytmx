@@ -1,37 +1,26 @@
-pytmx package
+PyTMX package
 =============
 
-Submodules
-----------
-
-pytmx.constants module
-----------------------
-
-.. automodule:: pytmx.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pytmx.pytmx module
-------------------
+pytmx.pytmx
+-----------
 
 .. automodule:: pytmx.pytmx
     :members:
     :undoc-members:
     :show-inheritance:
 
-pytmx.tmxloader module
-----------------------
+pytmx.utils
+-----------
 
-.. automodule:: pytmx.tmxloader
+.. automodule:: pytmx.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-pytmx.utils module
-------------------
+pytmx.tmxloader
+---------------
 
-.. automodule:: pytmx.utils
+.. automodule:: pytmx.tmxloader
     :members:
     :undoc-members:
     :show-inheritance:

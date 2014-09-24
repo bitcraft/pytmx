@@ -1,6 +1,9 @@
 from itertools import product
 import logging
 
+__all__ = ['build_rects', 'simplify']
+
+
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
@@ -154,4 +157,3 @@ def simplify(all_points, tilewidth, tileheight):
     return rect_list
 
 
-__all__ = ['decode_gid', 'build_rects', 'simplify', 'handle_bool']

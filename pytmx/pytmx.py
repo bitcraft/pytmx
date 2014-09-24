@@ -7,14 +7,15 @@ from six.moves import zip, map
 from operator import attrgetter
 from .constants import *
 
+__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject',
+           'TiledObjectGroup', 'TiledImageLayer']
+
+
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
-
-__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject',
-           'TiledObjectGroup', 'TiledImageLayer']
 
 
 def decode_gid(raw_gid):
@@ -384,8 +385,7 @@ class TiledMap(TiledElement):
         """Get the tile properties of each GID in layer
 
         :param layer: layer number
-        rtype: iterator of (gid, properties) tuples for each tile gid with \
-        properties in the tile layer
+        :rtype: iterator of (gid, properties) tuples
         """
         try:
             assert (int(layer) >= 0)
@@ -520,7 +520,7 @@ class TiledMap(TiledElement):
         """Used to manage the mapping of GIDs between the tmx and pytmx
 
         :param tiled_gid: GID that is found in TMX data
-        rtype: GID that pytmx uses for the the GID passed
+        :rtype: GID that pytmx uses for the the GID passed
         """
         if tiled_gid:
             try:
@@ -540,9 +540,7 @@ class TiledMap(TiledElement):
         """Used to lookup a GID read from a TMX file's data
 
         :param tiled_gid: GID that is found in TMX data
-        rtype: (GID, flags) that pytmx uses for the the GID passed
-
-        returns None if the tile is not used in the map:
+        :rtype: (GID, flags) for the the GID passed, None if not found
         """
         try:
             return self.gidmap[int(tiled_gid)]

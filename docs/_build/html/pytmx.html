@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pytmx package &mdash; PyTMX 2.16.4 documentation</title>
+    <title>PyTMX package &mdash; PyTMX 3.19.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.16.4',
+        VERSION:     '3.19.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyTMX 2.16.4 documentation" href="index.html" /> 
+    <link rel="top" title="PyTMX 3.19.4 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">PyTMX 2.16.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyTMX 3.19.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,152 +45,300 @@
           <div class="body">
             
   <div class="section" id="pytmx-package">
-<h1>pytmx package<a class="headerlink" href="#pytmx-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-pytmx.constants">
-<span id="pytmx-constants-module"></span><h2>pytmx.constants module<a class="headerlink" href="#module-pytmx.constants" title="Permalink to this headline">¶</a></h2>
-</div>
+<h1>PyTMX package<a class="headerlink" href="#pytmx-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-pytmx.pytmx">
-<span id="pytmx-pytmx-module"></span><h2>pytmx.pytmx module<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
+<span id="pytmx-pytmx"></span><h2>pytmx.pytmx<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pytmx.pytmx.TiledMap">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
-<p>Contains the tile layers, tile images, object groups, and objects from a
-Tiled TMX map.</p>
+<p>Contains the layers, objects, and images from a Tiled TMX map</p>
+<p>This class is meant to handle most of the work you need to do to use a map.</p>
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.addImageLayer">
-<tt class="descname">addImageLayer</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.addImageLayer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a TiledImageLayer layer object to the map.</p>
+<dt id="pytmx.pytmx.TiledMap.add_layer">
+<tt class="descname">add_layer</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a layer (TileTileLayer, TiledImageLayer, or TiledObjectGroup)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> &#8211; TileTileLayer, TiledImageLayer, TiledObjectGroup object</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.addTileLayer">
-<tt class="descname">addTileLayer</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.addTileLayer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a TiledLayer layer object to the map.</p>
+<dt id="pytmx.pytmx.TiledMap.add_tileset">
+<tt class="descname">add_tileset</tt><big>(</big><em>tileset</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.add_tileset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a tileset to the map</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tileset</strong> &#8211; TiledTileset</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getDrawOrder">
-<tt class="descname">getDrawOrder</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getDrawOrder" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a list of objects in the order that they should be drawn
-this will also exclude any layers that are not set to visible</p>
-<p>may be useful if you have objects and want to control rendering
-from tiled</p>
+<dt id="pytmx.pytmx.TiledMap.get_layer_by_name">
+<tt class="descname">get_layer_by_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_layer_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a layer by name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; Name of layer.  Case-sensitive.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Layer object if found, otherwise ValueError</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getLayerData">
-<tt class="descname">getLayerData</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getLayerData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the data for a layer.</p>
-<p>Data is an array of arrays.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
-</pre></div>
-</div>
+<dt id="pytmx.pytmx.TiledMap.get_object_by_name">
+<tt class="descname">get_object_by_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_object_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find an object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; Name of object.  Case-sensitive.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Object if found, otherwise ValueError</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getObjects">
-<tt class="descname">getObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getObjects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return iterator of all the objects associated with this map</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_gid">
+<tt class="descname">get_tile_gid</tt><big>(</big><em>x</em>, <em>y</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tile image GID for this location</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>layer</strong> &#8211; layer number</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pygame surface if found, otherwise ValueError</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileGID">
-<tt class="descname">getTileGID</tt><big>(</big><em>x</em>, <em>y</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileGID" title="Permalink to this definition">¶</a></dt>
-<dd><p>return GID of a tile in this location
-x and y must be integers and are in tile coordinates, not pixel</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_image">
+<tt class="descname">get_tile_image</tt><big>(</big><em>x</em>, <em>y</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tile image for this location</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>layer</strong> &#8211; layer number</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pygame surface if found, otherwise 0</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileImage">
-<tt class="descname">getTileImage</tt><big>(</big><em>x</em>, <em>y</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileImage" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the tile image for this location
-x and y must be integers and are in tile coordinates, not pixel</p>
-<p>return value will be 0 if there is no tile with that location.</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_image_by_gid">
+<tt class="descname">get_tile_image_by_gid</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_image_by_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tile image for this location</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gid</strong> &#8211; GID of image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pygame surface if found, otherwise ValueError</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileImageByGid">
-<tt class="descname">getTileImageByGid</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileImageByGid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileImages">
-<tt class="descname">getTileImages</tt><big>(</big><em>r</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileImages" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a group of tiles in an area
-expects a pygame rect or rect-like list/tuple</p>
-<p>useful if you don&#8217;t want to repeatedly call getTileImage</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_locations_by_gid">
+<tt class="descname">get_tile_locations_by_gid</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_locations_by_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search map for tile locations by the GID</p>
+<p>Not a fast operation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gid</strong> &#8211; GID to be searched for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">generator of tile locations</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileLayerByName">
-<tt class="descname">getTileLayerByName</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileLayerByName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a TiledLayer object with the name.
-This is case-sensitive.</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_properties">
+<tt class="descname">get_tile_properties</tt><big>(</big><em>x</em>, <em>y</em>, <em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tile image GID for this location</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>layer</strong> &#8211; layer number</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">python dict if found, otherwise None</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileLayerOrder">
-<tt class="descname">getTileLayerOrder</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileLayerOrder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list of the map&#8217;s layers in drawing order.</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_properties_by_gid">
+<tt class="descname">get_tile_properties_by_gid</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_properties_by_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the tile properties of a tile GID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gid</strong> &#8211; GID</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">python dict if found, otherwise None</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileLocation">
-<tt class="descname">getTileLocation</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileLocation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTileProperties">
-<tt class="descname">getTileProperties</tt><big>(</big><em>(x</em>, <em>y</em>, <em>layer)</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTileProperties" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the properties for the tile, if any
-x and y must be integers and are in tile coordinates, not pixel</p>
-<p>returns a dict of there are properties, otherwise will be None</p>
+<dt id="pytmx.pytmx.TiledMap.get_tile_properties_by_layer">
+<tt class="descname">get_tile_properties_by_layer</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tile_properties_by_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the tile properties of each GID in layer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> &#8211; layer number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">iterator of (gid, properties) tuples</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTilePropertiesByGID">
-<tt class="descname">getTilePropertiesByGID</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTilePropertiesByGID" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pytmx.pytmx.TiledMap.getTilePropertiesByLayer">
-<tt class="descname">getTilePropertiesByLayer</tt><big>(</big><em>layer</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.getTilePropertiesByLayer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list of tile properties (dict) in use in this tile layer.</p>
+<dt id="pytmx.pytmx.TiledMap.get_tileset_from_gid">
+<tt class="descname">get_tileset_from_gid</tt><big>(</big><em>gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.get_tileset_from_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return tileset that owns the gid</p>
+<dl class="docutils">
+<dt>Note: this is a slow operation, so if you are expecting to do this</dt>
+<dd>often, it would be worthwhile to cache the results of this.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gid</strong> &#8211; gid of tile image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">TiledTileset if found, otherwise ValueError</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
-
-<dl class="method">
-<dt id="pytmx.pytmx.TiledMap.load">
-<tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse a map node from a tiled tmx file</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pytmx.pytmx.TiledMap.loadTileImages">
-<tt class="descname">loadTileImages</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.loadTileImages" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="pytmx.pytmx.TiledMap.map_gid">
-<tt class="descname">map_gid</tt><big>(</big><em>real_gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.map_gid" title="Permalink to this definition">¶</a></dt>
-<dd><p>used to lookup a GID read from a TMX file&#8217;s data</p>
+<tt class="descname">map_gid</tt><big>(</big><em>tiled_gid</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.map_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to lookup a GID read from a TMX file&#8217;s data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tiled_gid</strong> &#8211; GID that is found in TMX data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(GID, flags) for the the GID passed, None if not found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pytmx.pytmx.TiledMap.objectgroups">
+<tt class="descname">objectgroups</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.objectgroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return iterator of all object groups</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Iterator</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pytmx.pytmx.TiledMap.objects">
 <tt class="descname">objects</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.objects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return iterator of all the objects associated with this map</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Iterator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pytmx.pytmx.TiledMap.parse">
+<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a map from ElementTree xml node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pytmx.pytmx.TiledMap.register_gid">
-<tt class="descname">register_gid</tt><big>(</big><em>real_gid</em>, <em>flags=0</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.register_gid" title="Permalink to this definition">¶</a></dt>
-<dd><p>used to manage the mapping of GID between the tmx data and the internal
-data.</p>
-<p>number returned is gid used internally</p>
+<tt class="descname">register_gid</tt><big>(</big><em>tiled_gid</em>, <em>flags=0</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.register_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to manage the mapping of GIDs between the tmx and pytmx</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tiled_gid</strong> &#8211; GID that is found in TMX data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">GID that pytmx uses for the the GID passed</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -199,25 +347,63 @@ data.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.setTileProperties">
-<tt class="descname">setTileProperties</tt><big>(</big><em>gid</em>, <em>d</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.setTileProperties" title="Permalink to this definition">¶</a></dt>
-<dd><p>set the properties of a tile by GID.
-must use a standard python dict as d</p>
+<dt id="pytmx.pytmx.TiledMap.set_tile_properties">
+<tt class="descname">set_tile_properties</tt><big>(</big><em>gid</em>, <em>properties</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.set_tile_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the tile properties of a tile GID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gid</strong> &#8211; GID</li>
+<li><strong>properties</strong> &#8211; python dict of properties for GID</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pytmx.pytmx.TiledMap.visibleLayers">
-<tt class="descname">visibleLayers</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.visibleLayers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a generator of [Image/Tile]Layer objects that are set &#8216;visible&#8217;.</p>
-<p>Layers have their visibility set in Tiled.</p>
+<dt id="pytmx.pytmx.TiledMap.visible_layers">
+<tt class="descname">visible_layers</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.visible_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return iterator of Layer objects that are set &#8216;visible&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Iterator</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pytmx.pytmx.TiledMap.visibleTileLayers">
-<tt class="descname">visibleTileLayers</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.visibleTileLayers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of TileLayer objects that are set &#8216;visible&#8217;.</p>
-<p>Layers have their visibility set in Tiled.  Optionally, you can over-
-ride the Tiled visibility by creating a property named &#8216;visible&#8217;.</p>
+<dt id="pytmx.pytmx.TiledMap.visible_object_groups">
+<tt class="descname">visible_object_groups</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.visible_object_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return iterator of object group indexes that are set &#8216;visible&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Iterator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pytmx.pytmx.TiledMap.visible_tile_layers">
+<tt class="descname">visible_tile_layers</tt><a class="headerlink" href="#pytmx.pytmx.TiledMap.visible_tile_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return iterator of layer indexes that are set &#8216;visible&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Iterator</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -226,13 +412,25 @@ ride the Tiled visibility by creating a property named &#8216;visible&#8217;.</p
 <dt id="pytmx.pytmx.TiledTileset">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledTileset</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
+<p>Represents a Tiled Tileset</p>
+<p>External tilesets are supported.  GID/ID&#8217;s from Tiled are not guaranteed to
+be the same after loaded.</p>
 <dl class="method">
 <dt id="pytmx.pytmx.TiledTileset.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileset.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse a tileset element and return a tileset object and properties for
-tiles as a dict</p>
-<p>a bit of mangling is done here so that tilesets that have external
+<dd><p>Parse a Tileset from ElementTree xml node</p>
+<p>A bit of mangling is done here so that tilesets that have external
 TSX files appear the same as those that don&#8217;t</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -243,23 +441,35 @@ TSX files appear the same as those that don&#8217;t</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="pytmx.pytmx.TiledLayer">
-<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledLayer</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledLayer" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileLayer">
+<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledTileLayer</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
+<p>Represents a TileLayer</p>
+<p>Iterate over the layer using the iterator protocol</p>
 <dl class="method">
-<dt id="pytmx.pytmx.TiledLayer.iter_tiles">
-<tt class="descname">iter_tiles</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledLayer.iter_tiles" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileLayer.iter_tiles">
+<tt class="descname">iter_tiles</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.iter_tiles" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledLayer.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledLayer.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse a layer element</p>
+<dt id="pytmx.pytmx.TiledTileLayer.parse">
+<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a Tile Layer from ElementTree xml node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pytmx.pytmx.TiledLayer.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'x', 'y', 'width', 'height', 'opacity', 'properties', 'data']</em><a class="headerlink" href="#pytmx.pytmx.TiledLayer.reserved" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileLayer.reserved">
+<tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'x', 'y', 'width', 'height', 'opacity', 'properties', 'data']</em><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.reserved" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -268,10 +478,23 @@ TSX files appear the same as those that don&#8217;t</p>
 <dt id="pytmx.pytmx.TiledObject">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledObject</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
+<p>Represents a any Tiled Object</p>
+<p>Supported types: Box, Ellipse, Tile Object, Polyline, Polygon</p>
 <dl class="method">
 <dt id="pytmx.pytmx.TiledObject.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObject.parse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Parse an Object from ElementTree xml node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="pytmx.pytmx.TiledObject.reserved">
@@ -283,12 +506,23 @@ TSX files appear the same as those that don&#8217;t</p>
 <dl class="class">
 <dt id="pytmx.pytmx.TiledObjectGroup">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledObjectGroup</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></p>
-<p>Stores TiledObjects.  Supports any operation of a normal list.</p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">builtins.list</span></tt></p>
+<p>Represents a Tiled ObjectGroup</p>
+<p>Supports any operation of a normal list.</p>
 <dl class="method">
 <dt id="pytmx.pytmx.TiledObjectGroup.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse a objectgroup element and return a object group</p>
+<dd><p>Parse an Object Group from ElementTree xml node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -302,10 +536,24 @@ TSX files appear the same as those that don&#8217;t</p>
 <dt id="pytmx.pytmx.TiledImageLayer">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledImageLayer</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
+<p>Represents Tiled Image Layer</p>
+<p>The image associated with this layer will be loaded and assigned a GID.
+(pygame only)</p>
 <dl class="method">
 <dt id="pytmx.pytmx.TiledImageLayer.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.parse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Parse an Image Layer from ElementTree xml node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; ElementTree xml node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="pytmx.pytmx.TiledImageLayer.reserved">
@@ -315,62 +563,14 @@ TSX files appear the same as those that don&#8217;t</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pytmx.tmxloader">
-<span id="pytmx-tmxloader-module"></span><h2>pytmx.tmxloader module<a class="headerlink" href="#module-pytmx.tmxloader" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pytmx.tmxloader.load_pygame">
-<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.tmxloader.load_pygame" title="Permalink to this definition">¶</a></dt>
-<dd><p>PYGAME USERS: Use me.</p>
-<p>Load a TMX file, load the images, and return a TiledMap class that is ready to use.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pytmx.tmxloader.load_tmx">
-<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_tmx</tt><a class="headerlink" href="#pytmx.tmxloader.load_tmx" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">TiledMap</span></tt></p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-pytmx.utils">
-<span id="pytmx-utils-module"></span><h2>pytmx.utils module<a class="headerlink" href="#module-pytmx.utils" title="Permalink to this headline">¶</a></h2>
+<span id="pytmx-utils"></span><h2>pytmx.utils<a class="headerlink" href="#module-pytmx.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pytmx.utils.buildDistributionRects">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">buildDistributionRects</tt><big>(</big><em>tmxmap</em>, <em>layer</em>, <em>tileset=None</em>, <em>real_gid=None</em><big>)</big><a class="headerlink" href="#pytmx.utils.buildDistributionRects" title="Permalink to this definition">¶</a></dt>
-<dd><p>generate a set of non-overlapping rects that represents the distribution
-of the specified gid.</p>
+<dt id="pytmx.utils.build_rects">
+<tt class="descclassname">pytmx.utils.</tt><tt class="descname">build_rects</tt><big>(</big><em>tmxmap</em>, <em>layer</em>, <em>tileset=None</em>, <em>real_gid=None</em><big>)</big><a class="headerlink" href="#pytmx.utils.build_rects" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a set of non-overlapping rects that represents the distribution of the specified gid.</p>
 <p>useful for generating rects for use in collision detection</p>
 </dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.decode_gid">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">decode_gid</tt><big>(</big><em>raw_gid</em><big>)</big><a class="headerlink" href="#pytmx.utils.decode_gid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.group">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">group</tt><big>(</big><em>l</em>, <em>n</em><big>)</big><a class="headerlink" href="#pytmx.utils.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.handle_bool">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">handle_bool</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#pytmx.utils.handle_bool" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.pairwise">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">pairwise</tt><big>(</big><em>iterable</em><big>)</big><a class="headerlink" href="#pytmx.utils.pairwise" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.parse_properties">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">parse_properties</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.utils.parse_properties" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse a node and return a dict that represents a tiled &#8220;property&#8221;</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.read_points">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">read_points</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#pytmx.utils.read_points" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="pytmx.utils.simplify">
@@ -410,6 +610,28 @@ making a list of rects, one for each tile on the map!</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-pytmx.tmxloader">
+<span id="pytmx-tmxloader"></span><h2>pytmx.tmxloader<a class="headerlink" href="#module-pytmx.tmxloader" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pytmx.tmxloader.load_pygame">
+<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.tmxloader.load_pygame" title="Permalink to this definition">¶</a></dt>
+<dd><p>PYGAME USERS: Use me.</p>
+<p>Load a TMX file, load the images, and return a TiledMap class that is
+ready to use.</p>
+<p>this utility has &#8216;smart&#8217; tile loading.  by default any tile without
+transparent pixels will be loaded for quick blitting.  if the tile has
+transparent pixels, then it will be loaded with per-pixel alpha.  this is
+a per-tile, per-image check.</p>
+<p>if a color key is specified as an argument, or in the tmx data, the
+per-pixel alpha will not be used at all. if the tileset&#8217;s image has colorkey
+transparency set in Tiled, the loader will return images that have their
+transparency already set.</p>
+<p>TL;DR:
+Don&#8217;t attempt to convert() or convert_alpha() the individual tiles.  It is
+already done for you.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-pytmx">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pytmx" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -423,12 +645,10 @@ making a list of rects, one for each tile on the map!</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">pytmx package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-pytmx.constants">pytmx.constants module</a></li>
-<li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx module</a></li>
-<li><a class="reference internal" href="#module-pytmx.tmxloader">pytmx.tmxloader module</a></li>
-<li><a class="reference internal" href="#module-pytmx.utils">pytmx.utils module</a></li>
+<li><a class="reference internal" href="#">PyTMX package</a><ul>
+<li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx</a></li>
+<li><a class="reference internal" href="#module-pytmx.utils">pytmx.utils</a></li>
+<li><a class="reference internal" href="#module-pytmx.tmxloader">pytmx.tmxloader</a></li>
 <li><a class="reference internal" href="#module-pytmx">Module contents</a></li>
 </ul>
 </li>
@@ -465,12 +685,12 @@ making a list of rects, one for each tile on the map!</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">PyTMX 2.16.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyTMX 3.19.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, bitcraft (leif.theden@gmail.com).
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+        &copy; Copyright 2014, bitcraft.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

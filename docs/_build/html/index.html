@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyTMX &mdash; PyTMX 6.18.0 documentation</title>
+    <title>PyTMX &mdash; PyTMX 3.19.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.18.0',
+        VERSION:     '3.19.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyTMX 6.18.0 documentation" href="#" /> 
+    <link rel="top" title="PyTMX 3.19.4 documentation" href="#" /> 
   </head>
   <body>
     <div class="related">
@@ -32,10 +32,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="#">PyTMX 6.18.0 documentation</a> &raquo;</li> 
+        <li><a href="#">PyTMX 3.19.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -46,33 +43,106 @@
             
   <div class="section" id="pytmx">
 <h1>PyTMX<a class="headerlink" href="#pytmx" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>This map loader can be used to load maps created in the Tiled Map Editor.  It
-provides a simple way to get tile images and associated metadata so that you
-can draw a map onto the screen and do useful things with metadata.</p>
-<p>PyTMX strives to balance performance, flexibility, and performance.  Feel free
-to use the classes provided in pytmx.py as superclasses to your own maps, or
-simply load the data with PyTMX and copy the data into your own classes with
-the simple api.</p>
-<p>I&#8217;ve included a test suite and demo in the &#8216;tests&#8217; folder.  It should work
-across all platforms.  test.py demonstrates loading a variety of maps and
-formats, and demo.py shows how you can create scrolling maps in a very simple
-fashion, while still retaining all the power of the Tiled Editor.
-instance.</p>
-<div class="section" id="usage-details">
-<h3>Usage Details<a class="headerlink" href="#usage-details" title="Permalink to this headline">¶</a></h3>
-<p>TODO</p>
+<p>PyTMX is a map loader for python/pygame designed for games.  It provides smart
+tile loading with a fast and efficient storage base.  Not only will does it
+correctly handle most Tiled object types, it also will load metadata for
+them, so you can modify your maps and objects in Tiled, instead of modifying
+your source code.</p>
+<p>PyTMX strives to balance performance and flexibility.  Feel free to use the
+classes provided in pytmx.py as superclasses for your own maps, or simply
+load the data with PyTMX and copy the data into your own classes with the api.</p>
 </div>
-<div class="section" id="tutorial">
-<h3>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h3>
-<p>TODO</p>
-<div class="toctree-wrapper compound">
+<div class="section" id="design-goals-and-features">
+<h1>Design Goals and Features<a class="headerlink" href="#design-goals-and-features" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
+<li>API with many handy functions</li>
+<li>Memory efficient and performant</li>
+<li>Loads data, &#8220;properties&#8221; metadata, and images from Tiled&#8217;s TMX format</li>
+<li>Supports base64, csv, gzip, zlib and uncompressed XML</li>
+<li>Properties for all native Tiled object types</li>
+<li>Point data for polygon and polyline objects</li>
+<li>Automatic flipping and rotation of tiles</li>
+<li>Image loading with pygame (will work without images as well)</li>
 </ul>
 </div>
+<div class="section" id="getting-help">
+<h1>Getting Help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h1>
+<p>For bugs or feature requests, please use the issues feature of github.  For
+all other general questions, join me on IRC at freennode.net #pygame.</p>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Install from pip</p>
+<blockquote>
+<div>pip install pytmx</div></blockquote>
+<p>You can also manually install it</p>
+<blockquote>
+<div>python setup.py install</div></blockquote>
+</div>
+<div class="section" id="basic-use">
+<h1>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>From a file:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
+<div class="section" id="tile-object-and-map-properties">
+<h1>Tile, Object, and Map Properties<a class="headerlink" href="#tile-object-and-map-properties" title="Permalink to this headline">¶</a></h1>
+<p>Properties are any key/value data added to an object/map/layer in Tiled
+through the properties dialog.  Tile properties are accessed through the the
+parent map object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">TiledMap</span><span class="p">(</span><span class="s">&#39;level1.tmx&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">props</span> <span class="o">=</span> <span class="n">txmdata</span><span class="o">.</span><span class="n">get_tile_properties</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">props</span> <span class="o">=</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">get_tile_properties_by_gid</span><span class="p">(</span><span class="n">tile_gid</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All other objects, including the map, layer, objects, etc. are in an
+python dictionary attribute called &#8220;properties&#8221;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">TiledMap</span><span class="p">(</span><span class="s">&#39;level1.tmx&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">tmxdata</span><span class="o">.</span><span class="n">visible_layers</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">layer</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;movement_speed&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scrolling-demo">
+<h1>Scrolling Demo<a class="headerlink" href="#scrolling-demo" title="Permalink to this headline">¶</a></h1>
+<p>Scrolling and Tiled maps go together, so I&#8217;ve created a library to make PyGame
+projects easy to use PyTMX maps and have a great scrolling map.</p>
+<p>pyscroll can use PyTMX maps to create an easy to use replacement for PyGame
+SpriteGroups.  Just use the PyScroll group and you can use fast, multilayered,
+scrolling maps.</p>
+<p><a class="reference external" href="https://github.com/bitcraft/pyscroll">https://github.com/bitcraft/pyscroll</a></p>
+</div>
+<div class="section" id="import-notice-for-pygame-users">
+<h1>Import Notice for PyGame Users<a class="headerlink" href="#import-notice-for-pygame-users" title="Permalink to this headline">¶</a></h1>
+<p>The loader will correctly convert() or convert_alpha() each tile image, so you
+shouldn&#8217;t attempt to circumvent the loading mechanisms.</p>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>In the next section click &#8220;Module Index&#8221;, then &#8220;pytmx.pytmx&#8221;.  I will have
+better documentation in the future!</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -91,14 +161,15 @@ instance.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">PyTMX</a><ul>
-<li><a class="reference internal" href="#introduction">Introduction</a><ul>
-<li><a class="reference internal" href="#usage-details">Usage Details</a></li>
-<li><a class="reference internal" href="#tutorial">Tutorial</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">PyTMX</a></li>
+<li><a class="reference internal" href="#design-goals-and-features">Design Goals and Features</a></li>
+<li><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#basic-use">Basic use</a></li>
+<li><a class="reference internal" href="#tile-object-and-map-properties">Tile, Object, and Map Properties</a></li>
+<li><a class="reference internal" href="#scrolling-demo">Scrolling Demo</a></li>
+<li><a class="reference internal" href="#import-notice-for-pygame-users">Import Notice for PyGame Users</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
@@ -130,15 +201,12 @@ instance.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="#">PyTMX 6.18.0 documentation</a> &raquo;</li> 
+        <li><a href="#">PyTMX 3.19.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, bitcraft.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>
