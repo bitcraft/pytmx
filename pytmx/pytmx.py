@@ -222,17 +222,20 @@ class TiledMap(TiledElement):
         for subnode in node.findall('tileset'):
             self.add_tileset(TiledTileset(self, subnode))
 
-        # "tile objects", objects with a GID, have need to have their
-        # attributes set after the tileset is loaded,
-        # so this step must be performed last
+        # "tile objects", objects with a GID, have need to have their attributes
+        # set after the tileset is loaded, so this step must be performed last
+        # also, this step is performed for objects to load there tiles.
+        # height and width will automatically be set according to the tileset
+        # that the image is from
+
+        # tiled stores the origin of GID objects by the lower right corner
+        # this is different for all other types, so i just adjust it here
+        # so all types loaded with pytmx are uniform.
         for o in [o for o in self.objects if o.gid]:
             p = self.get_tile_properties_by_gid(o.gid)
             if p:
                 o.properties.update(p)
 
-            # tiled stores the origin of GID objects by the lower right corner
-            # this is different for all other types, so i just adjust it here
-            # so all types loaded with pytmx are uniform.
             try:
                 tileset = self.get_tileset_from_gid(o.gid)
             except ValueError:
@@ -240,6 +243,8 @@ class TiledMap(TiledElement):
                 logger.error(msg, o.gid, o)
             else:
                 o.y -= tileset.tileheight
+                o.height = tileset.tileheight
+                o.width = tileset.tilewidth
 
         return self
 
@@ -462,14 +467,10 @@ class TiledMap(TiledElement):
         except KeyError:
             raise ValueError
 
-        prev_tileset = None
-        for tileset in sorted(self.tilesets, key=attrgetter('firstgid')):
-            if tiled_gid < tileset.firstgid:
-                return prev_tileset
-            prev_tileset = tileset
-
-        if tiled_gid > prev_tileset.firstgid:
-            return prev_tileset
+        for tileset in sorted(self.tilesets, key=attrgetter('firstgid'),
+                              reverse=True):
+            if tiled_gid >= tileset.firstgid:
+                return tileset
 
         raise ValueError
 
@@ -718,7 +719,6 @@ class TiledTileLayer(TiledElement):
 
         elif compression == 'zlib':
             import zlib
-
             data = zlib.decompress(data)
 
         elif compression:

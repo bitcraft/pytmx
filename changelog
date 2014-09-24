@@ -10,6 +10,8 @@ released under the LGPL v3
 ===============================================================================
 
 New in 3.19:
+      core: new TiledMap.get_tileset_from_gid method for finding tilesets
+      core: fixed issue with tile objects y-axis conversion
       core: new iterator for tiledmap
       core: objects/shapes load the rotation value
       core: polygon/polyline and all other shapes return coordinates as float

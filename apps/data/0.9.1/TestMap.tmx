@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="5" height="3" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="figur" tilewidth="32" tileheight="64">
+  <image source="Tiled Images/figur.png" width="32" height="64"/>
+ </tileset>
+ <tileset firstgid="2" name="figur2" tilewidth="32" tileheight="96">
+  <image source="Tiled Images/figur2.png" width="32" height="96"/>
+ </tileset>
+ <tileset firstgid="3" name="background" tilewidth="160" tileheight="96">
+  <image source="Tiled Images/background.png" width="160" height="96"/>
+ </tileset>
+ <tileset firstgid="4" name="midTile" tilewidth="32" tileheight="32">
+  <image source="Tiled Images/midTile.png" width="96" height="128"/>
+ </tileset>
+ <tileset firstgid="16" name="bush" tilewidth="32" tileheight="32">
+  <image source="Tiled Images/bush.png" width="32" height="32"/>
+ </tileset>
+ <layer name="Background" width="5" height="3">
+  <data>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="3"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+  </data>
+ </layer>
+ <layer name="Main" width="5" height="3">
+  <data>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+   <tile gid="4"/>
+   <tile gid="5"/>
+   <tile gid="6"/>
+   <tile gid="0"/>
+   <tile gid="0"/>
+  </data>
+ </layer>
+ <objectgroup name="Objects">
+  <object gid="16" x="0" y="32"/>
+  <object gid="1" x="32" y="64"/>
+  <object gid="2" x="96" y="96"/>
+ </objectgroup>
+</map>
