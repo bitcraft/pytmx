@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyTMX package &mdash; PyTMX 3.19.4 documentation</title>
+    <title>pytmx package &mdash; pytmx  documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '3.19.4',
+        VERSION:     '',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyTMX 3.19.4 documentation" href="index.html" /> 
+    <link rel="top" title="pytmx  documentation" href="index.html" />
+    <link rel="prev" title="PyTMX" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +36,10 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">PyTMX 3.19.4 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="index.html" title="PyTMX"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pytmx  documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,9 +49,9 @@
           <div class="body">
             
   <div class="section" id="pytmx-package">
-<h1>PyTMX package<a class="headerlink" href="#pytmx-package" title="Permalink to this headline">¶</a></h1>
+<h1>pytmx package<a class="headerlink" href="#pytmx-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-pytmx.pytmx">
-<span id="pytmx-pytmx"></span><h2>pytmx.pytmx<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
+<span id="pytmx-pytmx-module"></span><h2>pytmx.pytmx module<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pytmx.pytmx.TiledMap">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
@@ -563,8 +567,30 @@ TSX files appear the same as those that don&#8217;t</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-pytmx.tmxloader">
+<span id="pytmx-tmxloader-module"></span><h2>pytmx.tmxloader module<a class="headerlink" href="#module-pytmx.tmxloader" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pytmx.tmxloader.load_pygame">
+<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.tmxloader.load_pygame" title="Permalink to this definition">¶</a></dt>
+<dd><p>PYGAME USERS: Use me.</p>
+<p>Load a TMX file, load the images, and return a TiledMap class that is
+ready to use.</p>
+<p>this utility has &#8216;smart&#8217; tile loading.  by default any tile without
+transparent pixels will be loaded for quick blitting.  if the tile has
+transparent pixels, then it will be loaded with per-pixel alpha.  this is
+a per-tile, per-image check.</p>
+<p>if a color key is specified as an argument, or in the tmx data, the
+per-pixel alpha will not be used at all. if the tileset&#8217;s image has colorkey
+transparency set in Tiled, the loader will return images that have their
+transparency already set.</p>
+<p>TL;DR:
+Don&#8217;t attempt to convert() or convert_alpha() the individual tiles.  It is
+already done for you.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-pytmx.utils">
-<span id="pytmx-utils"></span><h2>pytmx.utils<a class="headerlink" href="#module-pytmx.utils" title="Permalink to this headline">¶</a></h2>
+<span id="pytmx-utils-module"></span><h2>pytmx.utils module<a class="headerlink" href="#module-pytmx.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pytmx.utils.build_rects">
 <tt class="descclassname">pytmx.utils.</tt><tt class="descname">build_rects</tt><big>(</big><em>tmxmap</em>, <em>layer</em>, <em>tileset=None</em>, <em>real_gid=None</em><big>)</big><a class="headerlink" href="#pytmx.utils.build_rects" title="Permalink to this definition">¶</a></dt>
@@ -610,28 +636,6 @@ making a list of rects, one for each tile on the map!</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pytmx.tmxloader">
-<span id="pytmx-tmxloader"></span><h2>pytmx.tmxloader<a class="headerlink" href="#module-pytmx.tmxloader" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pytmx.tmxloader.load_pygame">
-<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.tmxloader.load_pygame" title="Permalink to this definition">¶</a></dt>
-<dd><p>PYGAME USERS: Use me.</p>
-<p>Load a TMX file, load the images, and return a TiledMap class that is
-ready to use.</p>
-<p>this utility has &#8216;smart&#8217; tile loading.  by default any tile without
-transparent pixels will be loaded for quick blitting.  if the tile has
-transparent pixels, then it will be loaded with per-pixel alpha.  this is
-a per-tile, per-image check.</p>
-<p>if a color key is specified as an argument, or in the tmx data, the
-per-pixel alpha will not be used at all. if the tileset&#8217;s image has colorkey
-transparency set in Tiled, the loader will return images that have their
-transparency already set.</p>
-<p>TL;DR:
-Don&#8217;t attempt to convert() or convert_alpha() the individual tiles.  It is
-already done for you.</p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-pytmx">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pytmx" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -645,15 +649,18 @@ already done for you.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">PyTMX package</a><ul>
-<li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx</a></li>
-<li><a class="reference internal" href="#module-pytmx.utils">pytmx.utils</a></li>
-<li><a class="reference internal" href="#module-pytmx.tmxloader">pytmx.tmxloader</a></li>
+<li><a class="reference internal" href="#">pytmx package</a><ul>
+<li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx module</a></li>
+<li><a class="reference internal" href="#module-pytmx.tmxloader">pytmx.tmxloader module</a></li>
+<li><a class="reference internal" href="#module-pytmx.utils">pytmx.utils module</a></li>
 <li><a class="reference internal" href="#module-pytmx">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PyTMX</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/pytmx.txt"
@@ -685,11 +692,14 @@ already done for you.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">PyTMX 3.19.4 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="index.html" title="PyTMX"
+             >previous</a> |</li>
+        <li><a href="index.html">pytmx  documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, bitcraft.
+        &copy; Copyright 2014, Author.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>

@@ -1,8 +1,3 @@
-.. PyMunkTMX documentation master file, created by
-   sphinx-quickstart on Sun Mar 30 11:49:45 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 PyTMX
 =====
 
@@ -115,11 +110,13 @@ The loader will correctly convert() or convert_alpha() each tile image, so you
 shouldn't attempt to circumvent the loading mechanisms.
 
 
-Documentation
-=============
+API Documentation
+=================
 
-In the next section click "Module Index", then "pytmx.pytmx".  I will have
-better documentation in the future!
+.. toctree::
+   :maxdepth: 4
+
+   pytmx
 
 
 Indices and tables
@@ -128,3 +125,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
