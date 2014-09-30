@@ -13,7 +13,7 @@ Missing tests:
 import logging
 
 from pytmx import *
-from pytmx.util_pygame import load_pygame
+#from pytmx import load_pygame
 import pygame
 from pygame.locals import *
 

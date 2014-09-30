@@ -10,8 +10,8 @@ try:
     from pygame.transform import flip, rotate
     import pygame
 except ImportError:
-    logger.debug('cannot import pygame (is it installed?)')
-    pass
+    logger.error('cannot import pygame (is it installed?)')
+    raise
 
 import itertools
 import pytmx
