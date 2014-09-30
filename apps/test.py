@@ -12,16 +12,15 @@ Missing tests:
 """
 import logging
 
-from pytmx import *
-#from pytmx import load_pygame
-import pygame
-from pygame.locals import *
-
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
+
+from pytmx import *
+import pygame
+from pygame.locals import *
 
 
 def init_screen(width, height):
