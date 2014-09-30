@@ -54,7 +54,7 @@
 <span id="pytmx-pytmx-module"></span><h2>pytmx.pytmx module<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pytmx.pytmx.TiledMap">
-<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em>, <em>image_loader=&lt;function default_image_loader at 0x0000000004DFCF28&gt;</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
 <p>Contains the layers, objects, and images from a Tiled TMX map</p>
 <p>This class is meant to handle most of the work you need to do to use a map.</p>
@@ -339,7 +339,20 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tiled_gid</strong> &#8211; GID that is found in TMX data</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">GID that pytmx uses for the the GID passed</td>
+</tbody>
+</table>
+<p>rtype: GID that pytmx uses for the the GID passed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pytmx.pytmx.TiledMap.reload_images">
+<tt class="descname">reload_images</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.reload_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the map images from disk</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
 </tbody>
 </table>
@@ -451,8 +464,8 @@ TSX files appear the same as those that don&#8217;t</p>
 <p>Represents a TileLayer</p>
 <p>Iterate over the layer using the iterator protocol</p>
 <dl class="method">
-<dt id="pytmx.pytmx.TiledTileLayer.iter_tiles">
-<tt class="descname">iter_tiles</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.iter_tiles" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileLayer.iter_data">
+<tt class="descname">iter_data</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.iter_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -476,6 +489,11 @@ TSX files appear the same as those that don&#8217;t</p>
 <tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'x', 'y', 'width', 'height', 'opacity', 'properties', 'data']</em><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.reserved" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="pytmx.pytmx.TiledTileLayer.tiles">
+<tt class="descname">tiles</tt><big>(</big><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.tiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -484,6 +502,11 @@ TSX files appear the same as those that don&#8217;t</p>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
 <p>Represents a any Tiled Object</p>
 <p>Supported types: Box, Ellipse, Tile Object, Polyline, Polygon</p>
+<dl class="attribute">
+<dt id="pytmx.pytmx.TiledObject.image">
+<tt class="descname">image</tt><a class="headerlink" href="#pytmx.pytmx.TiledObject.image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="pytmx.pytmx.TiledObject.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObject.parse" title="Permalink to this definition">¶</a></dt>
@@ -543,6 +566,11 @@ TSX files appear the same as those that don&#8217;t</p>
 <p>Represents Tiled Image Layer</p>
 <p>The image associated with this layer will be loaded and assigned a GID.
 (pygame only)</p>
+<dl class="attribute">
+<dt id="pytmx.pytmx.TiledImageLayer.image">
+<tt class="descname">image</tt><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="pytmx.pytmx.TiledImageLayer.parse">
 <tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.parse" title="Permalink to this definition">¶</a></dt>
@@ -566,75 +594,37 @@ TSX files appear the same as those that don&#8217;t</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-pytmx.tmxloader">
-<span id="pytmx-tmxloader-module"></span><h2>pytmx.tmxloader module<a class="headerlink" href="#module-pytmx.tmxloader" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pytmx.tmxloader.load_pygame">
-<tt class="descclassname">pytmx.tmxloader.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.tmxloader.load_pygame" title="Permalink to this definition">¶</a></dt>
-<dd><p>PYGAME USERS: Use me.</p>
-<p>Load a TMX file, load the images, and return a TiledMap class that is
-ready to use.</p>
-<p>this utility has &#8216;smart&#8217; tile loading.  by default any tile without
-transparent pixels will be loaded for quick blitting.  if the tile has
-transparent pixels, then it will be loaded with per-pixel alpha.  this is
-a per-tile, per-image check.</p>
-<p>if a color key is specified as an argument, or in the tmx data, the
-per-pixel alpha will not be used at all. if the tileset&#8217;s image has colorkey
-transparency set in Tiled, the loader will return images that have their
-transparency already set.</p>
-<p>TL;DR:
-Don&#8217;t attempt to convert() or convert_alpha() the individual tiles.  It is
-already done for you.</p>
+<dl class="class">
+<dt id="pytmx.pytmx.TileFlags">
+<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TileFlags</tt><a class="headerlink" href="#pytmx.pytmx.TileFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.tuple</span></tt></p>
+<p>TileFlags(flipped_horizontally, flipped_vertically, flipped_diagonally)</p>
+<dl class="attribute">
+<dt id="pytmx.pytmx.TileFlags.flipped_diagonally">
+<tt class="descname">flipped_diagonally</tt><a class="headerlink" href="#pytmx.pytmx.TileFlags.flipped_diagonally" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pytmx.pytmx.TileFlags.flipped_horizontally">
+<tt class="descname">flipped_horizontally</tt><a class="headerlink" href="#pytmx.pytmx.TileFlags.flipped_horizontally" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pytmx.pytmx.TileFlags.flipped_vertically">
+<tt class="descname">flipped_vertically</tt><a class="headerlink" href="#pytmx.pytmx.TileFlags.flipped_vertically" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
-<div class="section" id="module-pytmx.utils">
-<span id="pytmx-utils-module"></span><h2>pytmx.utils module<a class="headerlink" href="#module-pytmx.utils" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pytmx.utils.build_rects">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">build_rects</tt><big>(</big><em>tmxmap</em>, <em>layer</em>, <em>tileset=None</em>, <em>real_gid=None</em><big>)</big><a class="headerlink" href="#pytmx.utils.build_rects" title="Permalink to this definition">¶</a></dt>
-<dd><p>generate a set of non-overlapping rects that represents the distribution of the specified gid.</p>
-<p>useful for generating rects for use in collision detection</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pytmx.utils.simplify">
-<tt class="descclassname">pytmx.utils.</tt><tt class="descname">simplify</tt><big>(</big><em>all_points</em>, <em>tilewidth</em>, <em>tileheight</em><big>)</big><a class="headerlink" href="#pytmx.utils.simplify" title="Permalink to this definition">¶</a></dt>
-<dd><p>kludge:</p>
-<p>&#8220;A kludge (or kluge) is a workaround, a quick-and-dirty solution,
-a clumsy or inelegant, yet effective, solution to a problem, typically
-using parts that are cobbled together.&#8221;</p>
-<p>&#8211; wikipedia</p>
-<p>turn a list of points into a rects
-adjacent rects will be combined.</p>
-<dl class="docutils">
-<dt>plain english:</dt>
-<dd><p class="first">the input list must be a list of tuples that represent
-the areas to be combined into rects
-the rects will be blended together over solid groups</p>
-<p>so if data is something like:</p>
-<p>0 1 1 1 0 0 0
-0 1 1 0 0 0 0
-0 0 0 0 0 4 0
-0 0 0 0 0 4 0
-0 0 0 0 0 0 0
-0 0 1 1 1 1 1</p>
-<p>you&#8217;ll have the 4 rects that mask the area like this:</p>
-<p>..######......
-..####........
-..........##..
-..........##..
-..............
-....##########</p>
-<p class="last">pretty cool, right?</p>
-</dd>
-</dl>
-<p>there may be cases where the number of rectangles is not as low as possible,
-but I haven&#8217;t found that it is excessively bad.  certainly much better than
-making a list of rects, one for each tile on the map!</p>
-</dd></dl>
-
+<div class="section" id="pytmx-tmxloader-module">
+<h2>pytmx.tmxloader module<a class="headerlink" href="#pytmx-tmxloader-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="pytmx-utils-module">
+<h2>pytmx.utils module<a class="headerlink" href="#pytmx-utils-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-pytmx">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pytmx" title="Permalink to this headline">¶</a></h2>
@@ -651,8 +641,8 @@ making a list of rects, one for each tile on the map!</p>
   <ul>
 <li><a class="reference internal" href="#">pytmx package</a><ul>
 <li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx module</a></li>
-<li><a class="reference internal" href="#module-pytmx.tmxloader">pytmx.tmxloader module</a></li>
-<li><a class="reference internal" href="#module-pytmx.utils">pytmx.utils module</a></li>
+<li><a class="reference internal" href="#pytmx-tmxloader-module">pytmx.tmxloader module</a></li>
+<li><a class="reference internal" href="#pytmx-utils-module">pytmx.utils module</a></li>
 <li><a class="reference internal" href="#module-pytmx">Module contents</a></li>
 </ul>
 </li>

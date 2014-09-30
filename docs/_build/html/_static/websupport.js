@@ -669,7 +669,7 @@
     deleteCommentURL: '/_delete_comment',
     commentImage: '/static/_static/comment.png',
     closeCommentImage: '/static/_static/comment-close.png',
-    loadingImage: '/static/_static/ajax-util_pygam.gif',
+    loadingImage: '/static/_static/ajax-loader.gif',
     commentBrightImage: '/static/_static/comment-bright.png',
     upArrow: '/static/_static/up.png',
     downArrow: '/static/_static/down.png',
