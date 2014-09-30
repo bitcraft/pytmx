@@ -1,15 +1,11 @@
 import logging
 import six
-from itertools import chain, product, islice
-from collections import defaultdict
+import os
+from itertools import chain, product
+from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
 from six.moves import zip, map
 from operator import attrgetter
-from .constants import *
-
-__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject',
-           'TiledObjectGroup', 'TiledImageLayer']
-
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -17,9 +13,36 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+__all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject',
+           'TiledObjectGroup', 'TiledImageLayer', 'TileFlags']
+
+# internal flags
+TRANS_FLIPX = 1
+TRANS_FLIPY = 2
+TRANS_ROT = 4
+
+# Tiled gid flags
+GID_TRANS_FLIPX = 1 << 31
+GID_TRANS_FLIPY = 1 << 30
+GID_TRANS_ROT = 1 << 29
+
+flag_names = (
+    'flipped_horizontally',
+    'flipped_vertically',
+    'flipped_diagonally',)
+
+TileFlags = namedtuple('TileFlags', flag_names)
+
+
+def default_image_loader():
+    def load(filename, rect, flags):
+        return filename, rect, flags
+
+    return load
+
 
 def decode_gid(raw_gid):
-    """ Decode a GID from TMX data
+    """Decode a GID from TMX data
 
     as of 0.7.0 it determines if the tile should be flipped when rendered
     as of 0.8.0 bit 30 determines if GID is rotated
@@ -27,10 +50,10 @@ def decode_gid(raw_gid):
     :param raw_gid: 32-bit number from TMX layer data
     :return: gid, flags
     """
-    flags = 0
-    if raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX: flags += TRANS_FLIPX
-    if raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY: flags += TRANS_FLIPY
-    if raw_gid & GID_TRANS_ROT == GID_TRANS_ROT: flags += TRANS_ROT
+    flags = TileFlags(
+        raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
+        raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
+        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT)
     gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
     return gid, flags
 
@@ -154,12 +177,26 @@ class TiledMap(TiledElement):
     reserved = "visible version orientation width height tilewidth \
                 tileheight properties tileset layer objectgroup".split()
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, image_loader=default_image_loader,
+                 **kwargs):
         """
+        :param image_loader: function that will load images (see below)
         :param filename: filename of tiled map to load
+
+        image_loader:
+          this must be a reference to a function that will accept a tuple:
+          (filename of image, bounding rect of tile in image, flags)
+
+          the function must return a reference to to the tile.
         """
         TiledElement.__init__(self)
         self.filename = filename
+        self.image_loader = image_loader
+
+        # optional keyword arguments checked here
+        self.optional_gids = kwargs.get('optional_gids', set())
+        self.load_all_tiles = kwargs.get('load_all', False)
+
         self.layers = list()           # all layers in proper order
         self.tilesets = list()         # TiledTileset objects
         self.tile_properties = dict()  # tiles that have metadata
@@ -246,7 +283,81 @@ class TiledMap(TiledElement):
                 o.height = tileset.tileheight
                 o.width = tileset.tilewidth
 
+        self.reload_images()
         return self
+
+    def reload_images(self):
+        """Load the map images from disk
+
+        :return: None
+        """
+        self.images = [None] * self.maxgid
+
+        # load tile images used in layers
+        for ts in self.tilesets:
+            if ts.source is None:
+                continue
+
+            path = os.path.join(os.path.dirname(self.filename), ts.source)
+            colorkey = getattr(ts, 'trans', None)
+            loader = self.image_loader(path, colorkey)
+
+            # some tileset images may be slightly larger than the tile area
+            # ie: may include a title copyright, ect. this compensates for that
+            iw = ts.width
+            ih = ts.height
+            tw = ts.tilewidth + ts.spacing
+            th = ts.tileheight + ts.spacing
+            width = int((((iw-ts.margin*2+ts.spacing)//tw)*tw)-ts.spacing)
+            height = int((((ih-ts.margin*2+ts.spacing)//th)*th)-ts.spacing)
+
+            # trim off any pixels on the right side that isn't a tile.
+            # this happens if extra stuff is included on the left, like a logo
+            # or credits, is not actually part of the tileset.
+            width -= (iw - ts.margin) % tw
+
+            p = product(range(ts.margin, height + ts.margin, th),
+                        range(ts.margin, width + ts.margin, tw))
+
+            for real_gid, (y, x) in enumerate(p, ts.firstgid):
+                rect = (x, y, tw, th)
+                if x + ts.tilewidth-ts.spacing > width:
+                    continue
+
+                gids = self.map_gid(real_gid)
+                if gids is None:
+                    if self.load_all_tiles or real_gid in self.optional_gids:
+                        # TODO: handle flags? - might never be an issue, though
+                        gids = [self.register_gid(real_gid, flags=0)]
+
+                if gids:
+                    for gid, flags in gids:
+                        self.images[gid] = loader(rect, flags)
+
+        # load image layer images
+        for layer in (i for i in self.layers if isinstance(i, TiledImageLayer)):
+            source = getattr(layer, 'source', None)
+            if source:
+                colorkey = getattr(layer, 'trans', None)
+                real_gid = len(self.images)
+                gid = self.register_gid(real_gid)
+                layer.gid = gid
+                path = os.path.join(os.path.dirname(self.filename), source)
+                loader = self.image_loader(path, colorkey)
+                image = loader()
+                self.images.append(image)
+
+        # load images in tiles.
+        # instead of making a new gid, replace the reference to the tile tha
+        #  was loaded from the tileset
+        for real_gid, props in self.tile_properties.items():
+            source = props.get('source', None)
+            if source:
+                colorkey = props.get('trans', None)
+                path = os.path.join(os.path.dirname(self.filename), source)
+                loader = self.image_loader(path, colorkey)
+                image = loader()
+                self.images[real_gid] = image
 
     def get_tile_image(self, x, y, layer):
         """Return the tile image for this location
@@ -521,7 +632,7 @@ class TiledMap(TiledElement):
         """Used to manage the mapping of GIDs between the tmx and pytmx
 
         :param tiled_gid: GID that is found in TMX data
-        :rtype: GID that pytmx uses for the the GID passed
+        rtype: GID that pytmx uses for the the GID passed
         """
         if tiled_gid:
             try:
@@ -675,11 +786,19 @@ class TiledTileLayer(TiledElement):
         self.parse(node)
 
     def __iter__(self):
-        return self.iter_tiles()
+        return self.iter_data()
 
-    def iter_tiles(self):
+    def iter_data(self):
         for y, x in product(range(self.height), range(self.width)):
             yield x, y, self.data[y][x]
+
+    def tiles(self):
+        images = self.parent.images
+        data = self.data
+        for y, x in product(range(self.height), range(self.width)):
+            image = images[data[y][x]]
+            if image:
+                yield x, y, image
 
     def parse(self, node):
         """Parse a Tile Layer from ElementTree xml node
@@ -712,7 +831,6 @@ class TiledTileLayer(TiledElement):
 
         compression = data_node.get('compression', None)
         if compression == 'gzip':
-            # py3 => bytes
             import gzip
             with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
                 data = fh.read()
@@ -781,6 +899,12 @@ class TiledObject(TiledElement):
 
         self.parse(node)
 
+    @property
+    def image(self):
+        if self.gid:
+            return self.parent.images[self.gid]
+        return None
+
     def parse(self, node):
         """Parse an Object from ElementTree xml node
 
@@ -798,6 +922,11 @@ class TiledObject(TiledElement):
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
+            # tiled stores the origin of GID objects by the lower right corner
+            # this is different for all other types, so i just adjust it here
+            # so all types loaded with pytmx are uniform.
+            # TODO: map the gid to the tileset to get the correct height
+            self.y -= self.parent.tileheight
 
         points = None
         polygon = node.find('polygon')
@@ -871,8 +1000,6 @@ class TiledImageLayer(TiledElement):
         self.parent = parent
         self.source = None
         self.trans = None
-
-        # unify the structure of layers
         self.gid = 0
 
         # defaults from the specification
@@ -881,6 +1008,12 @@ class TiledImageLayer(TiledElement):
         self.visible = 1
 
         self.parse(node)
+
+    @property
+    def image(self):
+        if self.gid:
+            return self.parent.images[self.gid]
+        return None
 
     def parse(self, node):
         """Parse an Image Layer from ElementTree xml node
