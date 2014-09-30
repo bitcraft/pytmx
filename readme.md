@@ -35,8 +35,6 @@ __02/28/14__ - Image layer support, object points changed, new test.py!
 __02/24/14__ - New Python 3 Support: see python3 branch  
 __02/06/14__ - Python 3 support coming soon  
 
-_Please see tmxloader.py's docstring for version history._  
-
 
 Introduction
 ===============================================================================

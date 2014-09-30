@@ -1,8 +1,4 @@
-from itertools import product
 import logging
-
-__all__ = ['build_rects', 'simplify']
-
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -10,14 +6,119 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+try:
+    from pygame.transform import flip, rotate
+    import pygame
+except ImportError:
+    logger.error('cannot import pygame (is it installed?)')
+    raise
+
+import itertools
+import pytmx
+
+__all__ = ['load_pygame', 'pygame_image_loader', 'simplify', 'build_rects']
+
+
+def handle_transformation(tile, flags):
+    if flags.flipped_diagonally:
+        tile = flip(rotate(tile, 270), 1, 0)
+    if flags.flipped_horizontally or flags.flipped_vertically:
+        tile = flip(tile, flags.flipped_horizontally, flags.flipped_vertically)
+    return tile
+
+
+def smart_convert(original, colorkey, pixelalpha):
+    """
+    this method does several tests on a surface to determine the optimal
+    flags and pixel format for each tile surface.
+
+    this is done for the best rendering speeds and removes the need to
+    convert() the images on your own
+    """
+    tile_size = original.get_size()
+
+    # TODO: test how the 'threshold' value effects transparent pixel detection
+    threshold = 127   # the default
+
+    # count the number of pixels in the tile that are not transparent
+    px = pygame.mask.from_surface(original, threshold).count()
+
+    # there are no transparent pixels in the image
+    if px == tile_size[0] * tile_size[1]:
+        tile = original.convert()
+
+    # there are transparent pixels, and tiled set a colorkey
+    elif colorkey:
+        tile = original.convert()
+        tile.set_colorkey(colorkey, pygame.RLEACCEL)
+
+    # there are transparent pixels, and set for perpixel alpha
+    elif pixelalpha:
+        tile = original.convert_alpha()
+
+    # there are transparent pixels, and we won't handle them
+    else:
+        tile = original.convert()
+
+    return tile
+
+
+def pygame_image_loader(filename, colorkey, **kwargs):
+    if colorkey:
+        colorkey = pygame.Color('#{0}'.format(colorkey))
+
+    pixelalpha = kwargs.get('pixelalpha', True)
+    image = pygame.image.load(filename)
+
+    def load_image(rect=None, flags=None):
+        if rect:
+            try:
+                tile = image.subsurface(rect)
+            except ValueError:
+                logger.error('Tile bounds outside bounds of tileset image')
+                raise
+        else:
+            tile = image.copy()
+
+        if flags:
+            tile = handle_transformation(tile, flags)
+
+        tile = smart_convert(tile, colorkey, pixelalpha)
+        return tile
+
+    return load_image
+
+
+def load_pygame(filename, *args, **kwargs):
+    """
+    PYGAME USERS: Use me.
+
+    Load a TMX file, load the images, and return a TiledMap class that is
+    ready to use.
+
+    this utility has 'smart' tile loading.  by default any tile without
+    transparent pixels will be loaded for quick blitting.  if the tile has
+    transparent pixels, then it will be loaded with per-pixel alpha.  this is
+    a per-tile, per-image check.
+
+    if a color key is specified as an argument, or in the tmx data, the
+    per-pixel alpha will not be used at all. if the tileset's image has colorkey
+    transparency set in Tiled, the util_pygam will return images that have their
+    transparency already set.
+
+    TL;DR:
+    Don't attempt to convert() or convert_alpha() the individual tiles.  It is
+    already done for you.
+    """
+    return pytmx.TiledMap(filename, image_loader=pygame_image_loader)
+
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):
-    """
-    generate a set of non-overlapping rects that represents the distribution of the specified gid.
+    """generate a set of non-overlapping rects that represents the distribution\
+       of the specified gid.
 
     useful for generating rects for use in collision detection
     """
-
     if isinstance(tileset, int):
         try:
             tileset = tmxmap.tilesets[tileset]
@@ -59,7 +160,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             logger.debug(msg.format(layer, tmxmap))
             raise ValueError
 
-    p = product(range(tmxmap.width), range(tmxmap.height))
+    p = itertools.product(range(tmxmap.width), range(tmxmap.height))
     if gid:
         points = [(x, y) for (x, y) in p if layer_data[y][x] == gid]
     else:
@@ -70,7 +171,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
 
 
 def simplify(all_points, tilewidth, tileheight):
-    """
+    """Given a list of points, return list of rects that represent them
     kludge:
 
     "A kludge (or kluge) is a workaround, a quick-and-dirty solution,
@@ -111,9 +212,6 @@ def simplify(all_points, tilewidth, tileheight):
     but I haven't found that it is excessively bad.  certainly much better than
     making a list of rects, one for each tile on the map!
     """
-    from pygame import Rect
-
-
     def pick_rect(points, rects):
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox
@@ -138,12 +236,13 @@ def simplify(all_points, tilewidth, tileheight):
                     if x <= ex: y -= 1
                     break
 
-        c_rect = Rect(ox * tilewidth, oy * tileheight,
-                     (ex - ox + 1) * tilewidth, (y - oy + 1) * tileheight)
+        c_rect = pygame.Rect(ox * tilewidth, oy * tileheight,
+                             (ex - ox + 1) * tilewidth,
+                             (y - oy + 1) * tileheight)
 
         rects.append(c_rect)
 
-        rect = Rect(ox, oy, ex - ox + 1, y - oy + 1)
+        rect = pygame.Rect(ox, oy, ex - ox + 1, y - oy + 1)
         kill = [p for p in points if rect.collidepoint(p)]
         [points.remove(i) for i in kill]
 
@@ -155,5 +254,3 @@ def simplify(all_points, tilewidth, tileheight):
         pick_rect(all_points, rect_list)
 
     return rect_list
-
-

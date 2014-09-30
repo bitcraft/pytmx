@@ -8,12 +8,12 @@ logger.setLevel(logging.INFO)
 
 from .pytmx import *
 try:
-    from .tmxloader import load_pygame
+    from pytmx.util_pygame import load_pygame
 except ImportError:
     logger.debug('cannot import pygame tools')
 
 
-__version__ = (3, 19, 5)
+__version__ = (3, 20, 1)
 __author__ = 'bitcraft'
 __author_email__ = 'leif.theden@gmail.com'
 __description__ = 'Map loader for TMX Files - Python 2 and 3'

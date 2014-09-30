@@ -34,8 +34,8 @@ flag_names = (
 TileFlags = namedtuple('TileFlags', flag_names)
 
 
-def default_image_loader():
-    def load(filename, rect, flags):
+def default_image_loader(filename, flags, **kwargs):
+    def load(rect, flags):
         return filename, rect, flags
 
     return load
@@ -206,8 +206,8 @@ class TiledMap(TiledElement):
         # between the GIDs in the Tiled map data (tmx) and the data in this
         # object and the layers.  This dictionary keeps track of that.
         self.gidmap = defaultdict(list)
-        self.imagemap = dict()  # mapping of gid and trans flags to real gids
-        self.tiledgidmap = dict() # mapping of tiledgid to pytmx gid
+        self.imagemap = dict()     # mapping of gid and trans flags to real gids
+        self.tiledgidmap = dict()  # mapping of tiledgid to pytmx gid
         self.maxgid = 1
 
         # should be filled in by a loader function
@@ -348,8 +348,8 @@ class TiledMap(TiledElement):
                 self.images.append(image)
 
         # load images in tiles.
-        # instead of making a new gid, replace the reference to the tile tha
-        #  was loaded from the tileset
+        # instead of making a new gid, replace the reference to the tile that
+        # was loaded from the tileset
         for real_gid, props in self.tile_properties.items():
             source = props.get('source', None)
             if source:
@@ -922,11 +922,6 @@ class TiledObject(TiledElement):
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
             self.gid = self.parent.register_gid(self.gid)
-            # tiled stores the origin of GID objects by the lower right corner
-            # this is different for all other types, so i just adjust it here
-            # so all types loaded with pytmx are uniform.
-            # TODO: map the gid to the tileset to get the correct height
-            self.y -= self.parent.tileheight
 
         points = None
         polygon = node.find('polygon')

@@ -19,8 +19,8 @@ logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
 from pytmx import *
-import pygame
 from pygame.locals import *
+import pygame
 
 
 def init_screen(width, height):
