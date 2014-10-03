@@ -103,6 +103,226 @@ all other general questions, join me on IRC at freennode.net #pygame.</p>
 </dd>
 </dl>
 <p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">test_pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">test_pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">test_pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">test_pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">test_pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">test_pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">test_pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Getting the tile surface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">tmx_data</span><span class="o">.</span><span class="n">get_tile_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>From a XML string:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytmx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">pytmx</span><span class="o">.</span><span class="n">TiledMap</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Load with PyGame surfaces:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pytmx</span> <span class="kn">import</span> <span class="n">load_pygame</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmxdata</span> <span class="o">=</span> <span class="n">load_pygame</span><span class="p">(</span><span class="s">&quot;map.tmx&quot;</span><span class="p">)</span>
 </pre></div>
@@ -152,9 +372,8 @@ shouldn&#8217;t attempt to circumvent the loading mechanisms.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pytmx.html">pytmx package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pytmx.html#module-pytmx.pytmx">pytmx.pytmx module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pytmx.html#pytmx-tmxloader-module">pytmx.tmxloader module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pytmx.html#pytmx-utils-module">pytmx.utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pytmx.html#module-pytmx">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytmx.html#module-pytmx.util_pygame">pytmx.util_pygame module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytmx.html#module-pytmx.util_pyglet">pytmx.utils module</a></li>
 </ul>
 </li>
 </ul>
@@ -230,7 +449,7 @@ shouldn&#8217;t attempt to circumvent the loading mechanisms.</p>
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Author.
+        &copy; Copyright 2014, Leif Theden.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>

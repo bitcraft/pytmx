@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pytmx'
-copyright = '2014, Author'
+copyright = '2014, Leif Theden'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -266,9 +266,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = 'pytmx'
-epub_author = 'Author'
-epub_publisher = 'Author'
-epub_copyright = '2014, Author'
+epub_author = 'Leif Theden'
+epub_publisher = 'Leif Theden'
+epub_copyright = '2014, Leif Theden'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = 'pytmx'

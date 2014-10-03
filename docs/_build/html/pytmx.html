@@ -54,7 +54,7 @@
 <span id="pytmx-pytmx-module"></span><h2>pytmx.pytmx module<a class="headerlink" href="#module-pytmx.pytmx" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pytmx.pytmx.TiledMap">
-<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em>, <em>image_loader=&lt;function default_image_loader at 0x0000000004DFCF28&gt;</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledMap</tt><big>(</big><em>filename=None</em>, <em>image_loader=&lt;function default_image_loader at 0x1081c4668&gt;</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
 <p>Contains the layers, objects, and images from a Tiled TMX map</p>
 <p>This class is meant to handle most of the work you need to do to use a map.</p>
@@ -133,7 +133,7 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pygame surface if found, otherwise ValueError</p>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">surface if found, otherwise ValueError</p>
 </td>
 </tr>
 </tbody>
@@ -155,7 +155,7 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pygame surface if found, otherwise 0</p>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">surface if found, otherwise 0</p>
 </td>
 </tr>
 </tbody>
@@ -172,7 +172,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gid</strong> &#8211; GID of image</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pygame surface if found, otherwise ValueError</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">surface if found, otherwise ValueError</td>
 </tr>
 </tbody>
 </table>
@@ -314,8 +314,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledMap.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledMap.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledMap.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a map from ElementTree xml node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -339,9 +339,10 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tiled_gid</strong> &#8211; GID that is found in TMX data</td>
 </tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">GID that pytmx uses for the the GID passed</td>
+</tr>
 </tbody>
 </table>
-<p>rtype: GID that pytmx uses for the the GID passed</p>
 </dd></dl>
 
 <dl class="method">
@@ -433,8 +434,8 @@
 <p>External tilesets are supported.  GID/ID&#8217;s from Tiled are not guaranteed to
 be the same after loaded.</p>
 <dl class="method">
-<dt id="pytmx.pytmx.TiledTileset.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileset.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileset.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileset.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a Tileset from ElementTree xml node</p>
 <p>A bit of mangling is done here so that tilesets that have external
 TSX files appear the same as those that don&#8217;t</p>
@@ -450,11 +451,6 @@ TSX files appear the same as those that don&#8217;t</p>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pytmx.pytmx.TiledTileset.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'firstgid', 'source', 'name', 'tilewidth', 'tileheight', 'spacing', 'margin', 'image', 'tile', 'properties']</em><a class="headerlink" href="#pytmx.pytmx.TiledTileset.reserved" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -469,8 +465,8 @@ TSX files appear the same as those that don&#8217;t</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledTileLayer.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledTileLayer.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a Tile Layer from ElementTree xml node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -483,11 +479,6 @@ TSX files appear the same as those that don&#8217;t</p>
 </tbody>
 </table>
 </dd></dl>
-
-<dl class="attribute">
-<dt id="pytmx.pytmx.TiledTileLayer.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'x', 'y', 'width', 'height', 'opacity', 'properties', 'data']</em><a class="headerlink" href="#pytmx.pytmx.TiledTileLayer.reserved" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="pytmx.pytmx.TiledTileLayer.tiles">
@@ -508,8 +499,8 @@ TSX files appear the same as those that don&#8217;t</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledObject.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObject.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledObject.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObject.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an Object from ElementTree xml node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -523,22 +514,17 @@ TSX files appear the same as those that don&#8217;t</p>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pytmx.pytmx.TiledObject.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'type', 'x', 'y', 'width', 'height', 'gid', 'properties', 'polygon', 'polyline', 'image']</em><a class="headerlink" href="#pytmx.pytmx.TiledObject.reserved" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="pytmx.pytmx.TiledObjectGroup">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledObjectGroup</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">builtins.list</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></p>
 <p>Represents a Tiled ObjectGroup</p>
 <p>Supports any operation of a normal list.</p>
 <dl class="method">
-<dt id="pytmx.pytmx.TiledObjectGroup.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledObjectGroup.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an Object Group from ElementTree xml node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -552,11 +538,6 @@ TSX files appear the same as those that don&#8217;t</p>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pytmx.pytmx.TiledObjectGroup.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'name', 'color', 'x', 'y', 'width', 'height', 'opacity', 'object', 'properties']</em><a class="headerlink" href="#pytmx.pytmx.TiledObjectGroup.reserved" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -564,16 +545,15 @@ TSX files appear the same as those that don&#8217;t</p>
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TiledImageLayer</tt><big>(</big><em>parent</em>, <em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pytmx.pytmx.TiledElement</span></tt></p>
 <p>Represents Tiled Image Layer</p>
-<p>The image associated with this layer will be loaded and assigned a GID.
-(pygame only)</p>
+<p>The image associated with this layer will be loaded and assigned a GID.</p>
 <dl class="attribute">
 <dt id="pytmx.pytmx.TiledImageLayer.image">
 <tt class="descname">image</tt><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.image" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pytmx.pytmx.TiledImageLayer.parse">
-<tt class="descname">parse</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.parse" title="Permalink to this definition">¶</a></dt>
+<dt id="pytmx.pytmx.TiledImageLayer.parse_xml">
+<tt class="descname">parse_xml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.parse_xml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an Image Layer from ElementTree xml node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -587,17 +567,12 @@ TSX files appear the same as those that don&#8217;t</p>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pytmx.pytmx.TiledImageLayer.reserved">
-<tt class="descname">reserved</tt><em class="property"> = ['visible', 'source', 'name', 'width', 'height', 'opacity', 'visible']</em><a class="headerlink" href="#pytmx.pytmx.TiledImageLayer.reserved" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="pytmx.pytmx.TileFlags">
 <em class="property">class </em><tt class="descclassname">pytmx.pytmx.</tt><tt class="descname">TileFlags</tt><a class="headerlink" href="#pytmx.pytmx.TileFlags" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.tuple</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
 <p>TileFlags(flipped_horizontally, flipped_vertically, flipped_diagonally)</p>
 <dl class="attribute">
 <dt id="pytmx.pytmx.TileFlags.flipped_diagonally">
@@ -620,14 +595,94 @@ TSX files appear the same as those that don&#8217;t</p>
 </dd></dl>
 
 </div>
-<div class="section" id="pytmx-tmxloader-module">
-<h2>pytmx.tmxloader module<a class="headerlink" href="#pytmx-tmxloader-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pytmx.util_pygame">
+<span id="pytmx-util-pygame-module"></span><h2>pytmx.util_pygame module<a class="headerlink" href="#module-pytmx.util_pygame" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pytmx.util_pygame.load_pygame">
+<tt class="descclassname">pytmx.util_pygame.</tt><tt class="descname">load_pygame</tt><big>(</big><em>filename</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.util_pygame.load_pygame" title="Permalink to this definition">¶</a></dt>
+<dd><p>PYGAME USERS: Use me.</p>
+<p>Load a TMX file, load the images, and return a TiledMap class that is
+ready to use.</p>
+<p>this utility has &#8216;smart&#8217; tile loading.  by default any tile without
+transparent pixels will be loaded for quick blitting.  if the tile has
+transparent pixels, then it will be loaded with per-pixel alpha.  this is
+a per-tile, per-image check.</p>
+<p>if a color key is specified as an argument, or in the tmx data, the
+per-pixel alpha will not be used at all. if the tileset&#8217;s image has colorkey
+transparency set in Tiled, the util_pygam will return images that have their
+transparency already set.</p>
+<p>TL;DR:
+Don&#8217;t attempt to convert() or convert_alpha() the individual tiles.  It is
+already done for you.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pytmx.util_pygame.pygame_image_loader">
+<tt class="descclassname">pytmx.util_pygame.</tt><tt class="descname">pygame_image_loader</tt><big>(</big><em>filename</em>, <em>colorkey</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.util_pygame.pygame_image_loader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pytmx.util_pygame.simplify">
+<tt class="descclassname">pytmx.util_pygame.</tt><tt class="descname">simplify</tt><big>(</big><em>all_points</em>, <em>tilewidth</em>, <em>tileheight</em><big>)</big><a class="headerlink" href="#pytmx.util_pygame.simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of points, return list of rects that represent them
+kludge:</p>
+<p>&#8220;A kludge (or kluge) is a workaround, a quick-and-dirty solution,
+a clumsy or inelegant, yet effective, solution to a problem, typically
+using parts that are cobbled together.&#8221;</p>
+<p>&#8211; wikipedia</p>
+<p>turn a list of points into a rects
+adjacent rects will be combined.</p>
+<dl class="docutils">
+<dt>plain english:</dt>
+<dd><p class="first">the input list must be a list of tuples that represent
+the areas to be combined into rects
+the rects will be blended together over solid groups</p>
+<p>so if data is something like:</p>
+<p>0 1 1 1 0 0 0
+0 1 1 0 0 0 0
+0 0 0 0 0 4 0
+0 0 0 0 0 4 0
+0 0 0 0 0 0 0
+0 0 1 1 1 1 1</p>
+<p>you&#8217;ll have the 4 rects that mask the area like this:</p>
+<p>..######......
+..####........
+..........##..
+..........##..
+..............
+....##########</p>
+<p class="last">pretty cool, right?</p>
+</dd>
+</dl>
+<p>there may be cases where the number of rectangles is not as low as possible,
+but I haven&#8217;t found that it is excessively bad.  certainly much better than
+making a list of rects, one for each tile on the map!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pytmx.util_pygame.build_rects">
+<tt class="descclassname">pytmx.util_pygame.</tt><tt class="descname">build_rects</tt><big>(</big><em>tmxmap</em>, <em>layer</em>, <em>tileset=None</em>, <em>real_gid=None</em><big>)</big><a class="headerlink" href="#pytmx.util_pygame.build_rects" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a set of non-overlapping rects that represents the distribution       of the specified gid.</p>
+<p>useful for generating rects for use in collision detection</p>
+</dd></dl>
+
 </div>
-<div class="section" id="pytmx-utils-module">
-<h2>pytmx.utils module<a class="headerlink" href="#pytmx-utils-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-pytmx">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pytmx" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pytmx.util_pyglet">
+<span id="pytmx-utils-module"></span><h2>pytmx.utils module<a class="headerlink" href="#module-pytmx.util_pyglet" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pytmx.util_pyglet.pyglet_image_loader">
+<tt class="descclassname">pytmx.util_pyglet.</tt><tt class="descname">pyglet_image_loader</tt><big>(</big><em>filename</em>, <em>colorkey</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pytmx.util_pyglet.pyglet_image_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>basic image loading with pyglet</p>
+<p>returns pyglet Images, not textures</p>
+<p>This is a basic proof-of-concept and is likely to fail in some situations.</p>
+<dl class="docutils">
+<dt>Missing:</dt>
+<dd>Transparency
+Tile Rotation</dd>
+</dl>
+<p>This is slow, as well.</p>
+</dd></dl>
+
 </div>
 </div>
 
@@ -641,9 +696,8 @@ TSX files appear the same as those that don&#8217;t</p>
   <ul>
 <li><a class="reference internal" href="#">pytmx package</a><ul>
 <li><a class="reference internal" href="#module-pytmx.pytmx">pytmx.pytmx module</a></li>
-<li><a class="reference internal" href="#pytmx-tmxloader-module">pytmx.tmxloader module</a></li>
-<li><a class="reference internal" href="#pytmx-utils-module">pytmx.utils module</a></li>
-<li><a class="reference internal" href="#module-pytmx">Module contents</a></li>
+<li><a class="reference internal" href="#module-pytmx.util_pygame">pytmx.util_pygame module</a></li>
+<li><a class="reference internal" href="#module-pytmx.util_pyglet">pytmx.utils module</a></li>
 </ul>
 </li>
 </ul>
@@ -689,7 +743,7 @@ TSX files appear the same as those that don&#8217;t</p>
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Author.
+        &copy; Copyright 2014, Leif Theden.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>

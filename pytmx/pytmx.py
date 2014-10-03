@@ -35,7 +35,7 @@ TileFlags = namedtuple('TileFlags', flag_names)
 
 
 def default_image_loader(filename, flags, **kwargs):
-    def load(rect, flags):
+    def load(rect=None, flags=None):
         return filename, rect, flags
 
     return load
@@ -124,13 +124,13 @@ class TiledElement(object):
         self.properties = dict()
 
     @classmethod
-    def fromstring(cls, xml_string):
+    def from_xml_string(cls, xml_string):
         """Return a TileElement object from a xml string
 
         :param xml_string: string containing xml data
         rtype: TiledElement instance
         """
-        return cls().parse(ElementTree.fromstring(xml_string))
+        return cls().parse_xml(ElementTree.fromstring(xml_string))
 
     def set_properties(self, node):
         """
@@ -145,7 +145,7 @@ class TiledElement(object):
         # set the attributes that are derived from tiled 'properties'
         invalid = False
         for k, v in prop.items():
-            if k in self.reserved:
+            if hasattr(self, k):
                 invalid = True
                 msg = '{0} "{1}" has a property called "{2}"'
                 logger.debug(msg.format(self.__class__.__name__, self.name, k,
@@ -196,6 +196,7 @@ class TiledMap(TiledElement):
         # optional keyword arguments checked here
         self.optional_gids = kwargs.get('optional_gids', set())
         self.load_all_tiles = kwargs.get('load_all', False)
+        self.invert_y = kwargs.get('invert_y', True)
 
         self.layers = list()           # all layers in proper order
         self.tilesets = list()         # TiledTileset objects
@@ -226,7 +227,7 @@ class TiledMap(TiledElement):
         self.imagemap[(0, 0)] = 0
 
         if filename:
-            self.parse(ElementTree.parse(self.filename).getroot())
+            self.parse_xml(ElementTree.parse(self.filename).getroot())
 
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
@@ -235,7 +236,7 @@ class TiledMap(TiledElement):
     def __iter__(self):
         return chain(self.layers, self.objects)
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse a map from ElementTree xml node
 
         :param node: ElementTree xml node
@@ -279,7 +280,8 @@ class TiledMap(TiledElement):
                 msg = 'attempted to lookup invalid gid %s in object %s'
                 logger.error(msg, o.gid, o)
             else:
-                o.y -= tileset.tileheight
+                if self.invert_y:
+                    o.y -= tileset.tileheight
                 o.height = tileset.tileheight
                 o.width = tileset.tilewidth
 
@@ -365,7 +367,7 @@ class TiledMap(TiledElement):
         :param x: x coordinate
         :param y: y coordinate
         :param layer: layer number
-        :rtype: pygame surface if found, otherwise 0
+        :rtype: surface if found, otherwise 0
         """
         try:
             assert (x >= 0 and y >= 0)
@@ -395,7 +397,7 @@ class TiledMap(TiledElement):
         """Return the tile image for this location
 
         :param gid: GID of image
-        :rtype: pygame surface if found, otherwise ValueError
+        :rtype: surface if found, otherwise ValueError
         """
         try:
             assert (int(gid) >= 0)
@@ -415,7 +417,7 @@ class TiledMap(TiledElement):
         :param x: x coordinate
         :param y: y coordinate
         :param layer: layer number
-        :rtype: pygame surface if found, otherwise ValueError
+        :rtype: surface if found, otherwise ValueError
         """
         try:
             assert (x >= 0 and y >= 0 and layer >= 0)
@@ -632,7 +634,7 @@ class TiledMap(TiledElement):
         """Used to manage the mapping of GIDs between the tmx and pytmx
 
         :param tiled_gid: GID that is found in TMX data
-        rtype: GID that pytmx uses for the the GID passed
+        :rtype: GID that pytmx uses for the the GID passed
         """
         if tiled_gid:
             try:
@@ -670,9 +672,6 @@ class TiledTileset(TiledElement):
     External tilesets are supported.  GID/ID's from Tiled are not guaranteed to
     be the same after loaded.
     """
-    reserved = "visible firstgid source name tilewidth tileheight spacing \
-                margin image tile properties".split()
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -689,9 +688,9 @@ class TiledTileset(TiledElement):
         self.width = 0
         self.height = 0
 
-        self.parse(node)
+        self.parse_xml(node)
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse a Tileset from ElementTree xml node
 
         A bit of mangling is done here so that tilesets that have external
@@ -769,8 +768,6 @@ class TiledTileLayer(TiledElement):
 
     Iterate over the layer using the iterator protocol
     """
-    reserved = "visible name x y width height opacity properties data".split()
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -783,7 +780,7 @@ class TiledTileLayer(TiledElement):
         self.height = 0
         self.width = 0
 
-        self.parse(node)
+        self.parse_xml(node)
 
     def __iter__(self):
         return self.iter_data()
@@ -800,7 +797,7 @@ class TiledTileLayer(TiledElement):
             if image:
                 yield x, y, image
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse a Tile Layer from ElementTree xml node
 
         :param node: ElementTree xml node
@@ -879,9 +876,6 @@ class TiledObject(TiledElement):
 
     Supported types: Box, Ellipse, Tile Object, Polyline, Polygon
     """
-    reserved = "visible name type x y width height gid properties polygon \
-               polyline image".split()
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -897,7 +891,7 @@ class TiledObject(TiledElement):
         self.gid = 0
         self.visible = 1
 
-        self.parse(node)
+        self.parse_xml(node)
 
     @property
     def image(self):
@@ -905,7 +899,7 @@ class TiledObject(TiledElement):
             return self.parent.images[self.gid]
         return None
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse an Object from ElementTree xml node
 
         :param node: ElementTree xml node
@@ -954,9 +948,6 @@ class TiledObjectGroup(TiledElement, list):
 
     Supports any operation of a normal list.
     """
-    reserved = "visible name color x y width height opacity object \
-                properties".split()
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -967,9 +958,9 @@ class TiledObjectGroup(TiledElement, list):
         self.opacity = 1
         self.visible = 1
 
-        self.parse(node)
+        self.parse_xml(node)
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse an Object Group from ElementTree xml node
 
         :param node: ElementTree xml node
@@ -986,10 +977,7 @@ class TiledImageLayer(TiledElement):
     """ Represents Tiled Image Layer
 
     The image associated with this layer will be loaded and assigned a GID.
-    (pygame only)
     """
-    reserved = "visible source name width height opacity visible".split()
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1002,7 +990,7 @@ class TiledImageLayer(TiledElement):
         self.opacity = 1
         self.visible = 1
 
-        self.parse(node)
+        self.parse_xml(node)
 
     @property
     def image(self):
@@ -1010,7 +998,7 @@ class TiledImageLayer(TiledElement):
             return self.parent.images[self.gid]
         return None
 
-    def parse(self, node):
+    def parse_xml(self, node):
         """Parse an Image Layer from ElementTree xml node
 
         :param node: ElementTree xml node

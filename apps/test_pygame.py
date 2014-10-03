@@ -1,6 +1,6 @@
 """
 This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Thedem "bitcraft", 2012-2014
+Leif Theden "bitcraft", 2012-2014
 
 Rendering demo for the TMXLoader.
 
@@ -18,9 +18,10 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
-from pytmx import *
-from pygame.locals import *
 import pygame
+from pytmx import *
+from pytmx.util_pygame import load_pygame
+from pygame.locals import *
 
 
 def init_screen(width, height):

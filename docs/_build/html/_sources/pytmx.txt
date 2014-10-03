@@ -9,10 +9,10 @@ pytmx.pytmx module
     :undoc-members:
     :show-inheritance:
 
-pytmx.tmxloader module
-----------------------
+pytmx.util_pygame module
+------------------------
 
-.. automodule:: pytmx.tmxloader
+.. automodule:: pytmx.util_pygame
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,16 +20,8 @@ pytmx.tmxloader module
 pytmx.utils module
 ------------------
 
-.. automodule:: pytmx.utils
+.. automodule:: pytmx.util_pyglet
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: pytmx
-    :members:
-    :undoc-members:
-    :show-inheritance:

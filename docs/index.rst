@@ -60,6 +60,226 @@ From a XML string:
 
 Load with PyGame surfaces:
 
+    >>> from test_pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from test_pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = test_pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = test_pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import test_pytmx
+    >>> tmxdata = test_pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import test_pytmx
+    >>> tmxdata = test_pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = test_pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = test_pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import test_pytmx
+    >>> tmxdata = test_pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import test_pytmx
+    >>> tmxdata = test_pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
+    >>> from pytmx import load_pygame
+    >>> tmxdata = load_pygame("map.tmx")
+
+
+Getting the tile surface:
+
+    >>> image = tmx_data.get_tile_image(x, y, layer)
+    >>> screen.blit(image, position)
+
+
+
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap("map.tmx")
+
+
+From a XML string:
+    >>> import pytmx
+    >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
+
+
+Load with PyGame surfaces:
+
     >>> from pytmx import load_pygame
     >>> tmxdata = load_pygame("map.tmx")
 
