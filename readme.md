@@ -7,6 +7,8 @@ with no changes to the source code.  Please use this branch for all new PyTMX pr
 If you have any problems or suggestions, please open an issue.
 I am also often lurking #pygame on freenode.  Feel free to contact me.
 
+Requires the six module.
+
 *Released under the LGPL v3*
 
 #### See the "apps" folder for example use.  
