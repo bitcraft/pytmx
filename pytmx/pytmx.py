@@ -321,9 +321,11 @@ class TiledMap(TiledElement):
             p = product(range(ts.margin, height + ts.margin, th),
                         range(ts.margin, width + ts.margin, tw))
 
+            tw -= ts.spacing
+            th -= ts.spacing
             for real_gid, (y, x) in enumerate(p, ts.firstgid):
                 rect = (x, y, tw, th)
-                if x + ts.tilewidth-ts.spacing > width:
+                if x + tw > width + 1:
                     continue
 
                 gids = self.map_gid(real_gid)
