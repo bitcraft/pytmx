@@ -29,3 +29,9 @@ class TiledMapTest(TestCase):
 
         image = self.m.get_tile_image_by_gid(1)
         self.assertIsNotNone(image)
+
+    def test_import_pytmx_doesnt_import_pygame(self):
+        import pytmx
+        import sys
+        self.assertTrue('pygame' not in sys.modules)
+

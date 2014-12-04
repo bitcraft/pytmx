@@ -304,30 +304,15 @@ class TiledMap(TiledElement):
             colorkey = getattr(ts, 'trans', None)
             loader = self.image_loader(path, colorkey)
 
-            # some tileset images may be slightly larger than the tile area
-            # ie: may include a title copyright, ect. this compensates for that
-            iw = ts.width
-            ih = ts.height
-            tw = ts.tilewidth + ts.spacing
-            th = ts.tileheight + ts.spacing
-            width = int((((iw-ts.margin*2+ts.spacing)//tw)*tw)-ts.spacing)
-            height = int((((ih-ts.margin*2+ts.spacing)//th)*th)-ts.spacing)
+            p = product(range(ts.margin,
+                              ts.height + ts.margin - ts.tilewidth + 1,
+                              ts.tileheight + ts.spacing),
+                        range(ts.margin,
+                              ts.width + ts.margin - ts.tileheight + 1,
+                              ts.tilewidth + ts.spacing))
 
-            # trim off any pixels on the right side that isn't a tile.
-            # this happens if extra stuff is included on the left, like a logo
-            # or credits, is not actually part of the tileset.
-            width -= (iw - ts.margin) % tw
-
-            p = product(range(ts.margin, height + ts.margin, th),
-                        range(ts.margin, width + ts.margin, tw))
-
-            tw -= ts.spacing
-            th -= ts.spacing
             for real_gid, (y, x) in enumerate(p, ts.firstgid):
-                rect = (x, y, tw, th)
-                if x + tw > width + 1:
-                    continue
-
+                rect = (x, y, ts.tilewidth, ts.tileheight)
                 gids = self.map_gid(real_gid)
                 if gids is None:
                     if self.load_all_tiles or real_gid in self.optional_gids:

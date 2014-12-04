@@ -36,8 +36,6 @@ def smart_convert(original, colorkey, pixelalpha):
     convert() the images on your own
     """
     tile_size = original.get_size()
-
-    # TODO: test how the 'threshold' value effects transparent pixel detection
     threshold = 127   # the default
 
     # count the number of pixels in the tile that are not transparent
