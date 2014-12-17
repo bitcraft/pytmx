@@ -1,14 +1,13 @@
 """
 some tests for pytmx
 
-WIP
+WIP - all code that isn't abandoned is WIP
 """
 
 from unittest import TestCase
-from logging import getLogger
 
 import pytmx
-
+from pytmx import handle_bool
 
 class TiledMapTest(TestCase):
     filename = 'tests/test01.tmx'
@@ -35,3 +34,32 @@ class TiledMapTest(TestCase):
         import sys
         self.assertTrue('pygame' not in sys.modules)
 
+
+
+class handle_bool_TestCase(TestCase):
+
+    def test_when_passed_true_it_should_return_true(self):
+        self.assertTrue(handle_bool("true"))
+
+    def test_when_passed_yes_it_should_return_true(self):
+        self.assertTrue(handle_bool("yes"))
+
+    def test_when_passed_false_it_should_return_false(self):
+        self.assertFalse(handle_bool("false"))
+
+    def test_when_passed_no_it_should_return_false(self):
+        self.assertFalse(handle_bool("no"))
+
+    def test_when_passed_zero_it_should_return_false(self):
+        self.assertFalse(handle_bool("0"))
+
+    def test_when_passed_non_zero_it_should_return_true(self):
+        self.assertTrue(handle_bool("1337"))
+
+    def test_when_passed_garbage_it_should_raise_value_error(self):
+        with self.assertRaises(ValueError):
+            handle_bool("garbage")
+
+    def test_when_passed_None_it_should_raise_value_error(self):
+        with self.assertRaises(ValueError):
+            handle_bool(None)
