@@ -14,7 +14,7 @@ logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
 __all__ = ['TiledMap', 'TiledTileset', 'TiledTileLayer', 'TiledObject',
-           'TiledObjectGroup', 'TiledImageLayer', 'TileFlags']
+           'TiledObjectGroup', 'TiledImageLayer', 'TileFlags', 'convert_to_bool']
 
 # internal flags
 TRANS_FLIPX = 1
@@ -58,7 +58,7 @@ def decode_gid(raw_gid):
     return gid, flags
 
 
-def handle_bool(text):
+def convert_to_bool(text):
     # properly convert strings to a bool
     try:
         return bool(int(text))
@@ -95,7 +95,7 @@ types.update({
     "trans": str,
     "id": int,
     "opacity": float,
-    "visible": handle_bool,
+    "visible": convert_to_bool,
     "encoding": str,
     "compression": str,
     "gid": int,
@@ -131,7 +131,27 @@ class TiledElement(object):
         :param xml_string: string containing xml data
         rtype: TiledElement instance
         """
+        #  TODO: This is not how you implement inheritable class methods!
         return cls().parse_xml(ElementTree.fromstring(xml_string))
+
+    def cast_and_set_attributes_from_node_items(self, items):
+        for key, value in items:
+            casted_value = types[key](value)
+            setattr(self, key, casted_value)
+
+    def contains_invalid_property_name(self, items):
+        for k, v in items:
+            if hasattr(self, k):
+                msg = '{0} "{1}" has a property called "{2}"'
+                logger.debug(msg.format(self.__class__.__name__, self.name, k,
+                                        self.__class__.__name__))
+                return True
+        return False
+
+    def log_property_error_message(self):
+        msg = "This name(s) is reserved for {0} objects and cannot be used."
+        logger.error(msg.format(self.__class__.__name__))
+        logger.error("Please change the name(s) in Tiled and try again.")
 
     def set_properties(self, node):
         """
@@ -139,26 +159,13 @@ class TiledElement(object):
         in the values into the object's dictionary.  Names will be checked to
         make sure that they do not conflict with reserved names.
         """
-        # set the correct types
-        [setattr(self, k, types[str(k)](v)) for (k, v) in node.items()]
-        prop = parse_properties(node)
-
-        # set the attributes that are derived from tiled 'properties'
-        invalid = False
-        for k, v in prop.items():
-            if hasattr(self, k):
-                invalid = True
-                msg = '{0} "{1}" has a property called "{2}"'
-                logger.debug(msg.format(self.__class__.__name__, self.name, k,
-                                        self.__class__.__name__))
-
-        if invalid:
-            msg = "This name(s) is reserved for {0} objects and cannot be used."
-            logger.error(msg.format(self.__class__.__name__))
-            logger.error("Please change the name(s) in Tiled and try again.")
+        self.cast_and_set_attributes_from_node_items(node.items())
+        properties = parse_properties(node)
+        if self.contains_invalid_property_name(properties.items()):
+            self.log_property_error_message()
             raise ValueError
 
-        self.properties = prop
+        self.properties = properties
 
     def __getattr__(self, item):
         try:
