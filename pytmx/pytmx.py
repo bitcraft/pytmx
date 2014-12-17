@@ -65,14 +65,15 @@ def handle_bool(text):
     except:
         pass
 
-    try:
-        text = str(text).lower()
-        if text == "true":  return True
-        if text == "yes":   return True
-        if text == "false": return False
-        if text == "no":    return False
-    except:
-        pass
+    text = str(text).lower()
+    if text == "true":
+        return True
+    if text == "yes":
+        return True
+    if text == "false":
+        return False
+    if text == "no":
+        return False
 
     raise ValueError
 
