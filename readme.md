@@ -215,6 +215,14 @@ Example version: X.Y.Z
 - Z: minor release.  for bug fixes related to last release
 
 
+Running the Tests
+===============================================================================
+
+Install the nose package with pip then from the root of the project run:
+
+        nosetests
+
+
 Artwork Attributions
 ===============================================================================
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0

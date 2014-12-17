@@ -11,7 +11,7 @@ import pytmx
 
 
 class TiledMapTest(TestCase):
-    filename = 'test01.tmx'
+    filename = 'tests/test01.tmx'
 
     def setUp(self):
         self.m = pytmx.TiledMap(self.filename)
