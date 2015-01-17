@@ -313,10 +313,10 @@ class TiledMap(TiledElement):
             loader = self.image_loader(path, colorkey)
 
             p = product(range(ts.margin,
-                              ts.height + ts.margin - ts.tilewidth + 1,
+                              ts.height + ts.margin - ts.tileheight + 1,
                               ts.tileheight + ts.spacing),
                         range(ts.margin,
-                              ts.width + ts.margin - ts.tileheight + 1,
+                              ts.width + ts.margin - ts.tilewidth + 1,
                               ts.tilewidth + ts.spacing))
 
             for real_gid, (y, x) in enumerate(p, ts.firstgid):
