@@ -36,4 +36,5 @@ def pysdl2_image_loader(filename, colorkey, **kwargs):
 
 
 def load_pysdl2(filename, *args, **kwargs):
-    return pytmx.TiledMap(filename, image_loader=pysdl2_image_loader)
+    kwargs['image_loader'] = pysdl2_image_loader
+    return pytmx.TiledMap(filename, *args, **kwargs)

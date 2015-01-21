@@ -108,7 +108,8 @@ def load_pygame(filename, *args, **kwargs):
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
-    return pytmx.TiledMap(filename, image_loader=pygame_image_loader)
+    kwargs['image_loader'] = pygame_image_loader
+    return pytmx.TiledMap(filename, *args, **kwargs)
 
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):
