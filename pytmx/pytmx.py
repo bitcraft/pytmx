@@ -143,15 +143,14 @@ class TiledElement(object):
         for k, v in items:
             if hasattr(self, k):
                 msg = '{0} "{1}" has a property called "{2}"'
-                logger.debug(msg.format(self.__class__.__name__, self.name, k,
+                logger.error(msg.format(self.__class__.__name__, self.name, k,
                                         self.__class__.__name__))
                 return True
         return False
 
     def log_property_error_message(self):
-        msg = "This name(s) is reserved for {0} objects and cannot be used."
-        logger.error(msg.format(self.__class__.__name__))
-        logger.error("Please change the name(s) in Tiled and try again.")
+        msg = 'Some name are reserved for {0} objects and cannot be used.'
+        logger.error(msg)
 
     def set_properties(self, node):
         """
