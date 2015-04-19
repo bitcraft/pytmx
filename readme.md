@@ -2,7 +2,7 @@
 ##### For Python 2.7 and 3.3+
 
 This is the most up-to-date version of PyTMX available and works with Python 2.7
-and 3.3 with no changes to the source code.  Please use this branch for all new
+and 3.3+ with no changes to the source code.  Please use this branch for all new
 PyTMX projects.
 
 If you have any problems or suggestions, please open an issue.
@@ -18,6 +18,7 @@ Requires the six module.
 News
 ===============================================================================
 
+__04/18/15__ - Document support for pysdl2 and pyglet
 __09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
 __05/29/14__ - Added support for rotated objects and floating point  
@@ -36,11 +37,13 @@ correctly handle most Tiled object types, it also will load metadata for
 them, so you can modify your maps and objects in Tiled, instead of modifying
 your source code.
 
+New support for pysdl2 and pyglet!  Check it out!
+
 Because PyTMX was built with games in mind, it differs slightly from Tiled in
 a few minor aspects:
 
 - Layers not aligned to the grid are not supported.
-- Some object metadata attribute names are not supported (see below)
+- Some object metadata attribute names are not supported (see "Reserved Names")
 
 PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
@@ -53,6 +56,11 @@ with good results.
 
 Documentation
 ===============================================================================
+
+This readme does not include much detailed documentation.  Full API reference
+and documentation can be found at the site below.  For examples of real use,
+check out the apps folder in this repo.  The 'test' apps demonstrate how to
+load maps, get layer, tile, and object data, as well as some rendering.
 
 http://pytmx.readthedocs.org/
 
@@ -70,11 +78,11 @@ Design Goals and Features
 * API with many handy functions
 * Memory efficient and performant
 * Loads data, "properties" metadata, and images from Tiled's TMX format
-* Supports base64, csv, gzip, zlib and uncompressed XML
+* Supports base64, csv, gzip, zlib and uncompressed XML formats
 * Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
-* Built-in image loading with pygame (will work without images as well)
+* Built-in image loading with pygame, pysdl2, and pyglet
 
 
 Why use PyTMX?
@@ -82,7 +90,7 @@ Why use PyTMX?
 
 ### PyTMX is efficient:
 * Only the tiles used on a map are loaded into memory
-* Map information is stored as integers (16 bit), not python objects (32+kb)
+* Map information is stored as integers, not python objects (32+kb)
 * Extensive use of generators and iterators make it easy on memory
 * Code is designed for compact size and readability
 
@@ -91,7 +99,7 @@ Why use PyTMX?
 * PyTMX data classes can be extended
 * Does not force you to render data in any particular way
 * Includes many checks to give useful debugging information
-* pygame is supported, but not required
+* Supports pygame, pyglet, and pysdl2 image loading
 
 ### PyTMX is supported:
 * GitHub hosting allows for community participation
@@ -117,7 +125,7 @@ You can also manually install it
 Basic use:
 ===============================================================================
 
-#### Just data:
+#### Just data, no images:
 ```python
 import pytmx
 tmx_data = pytmx.TiledMap('map.tmx')
@@ -126,7 +134,7 @@ tmx_data = pytmx.TiledMap('map.tmx')
 #### Load with Pygame Images:
 
 ```python
-from pytmx import load_pygame
+from pytmx.util_pygame import load_pygame
 tmx_data = load_pygame('map.tmx')
 ```
 
@@ -134,20 +142,37 @@ The loader will correctly convert() or convert_alpha() each tile image, so you
 don't have to worry about that after you load the map.
 
 
-#### Getting the Tile Surface
+#### Load with pysdl2 Images (experimental):
+
+```python
+from pytmx.util_pysdl2 import load_pysdl2
+tmx_data = load_pysdl2('map.tmx')
+```
+
+#### Load with pyglet Images (experimental):
+
+```python
+from pytmx.util_pyglet import pyglet_image_loader
+tmx_data = load_pygame('map.tmx')
+```
+
+
+#### Getting the Tile Image
 
 ```python
 image = tmx_data.get_tile_image(x, y, layer)
-screen.blit(image, position)
 ```
 
 
 Tile, Object, and Map Properties
 ===============================================================================
 
-Properties are any key/value data added to an object/map/layer in Tiled
-through the properties dialog.  Tile properties are accessed through the the
-parent map object:
+Properties are a powerful feature of Tiled that allows the level designer to
+assign key/value data to individual maps, tilesets, tiles, and objects.  Pytmx
+includes full support for reading this data so you can set parameters for stuff
+in Tiled, instead of maintaining external data files, or even values in source.
+
+Individual tile properties are accessed through the the parent map object:
 
 ```
 tmxdata = TiledMap('level1.tmx')
@@ -156,22 +181,31 @@ props = tmxdata.get_tile_properties_by_gid(tile_gid)
 ```
 
 All other objects, including the map, layer, objects, etc. are in an
-dict attribute called "properties":
+object attribute (type: dict) called "properties":
 
 ```python
+# this is the map object
 tmx_data = TiledMap('level1.tmx')
+
+# so, here are the properties of the map
 tmx_data.properties['name']
+
+# and the properties of each layer
 for layer in tmxdata.visible_layers:
     layer.properties['movement_speed']
+    
+# here are properties of each object
+for obj in layer.objects():
+    obj.properties['attack_strength']
 ```
 
 
-Scrolling Demo
+Scrolling Maps for Pygame
 ===============================================================================
 
 I have another repo with a working demo of a proper scrolling map using Tiled
-maps.  Please feel free to test drive it.  It isn't limited to Tiled maps,
-you can use any data structure you want, as long as PyGame is used.
+maps and pygame.  Please feel free to test drive it.  It isn't limited to Tiled
+maps, you can use any data structure you want, as long as PyGame is used.
 
 https://github.com/bitcraft/pyscroll
 
@@ -179,16 +213,27 @@ https://github.com/bitcraft/pyscroll
 Reserved Names
 ================================================================================
 
-If you use "properties" for any of the following object types, you cannot use
-any of these words as a name for your property.  A ValueError will be raised
-if a Tile Object attempts to use a reserved name.
+Tiled supports user created metadata called "properties" for all the built-in
+objects, like the map, tileset, objects, etc.  Due to how the Tiled XML data is
+stored, there are situations where Tiled internal metadata might have the same
+name as user-created properties.
 
-In summary: don't use the following names when adding metadata in Tiled.
+Pytmx will raise a ValueError if it detects any conflicts.  This check is
+performed in order to prevent any situations where a level change might be made
+in Tiled, but the programmer/designer doesn't know or forgets if the change was
+made in the Tiled metadata or the user properties.
 
-As of 0.8.1, these values are:
+I realize that it creates problems with certain common names like "id", or
+"color".  Overall, it should help with clean design.  In the future, I may
+make an option for removing this check, as long as the programmer understands
+the risk.
+
+In summary, don't use the following names when creating properties in Tiled:
+
+As of 0.11.0, these values are:
 
 map:         version, orientation, width, height, tilewidth, tileheight  
-             properties, tileset, layer, objectgroup  
+             properties, tileset, layer, objectgroup
 
 tileset:     firstgid, source, name, tilewidth, tileheight, spacing, margin,  
              image, tile, properties  
@@ -200,19 +245,7 @@ layer:       name, x, y, width, height, opacity, properties, data
 objectgroup: name, color, x, y, width, height, opacity, object, properties  
 
 object:      name, type, x, y, width, height, gid, properties, polygon,  
-             polyline, image
-
-***   Please see the TiledMap class source for more api information.   ***
-
-
-Version Numbering
-================================================================================
-
-Example version: X.Y.Z  
-
-- X: 2 for python 2, 3 for python 3 and 2
-- Y: major release. for new features or api change
-- Z: minor release.  for bug fixes related to last release
+             polyline, image, id
 
 
 Running the Tests
