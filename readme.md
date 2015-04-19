@@ -18,7 +18,7 @@ Requires the six module.
 News
 ===============================================================================
 
-__04/18/15__ - Document support for pysdl2 and pyglet
+__04/18/15__ - Document support for pysdl2 and pyglet  
 __09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
 __05/29/14__ - Added support for rotated objects and floating point  
@@ -131,7 +131,7 @@ import pytmx
 tmx_data = pytmx.TiledMap('map.tmx')
 ```
 
-#### Load with Pygame Images:
+#### Load with pygame images:
 
 ```python
 from pytmx.util_pygame import load_pygame
@@ -142,14 +142,14 @@ The loader will correctly convert() or convert_alpha() each tile image, so you
 don't have to worry about that after you load the map.
 
 
-#### Load with pysdl2 Images (experimental):
+#### Load with pysdl2 images (experimental):
 
 ```python
 from pytmx.util_pysdl2 import load_pysdl2
 tmx_data = load_pysdl2('map.tmx')
 ```
 
-#### Load with pyglet Images (experimental):
+#### Load with pyglet images (experimental):
 
 ```python
 from pytmx.util_pyglet import pyglet_image_loader
@@ -157,7 +157,7 @@ tmx_data = load_pygame('map.tmx')
 ```
 
 
-#### Getting the Tile Image
+#### Getting the tile image
 
 ```python
 image = tmx_data.get_tile_image(x, y, layer)
