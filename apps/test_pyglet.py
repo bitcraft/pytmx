@@ -18,7 +18,7 @@ logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
 from pytmx import *
-from pytmx.util_pyglet import pyglet_image_loader
+from pytmx.util_pyglet import load_pyglet
 import pyglet
 
 
@@ -29,8 +29,7 @@ class TiledRenderer(object):
     no shape drawing yet
     """
     def __init__(self, filename):
-        tm = TiledMap(filename, image_loader=pyglet_image_loader,
-                      invert_y=False)
+        tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
@@ -57,8 +56,8 @@ class TiledRenderer(object):
         poly_color = (0, 255, 0)
 
         # fill the background color
-        #if self.tmx_data.background_color:
-        #    surface.fill(pygame.Color(self.tmx_data.background_color))
+        # if self.tmx_data.background_color:
+        #     surface.fill(pygame.Color(self.tmx_data.background_color))
 
         # iterate over all the visible layers, then draw them
         # according to the type of layer they are.
