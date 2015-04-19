@@ -18,7 +18,7 @@ Requires the six module.
 News
 ===============================================================================
 
-__04/18/15__ - Document support for pysdl2 and pyglet
+__04/18/15__ - Document support for pysdl2 and pyglet  
 __09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
 __05/29/14__ - Added support for rotated objects and floating point  
