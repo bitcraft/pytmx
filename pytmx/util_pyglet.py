@@ -18,13 +18,13 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
 
     returns pyglet Images, not textures
 
-    This is a basic proof-of-concept and is likely to fail in some situations.
+    This is a basic proof-of-concept and is likely to fail in most situations.
 
     Missing:
         Transparency
         Tile Rotation
 
-    This is slow, as well.
+    This is slow as well.
     """
     if colorkey:
         logger.debug('colorkey not implemented')

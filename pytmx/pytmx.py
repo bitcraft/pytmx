@@ -397,7 +397,7 @@ class TiledMap(TiledElement):
         try:
             assert (int(gid) >= 0)
             return self.images[gid]
-        except (TypeError):
+        except TypeError:
             msg = "GIDs must be expressed as a number.  Got: {0}"
             logger.debug(msg.format(gid))
             raise TypeError
@@ -625,12 +625,15 @@ class TiledMap(TiledElement):
         return (i for (i, l) in enumerate(self.layers)
                 if l.visible and isinstance(l, TiledObjectGroup))
 
-    def register_gid(self, tiled_gid, flags=0):
+    def register_gid(self, tiled_gid, flags=None):
         """Used to manage the mapping of GIDs between the tmx and pytmx
 
         :param tiled_gid: GID that is found in TMX data
         :rtype: GID that pytmx uses for the the GID passed
         """
+        if flags is None:
+            flags = TileFlags(0, 0, 0)
+
         if tiled_gid:
             try:
                 return self.imagemap[(tiled_gid, flags)][0]
@@ -670,6 +673,7 @@ class TiledTileset(TiledElement):
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
+        self.offset = (0, 0)
 
         # defaults from the specification
         self.firstgid = 0

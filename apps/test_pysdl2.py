@@ -7,7 +7,11 @@ Rendering demo for the TMXLoader.
 This should be considered --alpha-- quality.  I'm including it as a
 proof-of-concept for now and will improve on it in the future.
 
-Notice: slow!  no transparency!
+For Windows users, you will need to download SDL2 runtime and
+place it where pysdl2 can find it.  Please check the pysdl2 docs
+for information on that process.
+
+Notice: slow!  no transparency!  no tile rotation!
 """
 import logging
 
@@ -17,11 +21,17 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+# QUICK SDL2 HACK FOR WINDOWS
+# 1. download and move SDL2.dll to apps folder
+# 2. uncomment the two lines of code below
+# 3. profit!
+import os
+os.environ['PYSDL2_DLL_PATH'] = os.path.dirname(__file__)
+
 from pytmx import *
 from pytmx.util_pysdl2 import load_pysdl2
 from sdl2 import *
 import sdl2.ext
-from ctypes import byref
 
 
 class TiledRenderer(object):
@@ -30,89 +40,66 @@ class TiledRenderer(object):
 
     no shape drawing yet
     """
-    def __init__(self, filename, window):
-        tm = load_pysdl2(filename)
+    def __init__(self, filename, renderer):
+        tm = load_pysdl2(renderer, filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
+        self.renderer = renderer
 
-        # the loader just loads software surface by default, we change them
-        # to textures that will stay in video memory now
-        def transform(surface):
-            if surface is 0:
-                return 0
-            texture = SDL_CreateTextureFromSurface(self.renderer.renderer,
-                                                   surface)
-            SDL_FreeSurface(surface)
-            return texture
+    def render_tile_layer(self, layer):
+        """ Render the tile layer
 
-        self.renderer = sdl2.ext.Renderer(window)
-        tm.images = [transform(i) for i in tm.images]
-
-    def draw_rect(self, color, rect, width):
-        pass
-
-    def draw_lines(self, color, closed, points, width):
-        pass
-
-    def clear(self):
-        self.renderer.clear()
-
-    def draw(self):
-        # not going for efficiency here
-        # for demonstration purposes only
-
+        DOES NOT CHECK FOR DRAWING TILES OFF THE SCREEN
+        """
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        sdl_renderer = self.renderer.renderer
+        renderer = self.renderer.renderer
+        dest = sdl2.rect.SDL_Rect(0, 0, tw, th)
+        rce = sdl2.SDL_RenderCopyEx
 
+        # iterate over the tiles in the layer
+        for x, y, tile in layer.tiles():
+            texture, src, flip = tile
+            dest.x = x * tw
+            dest.y = y * th
+            angle = 90 if (flip & 4) else 0
+            rce(renderer, texture, src, dest, angle, None, flip)
+
+    def render_map(self):
+        """ Render the entire map
+
+        Only tile layer drawing is implemented
+        """
         for layer in self.tmx_data.visible_layers:
 
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
+                self.render_tile_layer(layer)
 
-                # iterate over the tiles in the layer
-                for x, y, texture in layer.tiles():
-                    flags = Uint32()
-                    access = c_int()
-                    w = c_int()
-                    h = c_int()
-                    ret = render.SDL_QueryTexture(texture, byref(flags),
-                                      byref(access), byref(w), byref(h))
-
-                    r = SDL_Rect(int(x * tw), int(y * th), w, h)
-                    if SDL_RenderCopy(sdl_renderer, texture, None, r) == -1:
-                        raise SDL_Error()
-
-            # draw object layers
-            elif isinstance(layer, TiledObjectGroup):
-
-                # iterate over all the objects in the layer
-                for obj in layer:
-                    logger.info(obj)
-
-        SDL_RenderPresent(sdl_renderer)
 
 class SimpleTest(object):
     def __init__(self, filename, window):
         self.running = False
         self.dirty = False
         self.exit_status = 0
-        self.renderer = TiledRenderer(filename, window)
+        self.sdl_renderer = window.renderer
+        self.map_renderer = TiledRenderer(filename, self.sdl_renderer)
 
         logger.info("Objects in map:")
-        for obj in self.renderer.tmx_data.objects:
+        for obj in self.map_renderer.tmx_data.objects:
             logger.info(obj)
             for k, v in obj.properties.items():
                 logger.info("%s\t%s", k, v)
 
         logger.info("GID (tile) properties:")
-        for k, v in self.renderer.tmx_data.tile_properties.items():
+        for k, v in self.map_renderer.tmx_data.tile_properties.items():
             logger.info("%s\t%s", k, v)
 
     def draw(self):
-        self.renderer.clear()
-        self.renderer.draw()
+        self.sdl_renderer.clear()
+        self.map_renderer.render_map()
+        self.sdl_renderer.present()
 
     def run(self, window):
         """Starts an event loop without actually processing any event."""
@@ -142,7 +129,10 @@ def all_filenames():
 
 
 if __name__ == '__main__':
-    window = sdl2.ext.Window("pytmx + psdl2 = ???", size=(640, 480))
+    window = sdl2.ext.Window("pytmx + psdl2 = awesome???", size=(600, 600))
+    window.renderer = sdl2.ext.Renderer(window)
+    window.renderer.blendmode = SDL_BLENDMODE_BLEND
+    window.renderer.color = 0, 0, 0, 0
     window.show()
 
     try:
