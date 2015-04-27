@@ -224,9 +224,11 @@ in Tiled, but the programmer/designer doesn't know or forgets if the change was
 made in the Tiled metadata or the user properties.
 
 I realize that it creates problems with certain common names like "id", or
-"color".  Overall, it should help with clean design.  In the future, I may
-make an option for removing this check, as long as the programmer understands
-the risk.
+"color".  Overall, it should help with clean design. 
+ 
+If you really don't care about name conflicts, there is an option you can try,
+at your own risk.  Pass 'allow_duplicate_names=True' to any loader or 
+to the TiledMap constructor and the checks will be disabled.
 
 In summary, don't use the following names when creating properties in Tiled:
 

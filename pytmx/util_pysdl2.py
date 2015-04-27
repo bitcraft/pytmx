@@ -62,5 +62,5 @@ def pysdl2_image_loader(renderer, filename, colorkey, **kwargs):
 
 
 def load_pysdl2(renderer, filename, *args, **kwargs):
-    loader = partial(pysdl2_image_loader, renderer)
-    return pytmx.TiledMap(filename, image_loader=loader)
+    kwargs['image_loader'] = partial(pysdl2_image_loader, renderer)
+    return pytmx.TiledMap(filename, *args, **kwargs)

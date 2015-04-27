@@ -5,8 +5,8 @@ from setuptools import setup
 
 
 setup(name="PyTMX",
-      version='3.20.8',
-      description='loads tiled tmx maps.  for python 2.7 and 3.3',
+      version='3.20.9',
+      description='loads tiled tmx maps.  for python 2.7 and 3.3+',
       author='bitcraft',
       author_email='leif.theden@gmail.com',
       packages=['pytmx'],
@@ -19,6 +19,7 @@ setup(name="PyTMX",
           "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.3",
+          "Programming Language :: Python :: 3.4",
           "Topic :: Games/Entertainment",
           "Topic :: Multimedia :: Graphics",
           "Topic :: Software Development :: Libraries :: pygame",

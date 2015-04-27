@@ -1,20 +1,22 @@
 Map loader for TMX Files
 Leif Theden, "bitcraft", 2012-2014
 
-v3.20 - for python 2.7 and 3.3+
-Tested with Tiled 0.9.0.
+v3.20.x - for python 2.7 and 3.3+
+Tested with Tiled 0.11.0.
 
 Released under the LGPL v3
 
 ===============================================================================
 
 New in 3.20:
+      core: option to disable duplicate property checks: allow_duplicate_names
+      core: keyword arguments correctly passed with util_* loaders
       core: new convenience methods to simplify drawing
       core: more abstract loading of images
       core: tile images can be reloaded after tmx data is loaded
       core: new keyword: "invert_y", to support the pyglet loader
-    pyglet: suppport image loading with pyglet
-    pyglet: map viewer in pyglet (spoiler: it sucks, but works)
+    pysdl2: support image loading with pysdl2 (experimental)
+    pyglet: support image loading with pyglet (experimental)
 
 New in 3.19:
       core: new iterator for tiledmap

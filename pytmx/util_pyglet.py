@@ -54,5 +54,6 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
 
 
 def load_pyglet(filename, *args, **kwargs):
-    return pytmx.TiledMap(filename, image_loader=pyglet_image_loader,
-                          invert_y=True)
+    kwargs['image_loader'] = pyglet_image_loader
+    kwargs['invert_y'] = True
+    return pytmx.TiledMap(filename, *args, **kwargs)
