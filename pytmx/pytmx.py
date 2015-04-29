@@ -144,7 +144,7 @@ class TiledElement(object):
         """Return a TileElement object from a xml string
 
         :param xml_string: string containing xml data
-        rtype: TiledElement instance
+        :rtype: TiledElement instance
         """
         return cls().parse_xml(ElementTree.fromstring(xml_string))
 
@@ -498,7 +498,7 @@ class TiledMap(TiledElement):
     def get_tile_locations_by_gid(self, gid):
         """Search map for tile locations by the GID
 
-        Not a fast operation
+        Note: Not a fast operation
 
         :param gid: GID to be searched for
         :rtype: generator of tile locations
@@ -603,7 +603,7 @@ class TiledMap(TiledElement):
     def get_tileset_from_gid(self, gid):
         """Return tileset that owns the gid
 
-        Note: this is a slow operation, so if you are expecting to do this
+        Note: this is a slow operation, so if you are expecting to do this \
               often, it would be worthwhile to cache the results of this.
 
         :param gid: gid of tile image
@@ -803,9 +803,9 @@ class TiledTileset(TiledElement):
 
 
 class TiledTileLayer(TiledElement):
-    """ Represents a TileLayer
+    """Represents a TileLayer
 
-    Iterate over the layer using the iterator protocol
+    To just get the tiles, use TiledTileLayer.tiles()
     """
 
     def __init__(self, parent, node):
@@ -830,6 +830,11 @@ class TiledTileLayer(TiledElement):
             yield x, y, self.data[y][x]
 
     def tiles(self):
+        """Quickly iterate over tile images of this layer
+
+        This is an optimised generator function that returns
+        (tile_x, tile_y, tile_image) tuples,
+        """
         images = self.parent.images
         data = self.data
         for y, x in product(range(self.height), range(self.width)):
