@@ -6,8 +6,6 @@ WIP - all code that isn't abandoned is WIP
 from unittest import TestCase, skip
 import sys
 
-# from mock import Mock, patch
-
 import pytmx
 from pytmx import convert_to_bool
 from pytmx import TiledElement
@@ -28,6 +26,11 @@ class TiledMapTest(TestCase):
 
         image = self.m.get_tile_image_by_gid(1)
         self.assertIsNotNone(image)
+
+    def test_reserved_names_check_disabled_with_option(self):
+        pytmx.TiledElement.allow_duplicate_names = False
+        pytmx.TiledMap(allow_duplicate_names=True)
+        self.assertTrue(pytmx.TiledElement.allow_duplicate_names)
 
     @skip('Need to make a better test')
     def test_import_pytmx_doesnt_import_pygame(self):
