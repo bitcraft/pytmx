@@ -32,8 +32,8 @@ class TiledRenderer(object):
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
-        self.batches = []
-        self.sprites = []
+        self.batches = []   # list of batches, e.g. layers
+        self.sprites = []   # container for tiles
         self.generate_sprites()
 
     def draw_rect(self, color, rect, width):
@@ -54,8 +54,8 @@ class TiledRenderer(object):
         poly_color = (0, 255, 0)
 
         for layer in self.tmx_data.visible_layers:
-            batch = pyglet.graphics.Batch()
-            self.batches.append(batch)
+            batch = pyglet.graphics.Batch() # create a new batch
+            self.batches.append(batch)      # add the batch to the list
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
 
@@ -92,7 +92,7 @@ class TiledRenderer(object):
             # draw image layers
             elif isinstance(layer, TiledImageLayer):
                 if layer.image:
-                    x = mw // 2
+                    x = mw // 2  # centers image
                     y = mh // 2
                     sprite = pyglet.sprite.Sprite(
                         layer.image, batch=batch, x=x, y=y
@@ -100,9 +100,8 @@ class TiledRenderer(object):
                     self.sprites.append(sprite)
 
     def draw(self):
-        if self.batches:
-            for b in self.batches:
-                b.draw()
+        for b in self.batches:
+            b.draw()
 
 
 class SimpleTest(object):
