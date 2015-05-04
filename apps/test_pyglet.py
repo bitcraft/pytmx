@@ -21,7 +21,6 @@ from pytmx import *
 from pytmx.util_pyglet import load_pyglet
 import pyglet
 
-
 class TiledRenderer(object):
     """
     Super simple way to render a tiled map with pyglet
@@ -32,6 +31,9 @@ class TiledRenderer(object):
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
+        self.batches = []
+        self.sprites = []
+        self.generate_sprites()
 
     def draw_rect(self, color, rect, width):
         pass
@@ -39,37 +41,32 @@ class TiledRenderer(object):
     def draw_lines(self, color, closed, points, width):
         pass
 
-    def draw(self):
-        # not going for efficiency here
-        # for demonstration purposes only
-
-        # deref these heavily used references for speed
+    def generate_sprites(self):
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        mw = self.tmx_data.width
         mh = self.tmx_data.height - 1
-        pixel_height = (mh + 1) * th
+        mw = self.tmx_data.width
         draw_rect = self.draw_rect
         draw_lines = self.draw_lines
 
         rect_color = (255, 0, 0)
         poly_color = (0, 255, 0)
 
-        # fill the background color
-        # if self.tmx_data.background_color:
-        #     surface.fill(pygame.Color(self.tmx_data.background_color))
-
-        # iterate over all the visible layers, then draw them
-        # according to the type of layer they are.
         for layer in self.tmx_data.visible_layers:
-
+            batch = pyglet.graphics.Batch()
+            self.batches.append(batch)
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
 
                 # iterate over the tiles in the layer
                 for x, y, image in layer.tiles():
                     y = mh - y
-                    image.blit(x * tw, y * th)
+                    x = x * tw
+                    y = y * th
+                    sprite = pyglet.sprite.Sprite(
+                        image, batch=batch, x=x, y=y
+                    )
+                    self.sprites.append(sprite)
 
             # draw object layers
             elif isinstance(layer, TiledObjectGroup):
@@ -94,7 +91,17 @@ class TiledRenderer(object):
             # draw image layers
             elif isinstance(layer, TiledImageLayer):
                 if layer.image:
-                    layer.image.blit(0, 0)
+                    x = mw // 2
+                    y = mh // 2
+                    sprite = pyglet.sprite.Sprite(
+                        layer.image, batch=batch, x=x, y=y
+                    )
+                    self.sprites.append(sprite)
+
+    def draw(self):
+        if self.batches:
+            for b in self.batches:
+                b.draw()
 
 
 class SimpleTest(object):
@@ -158,4 +165,3 @@ class TestWindow(pyglet.window.Window):
 if __name__ == '__main__':
     window = TestWindow(600, 600)
     pyglet.app.run()
-
