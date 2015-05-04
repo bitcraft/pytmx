@@ -21,6 +21,7 @@ from pytmx import *
 from pytmx.util_pyglet import load_pyglet
 import pyglet
 
+
 class TiledRenderer(object):
     """
     Super simple way to render a tiled map with pyglet
@@ -44,8 +45,8 @@ class TiledRenderer(object):
     def generate_sprites(self):
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
-        mh = self.tmx_data.height - 1
         mw = self.tmx_data.width
+        mh = self.tmx_data.height - 1
         draw_rect = self.draw_rect
         draw_lines = self.draw_lines
 
