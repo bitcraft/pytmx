@@ -47,6 +47,7 @@ class TiledRenderer(object):
         th = self.tmx_data.tileheight
         mw = self.tmx_data.width
         mh = self.tmx_data.height - 1
+        pixel_height = (mh + 1) * th
         draw_rect = self.draw_rect
         draw_lines = self.draw_lines
 
