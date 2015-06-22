@@ -117,6 +117,8 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
        of the specified gid.
 
     useful for generating rects for use in collision detection
+
+    Use at your own risk: this is experimental.
     """
     if isinstance(tileset, int):
         try:
