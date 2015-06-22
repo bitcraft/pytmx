@@ -113,12 +113,20 @@ def load_pygame(filename, *args, **kwargs):
 
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):
-    """generate a set of non-overlapping rects that represents the distribution\
+    """generate a set of non-overlapping rects that represents the distribution
        of the specified gid.
 
     useful for generating rects for use in collision detection
 
-    Use at your own risk: this is experimental.
+    Use at your own risk: this is experimental...will change in future
+
+    GID Note: You will need to add 1 to the GID reported by Tiled.
+
+    :param tmxmap: TiledMap object
+    :param layer: int or string name of layer
+    :param tileset: int or string name of tileset
+    :param real_gid: Tiled GID of the tile + 1 (see note)
+    :return: List of pygame Rect objects
     """
     if isinstance(tileset, int):
         try:
