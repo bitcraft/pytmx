@@ -198,8 +198,6 @@ class TiledMap(TiledElement):
 
     This class is meant to handle most of the work you need to do to use a map.
     """
-    reserved = "visible version orientation width height tilewidth \
-                tileheight properties tileset layer objectgroup".split()
 
     def __init__(self, filename=None, image_loader=default_image_loader,
                  **kwargs):
@@ -834,6 +832,9 @@ class TiledTileLayer(TiledElement):
 
         This is an optimised generator function that returns
         (tile_x, tile_y, tile_image) tuples,
+
+        :rtype: Generator
+        :return: (x, y, image) tuples
         """
         images = self.parent.images
         data = self.data
