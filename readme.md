@@ -2,8 +2,7 @@
 ##### For Python 2.7 and 3.3+
 
 This is the most up-to-date version of PyTMX available and works with Python 2.7
-and 3.3+ with no changes to the source code.  Please use this branch for all new
-PyTMX projects.
+and 3.3+.
 
 If you have any problems or suggestions, please open an issue.
 I am also often lurking #pygame on freenode.  Feel free to contact me.
@@ -32,7 +31,7 @@ Introduction
 ===============================================================================
 
 PyTMX is a map loader for python/pygame designed for games.  It provides smart
-tile loading with a fast and efficient storage base.  Not only will does it
+tile loading with a fast and efficient storage base.  Not only does it
 correctly handle most Tiled object types, it also will load metadata for
 them, so you can modify your maps and objects in Tiled, instead of modifying
 your source code.
@@ -126,6 +125,7 @@ Basic use:
 ===============================================================================
 
 #### Just data, no images:
+
 ```python
 import pytmx
 tmx_data = pytmx.TiledMap('map.tmx')
@@ -205,7 +205,7 @@ Scrolling Maps for Pygame
 
 I have another repo with a working demo of a proper scrolling map using Tiled
 maps and pygame.  Please feel free to test drive it.  It isn't limited to Tiled
-maps, you can use any data structure you want, as long as PyGame is used.
+maps, you can use any data structure you want, as long as pygame is used.
 
 https://github.com/bitcraft/pyscroll
 
@@ -224,14 +224,18 @@ in Tiled, but the programmer/designer doesn't know or forgets if the change was
 made in the Tiled metadata or the user properties.
 
 I realize that it creates problems with certain common names like "id", or
-"color".  Overall, it should help with clean design. 
+"color".  Overall, this check will help enforce clean design. 
  
-If you really don't care about name conflicts, there is an option you can try,
-at your own risk.  Pass 'allow_duplicate_names=True' to any loader or 
-to the TiledMap constructor and the checks will be disabled.
+However, If you really don't care about name conflicts, there is an option
+you can try at your own risk.  Pass 'allow_duplicate_names=True' to any
+loader or to the TiledMap constructor and the checks will be disabled.
+
+```python
+from pytmx.util_pygame import load_pygame
+tmx_data = load_pygame('map.tmx', allow_duplicate_names=True)
+```
 
 In summary, don't use the following names when creating properties in Tiled:
-
 As of 0.11.0, these values are:
 
 map:         version, orientation, width, height, tilewidth, tileheight  
