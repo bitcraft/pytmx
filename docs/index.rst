@@ -61,7 +61,7 @@ From a XML string:
 
 Load with pygame surfaces:
 
-    >>> from test_pytmx import load_pygame
+    >>> from pytmx.util_pygame import load_pygame
     >>> tmxdata = load_pygame("map.tmx")
 
 
