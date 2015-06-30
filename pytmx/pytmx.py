@@ -838,10 +838,10 @@ class TiledTileLayer(TiledElement):
         """
         images = self.parent.images
         data = self.data
-        for y, x in product(range(self.height), range(self.width)):
-            gid = data[y][x]
-            if gid:
-                yield x, y, images[gid]
+        for y, row in enumerate(data):
+            for x, gid in enumerate(row):
+                if gid:
+                    yield x, y, images[gid]
 
     def parse_xml(self, node):
         """Parse a Tile Layer from ElementTree xml node
