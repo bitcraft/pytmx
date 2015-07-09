@@ -157,11 +157,164 @@ tmx_data = load_pygame('map.tmx')
 ```
 
 
-#### Getting the tile image
+TiledMap Objects
+===============================================================================
+
+TiledMap objects are returned from the loader.  They contain layers, objects,
+and a bunch of useful functions for getting information about the map.
+
+Here is a list of attributes for use.  (ie: TiledMap.layers):
+
+- layers: all layers in order
+- tile_properties: dictionary of tile properties {GID: {props...}, ...}
+- layernames: dictionary of layers with names: {name: layer, ...}
+- images: list of all images in use, indexed by GID.  Index 0 is always None.
+- version
+- orientation
+- width: width of map in tiles, not pixels
+- height: height of map in tiles, not pixels
+- tileheight: height of tile in pixels.  may differ between layers.
+- tilewidth: width of tile in pixels.  may differ between layers.
+- background_color: map background color specified in Tiled
+
+
+#### Optional loading flags
+
+All loaders support the following flags:
+- load_all_tiles: if True, all tiles will be loaded, even if unused
+- invert_y: used for OpenGL graphics libs.  Screen origin is at lower-left
+- allow_duplicate_names: Force load maps with ambigious data (see 'reserved names')
 
 ```python
-image = tmx_data.get_tile_image(x, y, layer)
+from pytmx.util_pygame import load_pygame
+tiled_map = load_pygame(path_to_tmx_file, invert_y=True)
 ```
+
+#### Loading from XML strings
+
+Most pytmx objects support loading from XML strings.  For some objects, they require
+references to other objects (like a layer has references to a tileset) and won't load
+from XML.  If you want to store XML in a database or something, you can still load the
+entire map with an XML string:
+
+```python
+import pytmx
+tiled_map = pytmx.TiledMap.from_xml_string(some_string_here)
+```
+
+#### Custom Image Loading
+
+The pytmx.TiledMap object constructor now accepts an optional keyword "image_loader".  The argument should be a function that accepts filename, colorkey (false, or a color) and pixelalpha (boolean) arguments.  The function should return another function that will accept a rect-like object and any flags that the image loader might need to know, specific to the graphics library.  Since that concept might be difficult to understand, I'll illustrate with some code.
+
+
+
+
+#### Using TiledMap objects
+
+Please continue reading for basic use.  Advanced functionality can be found by reading
+the doc strings for visiting the project documentation at http://pytmx.readthedocs.org
+
+
+#### A note abput GID's
+
+pytmx does not load unused tiles by default, so the GID you find in Tiled may
+differ than the one you find in data loaded with pytmx.  Do not hard code
+references to GID's.  They really are for internal use.
+
+
+Getting Layers, Objects and Tiles
+===============================================================================
+
+#### Tiles
+
+To just get a tile for a particular spot, there is a handy method on
+TiledMap objects.  TiledMap objects are returned from load_map or load_pygame.
+The tile image type will depend on the loader used.  load_pygame returns
+pygame surfaces.
+
+```python
+pygame_surface = tmx_data.get_tile_image(x, y, layer)
+```
+
+#### Objects
+
+Objects can be accessed through the TiledMap or through a group.
+Object groups can be used just like a python list.
+
+```python
+object = tiled_map.objects[0]
+all_objects = tiled_map.get_object_by_name("baddy001")  # will not return duplicates
+group = tiled_map.get_layer_by_name("traps")
+traps = group[:]
+```
+
+#### Getting Layers and Groups
+
+Layers are accessed through the TiledMap class and there are a few ways to
+get references to them:
+
+```python
+layer = tiled_map.layers[0]
+layer = tiled_map.get_layer_by_name("base layer")
+layers = tiled_map.visible_tile_layers
+layers = tile_map.visible_object_groups
+layer_dict = tiled_map.layernames
+```
+
+#### Working with layer data and images
+
+Layer tiles are stored as a 'list of lists', or '2d array'.  Each element of
+layer data is a number which refers to a specific image in the map.  These
+numbers are called GID.  Do not make references to these numbers, as they
+will change if the map changes.
+
+With pygame, images will be plain pygame surfaces.  These surfaces will be
+checked for colorkey or per-pixel alpha automatically using information from
+the TMX file and from checking each image for transparent pixels.  You
+do not need, and should not convert the tiles, because it is already done. 
+
+The following methods work for pygame, pysdl2, pyglet and maps without loaded
+images.  If you do not load images, then the image will be an object describing
+the image.
+
+#### Least effort involved getting tile images.  Do this if you plan to render with pytmx objects.
+
+```python
+layer = tiled_map.layers[0]
+for x, y, image in layer.tiles():
+    ...
+```
+
+
+Working with Objects
+===============================================================================
+
+Pytmx loads all objects and their data:
+- name
+- type
+- x
+- y
+- width
+- height
+- rotation
+- gid (if it has an image)
+- visible
+- image
+- properties
+
+#### Basics
+Attributes x, y, width, and height all represent the bounding box of the object,
+even polygons and polylines.  You can access object properties by the
+'properties' attribute.
+
+#### Image Objects
+If using a loader, then TiledObject.image will be a reference to the image used.
+
+#### Polygon/Polyline Objects
+These objects have special atributes: 'closed' and 'points'.  Each point is (x, y) tuple.
+If the object is a polygon, then TiledObject.closed will be True.  Points are not
+rotated if the rotation property is used.
+
 
 
 Tile, Object, and Map Properties
