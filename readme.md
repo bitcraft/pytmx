@@ -287,23 +287,21 @@ def other_library_loader(filename, colorkey, **kwargs):
 level_map_and_images = pytmx.TiledMap("leveldata.tmx", image_loader=other_library_loader)
 ```
 
-
-Getting Layers, Objects and Tile Images
-===============================================================================
-
-#### Getting Tile Layers and Object Groups
-
 Layers are accessed through the TiledMap class and there are a few ways to
 get references to them:
 
 ```python
+# get a layer by name
 layer_or_group = tiled_map.get_layer_by_name("base layer")
 
+# TiledMap.layers is a list of layers and groups
 layer = tiled_map.layers[layer_index_number]
 
+# easily get references to just the visible tile layers
 for layer in tiled_map.visible_tile_layers:
     ...
 
+# just get references to visible object groups
 for group in tile_map.visible_object_groups:
     ...
 ```
@@ -337,10 +335,9 @@ gid = layer.data[y][x]
 image = tiled_map.images[gid]
 ```
 
-#### Least effort involved getting all tile images.
+#### Least effort involved getting all tile images:
 
 ```python
-layer = tiled_map.layers[0]
 for x, y, image in layer.tiles():
     ...
 ```
