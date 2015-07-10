@@ -1,8 +1,8 @@
 ## PyTMX
 ##### For Python 2.7 and 3.3+
 
-This is the most up-to-date version of PyTMX available and works with Python 2.7
-and 3.3+.
+This is the most up-to-date version of PyTMX available and works with
+Python 2.7 and 3.3+.
 
 If you have any problems or suggestions, please open an issue.
 I am also often lurking #pygame on freenode.  Feel free to contact me.
@@ -11,12 +11,13 @@ Requires the six module.
 
 *Released under the LGPL v3*
 
-#### See the "apps" folder for example use.  
+### See the "apps" folder for example use and cut/paste code.
 
 
 News
 ===============================================================================
 
+__07/08/15__ - Documentation overhaul
 __04/18/15__ - Document support for pysdl2 and pyglet  
 __09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
 __07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
@@ -48,15 +49,29 @@ PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
 load the data with PyTMX and copy the data into your own classes with the api.
 
-Finally, there is no save feature.  Once the map is loaded, it will be up to
+There is no save feature.  Once the map is loaded, it will be up to
 you to provide a way to save changes to the map.  I've used the pickle module
 with good results.
+
+I need to clarify a few things:
+- pytmx is not a rendering engine
+- pytmx is not the Tiled Map Editor
+
+#### Please consider the following
+
+PyTMX is a map __loader__.  Pytmx takes the pain out of parsing XML, variable type conversion, shape loading, properties, and of course image loading.  When asking for help, please understand that I want people to make their own games or utilities, and that PyTMX is able to make Tiled Maps easy to use.
+
+pytmx is not going to make your JRPG for you.  You will need to do that yourself, and I, the author, cannot simply respond to every new developer who expects pytmx, pygame, or any other game library to simply make it work for them.  Programming is a learned skill, and for most it takes practice and diligent study to get proficient at.  I'm personally a nice guy, and do want to help, so before you flame me on your blog or reddit, understand what pytmx is used for, read the documentation and copy/paste the demo code if you have to.  Thank you.
+
+I have a working solution to using Tiled Maps and Pygame ready for you.  If you simply want a library to render the maps for you, please check it out, as they are designed to work together.
+
+http://github.com/bitcraft/pyscroll
 
 
 Documentation
 ===============================================================================
 
-This readme does not include much detailed documentation.  Full API reference
+This readme does include some detailed documentation, but the full API reference
 and documentation can be found at the site below.  For examples of real use,
 check out the apps folder in this repo.  The 'test' apps demonstrate how to
 load maps, get layer, tile, and object data, as well as some rendering.
@@ -128,34 +143,83 @@ Basic use:
 
 ```python
 import pytmx
-tmx_data = pytmx.TiledMap('map.tmx')
+tiled_map = pytmx.TiledMap('map.tmx')
 ```
 
 #### Load with pygame images:
 
 ```python
 from pytmx.util_pygame import load_pygame
-tmx_data = load_pygame('map.tmx')
+tiled_map = load_pygame('map.tmx')
 ```
-
-The loader will correctly convert() or convert_alpha() each tile image, so you
-don't have to worry about that after you load the map.
-
 
 #### Load with pysdl2 images (experimental):
 
 ```python
 from pytmx.util_pysdl2 import load_pysdl2
-tmx_data = load_pysdl2('map.tmx')
+tiled_map = load_pysdl2('map.tmx')
 ```
 
 #### Load with pyglet images (experimental):
 
 ```python
 from pytmx.util_pyglet import pyglet_image_loader
-tmx_data = load_pygame('map.tmx')
+tiled_map = load_pygame('map.tmx')
 ```
 
+#### Load from XML string:
+
+```python
+import pytmx
+tiled_map = pytmx.TiledMap.from_xml_string(some_string_here)
+```
+
+#### Iterate through layers and groups:
+
+```python
+for layer in tiled_map.layers:
+   ...
+```
+
+#### Iterate through tile images in a tile layer:
+
+```python
+for x, y, image in layer.tiles():
+   ...
+```
+
+#### Iterate through Tiled objects in an object group:
+
+```python
+for obj in layer:
+   ...
+```
+
+#### Get properties of various object types:
+
+```python
+
+# properties is a dict 
+TiledMap.properties
+TiledTileLayer.properties['name']
+TiledObject.properties['type']
+
+# tile ('GID') properties are accessed through the TiledMap:
+properties = TiledMap.get_tile_properties(x, y, layer)
+```
+
+#### Get bounding box of an object:
+
+```python
+bbox = obj.x, obj.y, obj.width, obj.height
+```
+
+#### Get the points/vertex to draw a polygon/polyline object:
+
+```python
+points = obj.points
+# if obj.closed == True, then obj is a polygon
+```
 
 TiledMap Objects
 ===============================================================================
@@ -176,6 +240,7 @@ Here is a list of attributes for use.  (ie: TiledMap.layers):
 - tileheight: height of tile in pixels.  may differ between layers.
 - tilewidth: width of tile in pixels.  may differ between layers.
 - background_color: map background color specified in Tiled
+- properties: all user created properties about the map
 
 
 #### Optional loading flags
@@ -183,7 +248,7 @@ Here is a list of attributes for use.  (ie: TiledMap.layers):
 All loaders support the following flags:
 - load_all_tiles: if True, all tiles will be loaded, even if unused
 - invert_y: used for OpenGL graphics libs.  Screen origin is at lower-left
-- allow_duplicate_names: Force load maps with ambigious data (see 'reserved names')
+- allow_duplicate_names: Force load maps with ambiguous data (see 'reserved names')
 
 ```python
 from pytmx.util_pygame import load_pygame
@@ -204,10 +269,23 @@ tiled_map = pytmx.TiledMap.from_xml_string(some_string_here)
 
 #### Custom Image Loading
 
-The pytmx.TiledMap object constructor now accepts an optional keyword "image_loader".  The argument should be a function that accepts filename, colorkey (false, or a color) and pixelalpha (boolean) arguments.  The function should return another function that will accept a rect-like object and any flags that the image loader might need to know, specific to the graphics library.  Since that concept might be difficult to understand, I'll illustrate with some code.
+The pytmx.TiledMap object constructor now accepts an optional keyword "image_loader".  The argument should be a function that accepts filename, colorkey (false, or a color) and pixelalpha (boolean) arguments.  The function should return another function that will accept a rect-like object and any flags that the image loader might need to know, specific to the graphics library.  Since that concept might be difficult to understand, I'll illustrate with some code.  Use the following template code to load your images.
 
+ ```python
+import pytmx
 
+def other_library_loader(filename, colorkey, **kwargs):
+    def extract_image(rect, flags):
+        # use the rect and flags to load your image
+        # return some object suitable for your library
+        # what is returned here will populate TiledMap.images
+        # and will also be returned by TiledObject.Image
+        # and TiledTileLayer.tiles()
 
+    return extract_image
+
+level_map_and_images = pytmx.TiledMap("leveldata.tmx", image_loader=other_library_loader)
+```
 
 #### Using TiledMap objects
 
@@ -215,7 +293,7 @@ Please continue reading for basic use.  Advanced functionality can be found by r
 the doc strings for visiting the project documentation at http://pytmx.readthedocs.org
 
 
-#### A note abput GID's
+#### A note about GID's
 
 pytmx does not load unused tiles by default, so the GID you find in Tiled may
 differ than the one you find in data loaded with pytmx.  Do not hard code
@@ -225,16 +303,20 @@ references to GID's.  They really are for internal use.
 Getting Layers, Objects and Tiles
 ===============================================================================
 
-#### Tiles
+#### Tile Images
+
+Tile images are accessible from TiledMap objects and from TiledTileLayers.
 
 To just get a tile for a particular spot, there is a handy method on
-TiledMap objects.  TiledMap objects are returned from load_map or load_pygame.
-The tile image type will depend on the loader used.  load_pygame returns
-pygame surfaces.
+TiledMap objects.  The tile image type will depend on the loader used.
 
 ```python
-pygame_surface = tmx_data.get_tile_image(x, y, layer)
+pygame_surface = tile_map.get_tile_image(x, y, layer)
 ```
+
+If you would like to get all tiles from a particular layer, please look at the
+Layers section below.
+
 
 #### Objects
 
@@ -254,30 +336,25 @@ Layers are accessed through the TiledMap class and there are a few ways to
 get references to them:
 
 ```python
-layer = tiled_map.layers[0]
-layer = tiled_map.get_layer_by_name("base layer")
-layers = tiled_map.visible_tile_layers
-layers = tile_map.visible_object_groups
-layer_dict = tiled_map.layernames
+layer_or_group = tiled_map.get_layer_by_name("base layer")
+
+layer = tiled_map.layers[layer_index_number]
+
+for layer in tiled_map.visible_tile_layers:
+    ...
+
+for group in tile_map.visible_object_groups:
+    ...
 ```
 
-#### Working with layer data and images
+#### Working with Layer Data and Images
 
-Layer tiles are stored as a 'list of lists', or '2d array'.  Each element of
-layer data is a number which refers to a specific image in the map.  These
-numbers are called GID.  Do not make references to these numbers, as they
-will change if the map changes.
+Worked with layer data directly is not recommended!  Please use TiledTileLayer.tiles().
 
-With pygame, images will be plain pygame surfaces.  These surfaces will be
-checked for colorkey or per-pixel alpha automatically using information from
-the TMX file and from checking each image for transparent pixels.  You
-do not need, and should not convert the tiles, because it is already done. 
 
-The following methods work for pygame, pysdl2, pyglet and maps without loaded
-images.  If you do not load images, then the image will be an object describing
-the image.
+#### Least effort involved getting tile images.
 
-#### Least effort involved getting tile images.  Do this if you plan to render with pytmx objects.
+Do this if you plan to render using pytmx objects, or just get all tile images with position:
 
 ```python
 layer = tiled_map.layers[0]
@@ -285,8 +362,34 @@ for x, y, image in layer.tiles():
     ...
 ```
 
+#### If you really want to work with layer data directly...
 
-Working with Objects
+Layer tiles are stored as a 'list of lists', or '2d array'.  Each element of
+layer data is a number which refers to a specific image in the map.  These
+numbers are called GID.  Do not make references to these numbers, as they
+will change if the map changes. 
+
+Images for the GID can be accessed with the TiledMap.images list.
+
+With pygame, images will be plain pygame surfaces.  These surfaces will be
+checked for colorkey or per-pixel alpha automatically using information from
+the TMX file and from checking each image for transparent pixels.  You
+do not need, and should not convert the tiles because it is already done. 
+
+```python
+layer = tiled_map.layers[0]
+for x, y, gid in layer:
+    ...
+
+# row index = 'y'
+# column index = 'x'
+image_gid = layer[row_index][column_index]
+
+# change GID of a position
+layer[y][x] = new_gid
+```
+
+Working with Tiled Objects (polygons, object, etc)
 ===============================================================================
 
 Pytmx loads all objects and their data:
@@ -311,7 +414,7 @@ even polygons and polylines.  You can access object properties by the
 If using a loader, then TiledObject.image will be a reference to the image used.
 
 #### Polygon/Polyline Objects
-These objects have special atributes: 'closed' and 'points'.  Each point is (x, y) tuple.
+These objects have special attributes: 'closed' and 'points'.  Each point is (x, y) tuple.
 If the object is a polygon, then TiledObject.closed will be True.  Points are not
 rotated if the rotation property is used.
 
@@ -325,31 +428,30 @@ assign key/value data to individual maps, tilesets, tiles, and objects.  Pytmx
 includes full support for reading this data so you can set parameters for stuff
 in Tiled, instead of maintaining external data files, or even values in source.
 
+Properties are created by the user in tiled.  There is also another set of data
+that is part of each object, accessed by normal object attributes.  This other
+data is not set directly by the user, but is instead set by tiled.  Typical
+data that is object attributes are: 'name', 'x', 'opacity', or 'id'.
+
+If the user sets data for an object in Tiled, it becomes part of 'properties'.
+
+```python
+# data normally set by Tiled
+obj.name
+obj.x
+obj.opacity
+
+# data set by the user in Tiled
+obj.properties['hit points']
+obj.properties['goes to 11']
+```
+
 Individual tile properties are accessed through the the parent map object:
 
 ```
-tmxdata = TiledMap('level1.tmx')
-props = txmdata.get_tile_properties(x, y, layer)
-props = tmxdata.get_tile_properties_by_gid(tile_gid)
-```
-
-All other objects, including the map, layer, objects, etc. are in an
-object attribute (type: dict) called "properties":
-
-```python
-# this is the map object
-tmx_data = TiledMap('level1.tmx')
-
-# so, here are the properties of the map
-tmx_data.properties['name']
-
-# and the properties of each layer
-for layer in tmxdata.visible_layers:
-    layer.properties['movement_speed']
-    
-# here are properties of each object
-for obj in layer.objects():
-    obj.properties['attack_strength']
+tiled_map = TiledMap('level1.tmx')
+props = tiled_map.get_tile_properties(x, y, layer)
+props = tiled_map.get_tile_properties_by_gid(tile_gid)
 ```
 
 
@@ -385,7 +487,7 @@ loader or to the TiledMap constructor and the checks will be disabled.
 
 ```python
 from pytmx.util_pygame import load_pygame
-tmx_data = load_pygame('map.tmx', allow_duplicate_names=True)
+tiled_map = load_pygame('map.tmx', allow_duplicate_names=True)
 ```
 
 In summary, don't use the following names when creating properties in Tiled:
@@ -403,16 +505,8 @@ layer:       name, x, y, width, height, opacity, properties, data
 
 objectgroup: name, color, x, y, width, height, opacity, object, properties  
 
-object:      name, type, x, y, width, height, gid, properties, polygon,  
-             polyline, image, id
-
-
-Running the Tests
-===============================================================================
-
-Install the nose package with pip then from the root of the project run:
-
-        nosetests
+object:      id, name, type, x, y, width, height, gid, properties, polygon,  
+             polyline, image
 
 
 Artwork Attributions
@@ -420,3 +514,4 @@ Artwork Attributions
 The 16x16 overworld tiles were created by MrBeast at opengameart.org. CC-BY 3.0
 
 * If I missed your attribution, please let me know.
+
