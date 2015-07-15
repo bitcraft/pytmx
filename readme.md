@@ -153,8 +153,8 @@ tiled_map = load_pysdl2('map.tmx')
 #### Load with pyglet images (experimental):
 
 ```python
-from pytmx.util_pyglet import pyglet_image_loader
-tiled_map = load_pygame('map.tmx')
+from pytmx.util_pyglet import load_pyglet
+tiled_map = load_pyglet('map.tmx')
 ```
 
 #### Load from XML string:
