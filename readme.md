@@ -249,8 +249,8 @@ tiled_map = load_pygame(path_to_tmx_file, invert_y=True)
 
 Most pytmx objects support loading from XML strings.  For some objects, they require
 references to other objects (like a layer has references to a tileset) and won't load
-from XML.  If you want to store XML in a database or something, you can still load the
-entire map with an XML string:
+directly from XML.  They can only be loaded if the entire map is loaded first.  If you
+want to store XML in a database or something, you can load the entire map with an XML string:
 
 ```python
 import pytmx
