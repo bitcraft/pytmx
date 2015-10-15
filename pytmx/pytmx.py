@@ -96,8 +96,8 @@ types = defaultdict(lambda: str)
 types.update({
     "version": float,
     "orientation": str,
-    "width": int,
-    "height": int,
+    "width": float,
+    "height": float,
     "tilewidth": int,
     "tileheight": int,
     "firstgid": int,
@@ -842,6 +842,15 @@ class TiledTileLayer(TiledElement):
             for x, gid in enumerate(row):
                 if gid:
                     yield x, y, images[gid]
+
+    def set_properties(self, node):
+        TiledElement.set_properties(self, node)
+
+        # TODO: make class/layer-specific type casting
+        # layer height and widht must be int, but TiledElement.set_properties()
+        # make a float by default, so recast as int here
+        self.height = int(self.height)
+        self.width = int(self.width)
 
     def parse_xml(self, node):
         """Parse a Tile Layer from ElementTree xml node
