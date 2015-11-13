@@ -781,7 +781,7 @@ class TiledTileset(TiledElement):
 
             # handle tiles with animations
             anim = child.find('animation')
-            p['frames'] = []
+            p['frames'] = list()
             if anim is not None:
                 for frame in anim.findall("frame"):
                     f = dict()
