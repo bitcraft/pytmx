@@ -17,7 +17,7 @@ Requires the six module.
 News
 ===============================================================================
 
-__11/13/15__ - Animations are now loaded
+__11/13/15__ - Animations are now loaded  
 __07/08/15__ - Documentation overhaul  
 __04/18/15__ - Document support for pysdl2 and pyglet  
 __09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
