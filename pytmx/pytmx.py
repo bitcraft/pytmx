@@ -264,6 +264,15 @@ class TiledMap(TiledElement):
     def __iter__(self):
         return chain(self.layers, self.objects)
 
+    def set_properties(self, node):
+        TiledElement.set_properties(self, node)
+
+        # TODO: make class/layer-specific type casting
+        # layer height and width must be int, but TiledElement.set_properties()
+        # make a float by default, so recast as int here
+        self.height = int(self.height)
+        self.width = int(self.width)
+
     def parse_xml(self, node):
         """Parse a map from ElementTree xml node
 
@@ -290,7 +299,7 @@ class TiledMap(TiledElement):
 
         # "tile objects", objects with a GID, have need to have their attributes
         # set after the tileset is loaded, so this step must be performed last
-        # also, this step is performed for objects to load there tiles.
+        # also, this step is performed for objects to load their tiles.
         # height and width will automatically be set according to the tileset
         # that the image is from
 
@@ -300,6 +309,7 @@ class TiledMap(TiledElement):
 
         # iterate through tile objects and handle the image
         for o in [o for o in self.objects if o.gid]:
+
             # gids might also have properties assigned to them
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
@@ -504,8 +514,8 @@ class TiledMap(TiledElement):
         # use this func to make sure GID is valid
         self.get_tile_image_by_gid(gid)
 
-        p = product(range(int(self.width)),
-                    range(int(self.height)),
+        p = product(range(self.width),
+                    range(self.height),
                     range(len(self.layers)))
 
         return ((x, y, l) for (x, y, l) in p if
@@ -857,7 +867,7 @@ class TiledTileLayer(TiledElement):
         TiledElement.set_properties(self, node)
 
         # TODO: make class/layer-specific type casting
-        # layer height and widht must be int, but TiledElement.set_properties()
+        # layer height and width must be int, but TiledElement.set_properties()
         # make a float by default, so recast as int here
         self.height = int(self.height)
         self.width = int(self.width)

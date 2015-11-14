@@ -39,6 +39,14 @@ class TiledMapTest(TestCase):
         pytmx.TiledMap(allow_duplicate_names=True)
         self.assertTrue(pytmx.TiledElement.allow_duplicate_names)
 
+    def test_map_width_height_is_int(self):
+        self.assertIsInstance(self.m.width, int)
+        self.assertIsInstance(self.m.height, int)
+
+    def test_layer_width_height_is_int(self):
+        self.assertIsInstance(self.m.layers[0].width, int)
+        self.assertIsInstance(self.m.layers[0].height, int)
+
     @skip('Need to make a better test')
     def test_import_pytmx_doesnt_import_pygame(self):
         self.assertTrue('pygame' not in sys.modules)
