@@ -300,7 +300,6 @@ class TiledMap(TiledElement):
 
         # iterate through tile objects and handle the image
         for o in [o for o in self.objects if o.gid]:
-
             # gids might also have properties assigned to them
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
@@ -505,8 +504,8 @@ class TiledMap(TiledElement):
         # use this func to make sure GID is valid
         self.get_tile_image_by_gid(gid)
 
-        p = product(range(self.width),
-                    range(self.height),
+        p = product(range(int(self.width)),
+                    range(int(self.height)),
                     range(len(self.layers)))
 
         return ((x, y, l) for (x, y, l) in p if
@@ -779,6 +778,17 @@ class TiledTileset(TiledElement):
                 p['trans'] = image.get('trans', None)
                 p['width'] = image.get('width')
                 p['height'] = image.get('height')
+
+            # handle tiles with animations
+            anim = child.find('animation')
+            p['frames'] = list()
+            if anim is not None:
+                for frame in anim.findall("frame"):
+                    f = dict()
+                    f['duration'] = int(frame.attrib['duration'])
+                    f['tileid'] = int(frame.attrib['tileid'])
+                    p['frames'].append(f)
+                    self.parent.register_gid(f['tileid'])
 
             for gid, flags in self.parent.map_gid(tiled_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
