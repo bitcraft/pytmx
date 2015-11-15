@@ -797,8 +797,8 @@ class TiledTileset(TiledElement):
                     f = dict()
                     f['duration'] = int(frame.attrib['duration'])
                     f['tileid'] = int(frame.attrib['tileid'])
+                    f['gid'] = self.parent.register_gid(f['tileid'] + self.firstgid)
                     p['frames'].append(f)
-                    self.parent.register_gid(f['tileid'])
 
             for gid, flags in self.parent.map_gid(tiled_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
