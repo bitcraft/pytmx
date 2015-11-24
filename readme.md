@@ -70,6 +70,12 @@ load maps, get layer, tile, and object data, as well as some rendering.
 http://pytmx.readthedocs.org/
 
 
+# Table of Contents
+1. [Installation](#Installation)
+2. [Example2](#example2)
+3. [Third Example](#third-example)
+
+
 Getting Help
 ===============================================================================
 
@@ -115,7 +121,7 @@ Why use PyTMX?
 * Liberal LGPL license means you can use PyTMX for your project
 
 
-Installation
+#Installation
 ===============================================================================
 
 Install from pip
