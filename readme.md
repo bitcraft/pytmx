@@ -71,9 +71,16 @@ http://pytmx.readthedocs.org/
 
 
 # Table of Contents
-1. [Installation](#Installation)
-2. [Example2](#example2)
-3. [Third Example](#third-example)
+1. [Installation](#installation)
+2. [Basic Use](#basic-use)
+3. [Properties](#object-properties)
+4. [Maps](#working-with-maps)
+5. [Loading from XML](#loading-from-xml)
+6. [Custom Image Loading](#custom-image-loading)
+7. [Tile Layers](#working-with-tile-layers)
+8. [Tile Animations](#getting-tile-animations)
+9. [Objects](#working-with-objects)
+10. [Understanding Properties](#understanding-properties)
 
 
 Getting Help
@@ -219,11 +226,15 @@ points = obj.points
 # if obj.closed == True, then obj is a polygon
 ```
 
-TiledMap Objects
+Working with Maps
 ===============================================================================
 
 TiledMap objects are returned from the loader.  They contain layers, objects,
-and a bunch of useful functions for getting information about the map.
+and a bunch of useful functions for getting information about the map.  In
+general, all of the pytmx types are not meant to be modified after being
+returned from the loader.  While there is a potentional for modifing them,
+its not a supported function, and may change any time.  Please consider them
+read-only.
 
 Here is a list of attributes for use.  (ie: TiledMap.layers):
 
@@ -253,7 +264,7 @@ from pytmx.util_pygame import load_pygame
 tiled_map = load_pygame(path_to_tmx_file, invert_y=True)
 ```
 
-#### Loading from XML strings
+#### Loading from XML
 
 Most pytmx objects support loading from XML strings.  For some objects, they require
 references to other objects (like a layer has references to a tileset) and won't load
@@ -267,7 +278,7 @@ tiled_map = pytmx.TiledMap.from_xml_string(some_string_here)
 
 #### Custom Image Loading
 
-The pytmx.TiledMap object constructor accepts an optional keyword "image_loader".  The argument should be a function that accepts filename, colorkey (false, or a color) and pixelalpha (boolean) arguments.  The function should return another function that will accept a rect-like object and any flags that the image loader might need to know, specific to the graphics library.  Since that concept might be difficult to understand, I'll illustrate with some code.  Use the following template code to load your images.
+The pytmx.TiledMap object constructor accepts an optional keyword "image_loader".  The argument should be a function that accepts filename, colorkey (false, or a color) and pixelalpha (boolean) arguments.  The function should return another function that will accept a rect-like object and any flags that the image loader might need to know, specific to the graphics library.  Since that concept might be difficult to understand, I'll illustrate with some code.  Use the following template code to load images from another graphics library.
 
  ```python
 import pytmx
@@ -295,8 +306,9 @@ def other_library_loader(filename, colorkey, **kwargs):
 level_map_and_images = pytmx.TiledMap("leveldata.tmx", image_loader=other_library_loader)
 ```
 
-Layers are accessed through the TiledMap class and there are a few ways to
-get references to them:
+#### Accessing layers
+
+Layers are accessed through the TiledMap class and there are a few ways to get references to them:
 
 ```python
 # get a layer by name
@@ -315,7 +327,7 @@ for group in tile_map.visible_object_groups:
 ```
 
 
-Working with Tiled Tile Layers
+Working with Tile Layers
 ===============================================================================
 
 Pytmx loads tile layers and their data:
@@ -410,10 +422,13 @@ image = tiled_map.images[image_gid]
 layer[y][x] = new_gid
 ```
 
-Working with Tiled Objects (polygons, object, etc)
+Working with Objects
 ===============================================================================
 
-Pytmx loads all objects and their data:
+Tiled "objects" are things that are created in object layers, and include
+polygons, polylings, boxes, ellispes, and tile objects.  Pytmx loads all objects
+and their data:
+
 - name
 - type
 - x
@@ -433,15 +448,19 @@ even polygons and polylines.
 #### Image Objects
 If using a loader, then TiledObject.image will be a reference to the image used.
 
+#### Tile Objects
+Tile Objects are objects that reference a tile in a tileset.  These are loaded and
+the image will be available to use.
+
 #### Polygon/Polyline Objects
 These objects have special attributes: 'closed' and 'points'.  Each point is (x, y) tuple.
 If the object is a polygon, then TiledObject.closed will be True.  Points are not
 rotated if the rotation property is used.
 
-#### Using objects
+#### Accessing objects
 
-Objects can be accessed through the TiledMap or through a group.
-Object groups can be used just like a python list.
+Objects can be accessed through the TiledMap or through a group.  Object groups can be
+used just like a python list, and support indexing, slicing, etc.
 
 ```python
 # search for an object with a specific name
@@ -458,7 +477,7 @@ for obj in group:
     ...
 ```
 
-Tile, Object, and Map Properties
+Understanding Properties
 ===============================================================================
 
 Properties are a powerful feature of Tiled that allows the level designer to
