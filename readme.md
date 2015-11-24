@@ -337,11 +337,39 @@ gid = layer.data[y][x]
 image = tiled_map.images[gid]
 ```
 
-#### Least effort involved getting all tile images:
+#### Least effort involved getting all tile images
 
 ```python
 for x, y, image in layer.tiles():
     ...
+```
+
+#### Getting tile animations
+
+Tiled supports animated tiles, and pytmx has the ability to load them.
+Animations are stored in the properties for the tile. The GID => image
+conversion is already done for you.  Animations from pytmx are a list
+of AnimationFrame namedtuples.  Please see the example below.
+
+```python
+# just iterate over animated tiles and demo them
+
+# tmx_map is a TiledMap object
+# tile_properties is a dictionary of all tile properties
+
+# iterate over the tile properties
+for gid, props in tmx_map.tile_properties.items():
+
+   # iterate over the frames of the animation
+   for animation_frame in props['frames']:
+   
+       # do something with the image and duration of the frame
+       d = animation_frame.duration
+       i = animation_frame.image
+       ...
+
+    # or just store the animation (list of frames)
+    my_anim = props['frames']
 ```
 
 #### If you really want to work with layer data directly...
