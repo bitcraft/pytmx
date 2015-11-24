@@ -20,7 +20,7 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
 
     returns pyglet Images, not textures
 
-    This is a basic proof-of-concept and is likely to fail in most situations.
+    This is a basic proof-of-concept and is likely to fail in some situations.
 
     Missing:
         Transparency

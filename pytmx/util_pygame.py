@@ -1,4 +1,6 @@
 import logging
+import itertools
+import pytmx
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -12,9 +14,6 @@ try:
 except ImportError:
     logger.error('cannot import pygame (is it installed?)')
     raise
-
-import itertools
-import pytmx
 
 __all__ = ['load_pygame', 'pygame_image_loader', 'simplify', 'build_rects']
 
@@ -62,6 +61,13 @@ def smart_convert(original, colorkey, pixelalpha):
 
 
 def pygame_image_loader(filename, colorkey, **kwargs):
+    """ pytmx image loader for pygame
+
+    :param filename:
+    :param colorkey:
+    :param kwargs:
+    :return:
+    """
     if colorkey:
         colorkey = pygame.Color('#{0}'.format(colorkey))
 
@@ -88,11 +94,9 @@ def pygame_image_loader(filename, colorkey, **kwargs):
 
 
 def load_pygame(filename, *args, **kwargs):
-    """
-    PYGAME USERS: Use me.
+    """ Load a TMX file, images, and return a TiledMap class
 
-    Load a TMX file, load the images, and return a TiledMap class that is
-    ready to use.
+    PYGAME USERS: Use me.
 
     this utility has 'smart' tile loading.  by default any tile without
     transparent pixels will be loaded for quick blitting.  if the tile has

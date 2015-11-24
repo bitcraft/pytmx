@@ -13,6 +13,12 @@ If you are not familiar with python classes, you might want to check the
 Missing tests:
 - object rotation
 """
+import pygame
+from pygame.locals import *
+
+from pytmx import *
+from pytmx.util_pygame import load_pygame
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,11 +26,6 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
-
-import pygame
-from pytmx import *
-from pytmx.util_pygame import load_pygame
-from pygame.locals import *
 
 
 def init_screen(width, height):
@@ -38,6 +39,7 @@ class TiledRenderer(object):
     """
     Super simple way to render a tiled map
     """
+
     def __init__(self, filename):
         tm = load_pygame(filename)
 
@@ -121,6 +123,7 @@ class TiledRenderer(object):
 class SimpleTest(object):
     """ Basic app to display a rendered Tiled map
     """
+
     def __init__(self, filename):
         self.renderer = None
         self.running = False
@@ -206,6 +209,7 @@ class SimpleTest(object):
                 pygame.display.flip()
 
         return self.exit_status
+
 
 if __name__ == '__main__':
     import os.path
