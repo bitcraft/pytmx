@@ -96,7 +96,7 @@ class TiledElementTestCase(TestCase):
         """
         self.element.name ='foo'
         items = {'name': None}
-        result = self.element.contains_invalid_property_name(items.items())
+        result = self.element._contains_invalid_property_name(items.items())
         self.assertTrue(result)
 
     def test_not_contains_reserved_property_name(self):
@@ -106,7 +106,7 @@ class TiledElementTestCase(TestCase):
             as existing attributes.
         """
         items = {'name': None}
-        result = self.element.contains_invalid_property_name(items.items())
+        result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
     def test_reserved_names_check_disabled_with_option(self):
@@ -120,7 +120,7 @@ class TiledElementTestCase(TestCase):
         pytmx.TiledElement.allow_duplicate_names = True
         self.element.name = 'foo'
         items = {'name': None}
-        result = self.element.contains_invalid_property_name(items.items())
+        result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
     def test_repr(self):
