@@ -73,13 +73,13 @@ http://pytmx.readthedocs.org/
 # Table of Contents
 1. [Installation](#installation)
 2. [Basic Use](#basic-use)
-3. [Properties](#object-properties)
-4. [Maps](#working-with-maps)
+3. [Getting Properties](#object-properties)
+4. [Working with Maps](#working-with-maps)
 5. [Loading from XML](#loading-from-xml)
 6. [Custom Image Loading](#custom-image-loading)
-7. [Tile Layers](#working-with-tile-layers)
-8. [Tile Animations](#getting-tile-animations)
-9. [Objects](#working-with-objects)
+7. [Working with Tile Layers](#working-with-tile-layers)
+8. [Getting Tile Animations](#getting-tile-animations)
+9. [Working with Objects](#working-with-objects)
 10. [Understanding Properties](#understanding-properties)
 
 
@@ -128,7 +128,7 @@ Why use PyTMX?
 * Liberal LGPL license means you can use PyTMX for your project
 
 
-#Installation
+Installation
 ===============================================================================
 
 Install from pip
