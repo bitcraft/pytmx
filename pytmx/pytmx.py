@@ -43,6 +43,7 @@ flag_names = (
     'flipped_diagonally',)
 
 TileFlags = namedtuple('TileFlags', flag_names)
+AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
 
 
 def default_image_loader(filename, flags, **kwargs):
@@ -774,6 +775,7 @@ class TiledTileset(TiledElement):
 
         # since tile objects [probably] don't have a lot of metadata,
         # we store it separately in the parent (a TiledMap instance)
+        register_gid = self.parent.register_gid
         for child in node.getiterator('tile'):
             tiled_gid = int(child.get("id"))
             p = parse_properties(child)
@@ -791,14 +793,13 @@ class TiledTileset(TiledElement):
 
             # handle tiles with animations
             anim = child.find('animation')
-            p['frames'] = list()
+            frames = list()
+            p['frames'] = frames
             if anim is not None:
                 for frame in anim.findall("frame"):
-                    f = dict()
-                    f['duration'] = int(frame.attrib['duration'])
-                    f['tileid'] = int(frame.attrib['tileid'])
-                    f['gid'] = self.parent.register_gid(f['tileid'] + self.firstgid)
-                    p['frames'].append(f)
+                    duration = int(frame.get('duration'))
+                    gid = register_gid(int(frame.get('tileid')) + self.firstgid)
+                    frames.append(AnimationFrame(gid, duration))
 
             for gid, flags in self.parent.map_gid(tiled_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)

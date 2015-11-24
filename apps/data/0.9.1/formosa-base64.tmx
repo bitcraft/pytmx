@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff" nextobjectid="9">
  <properties>
   <property name="custom0" value="value"/>
   <property name="custom1" value="value"/>
   <property name="custom2" value="value"/>
  </properties>
- <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16" tilecount="336">
   <properties>
    <property name="overworld" value="test"/>
   </properties>
@@ -31,12 +31,93 @@
    </properties>
   </tile>
  </tileset>
- <tileset firstgid="337" name="tiles" tilewidth="32" tileheight="32">
+ <tileset firstgid="337" name="tiles" tilewidth="32" tileheight="32" tilecount="4">
   <image source="tiles.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="341" name="water" tilewidth="16" tileheight="16" tilecount="144">
+  <image source="water.png" width="192" height="192"/>
+  <tile id="0">
+   <animation>
+    <frame tileid="0" duration="500"/>
+    <frame tileid="6" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="120">
+   <animation>
+    <frame tileid="120" duration="500"/>
+    <frame tileid="126" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="121">
+   <animation>
+    <frame tileid="121" duration="500"/>
+    <frame tileid="127" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="122">
+   <animation>
+    <frame tileid="122" duration="500"/>
+    <frame tileid="128" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="123">
+   <animation>
+    <frame tileid="123" duration="500"/>
+    <frame tileid="129" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="124">
+   <animation>
+    <frame tileid="124" duration="500"/>
+    <frame tileid="130" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="125">
+   <animation>
+    <frame tileid="125" duration="500"/>
+    <frame tileid="131" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="132">
+   <animation>
+    <frame tileid="132" duration="500"/>
+    <frame tileid="138" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="133">
+   <animation>
+    <frame tileid="133" duration="500"/>
+    <frame tileid="139" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="134">
+   <animation>
+    <frame tileid="134" duration="500"/>
+    <frame tileid="140" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="135">
+   <animation>
+    <frame tileid="135" duration="500"/>
+    <frame tileid="141" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="136">
+   <animation>
+    <frame tileid="136" duration="500"/>
+    <frame tileid="142" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="137">
+   <animation>
+    <frame tileid="137" duration="500"/>
+    <frame tileid="143" duration="500"/>
+   </animation>
+  </tile>
  </tileset>
  <layer name="Grass and Water" width="15" height="15">
   <data encoding="base64">
-   EgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAABrAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAGsAAABrAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAawAAAGsAAABrAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAABrAAAAawAAAGsAAABrAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAGsAAABrAAAAawAAAGsAAABrAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAAawAAAGsAAABrAAAA
+   EgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAADcAQAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAANIBAACfAQAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAA0QEAAJ8BAADPAQAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAADSAQAAnwEAAJ8BAACfAQAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAANEBAACfAQAAnwEAAJ8BAACfAQAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAANEBAADSAQAA0gEAAJ8BAACfAQAAnwEAAJ8BAACfAQAAnwEAAM8BAACfAQAAnwEAANkBAADaAQAAnwEAAJ8BAACfAQAAnwEAAJ8BAACfAQAA0QEAAM4BAACfAQAAnwEAANkBAADaAQAAnwEAAJ8BAACfAQAAnwEAAJ8BAADOAQAAnwEAAJ8BAACfAQAAnwEAAJ8BAACfAQAA
   </data>
  </layer>
  <layer name="Tile Layer 1" width="15" height="15">
@@ -50,30 +131,30 @@
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object name="Castle" x="192.25" y="16.25">
+  <object id="1" name="Castle" x="192.25" y="16.25">
    <properties>
     <property name="Population" value="234"/>
    </properties>
    <polygon points="0,0 0,32 48,32 48.5,0"/>
   </object>
-  <object name="Towers Area" x="0" y="192">
+  <object id="2" name="Towers Area" x="0" y="192">
    <polygon points="0,0 32,0 48,-16 96,-16 96,-96 48,-96 32,-112 0,-112"/>
   </object>
-  <object name="Coastline" x="0" y="208">
+  <object id="3" name="Coastline" x="0" y="208">
    <polyline points="0,0 112,0 128,-16 160,-16 240,-96"/>
   </object>
-  <object name="GenericObject" x="96.5" y="64.5" width="32.5" height="32.5"/>
-  <object name="SandCave" gid="262" x="64" y="80"/>
-  <object name="Road" x="224" y="48">
+  <object id="4" name="GenericObject" x="96.5" y="64.5" width="32.5" height="32.5"/>
+  <object id="5" name="SandCave" gid="262" x="64" y="80" width="16" height="16"/>
+  <object id="6" name="Road" x="224" y="48">
    <properties>
     <property name="MoveCost" value="2"/>
    </properties>
    <polyline points="0,0 0,48 -64,48 -64,64 -48,64"/>
   </object>
-  <object x="32" y="16" rotation="90.5">
+  <object id="7" x="32" y="16" rotation="90.5">
    <polygon points="0,0 9.66667,-8.66667 18,-15.6667 25,-16.3333 34.6667,-9.66667 42.6667,1 39,4.33333 40.3333,7.66667 39.3333,11.3333 24.6667,12.6667 16.6667,11 15.3333,7 4.33333,8 0.333333,3.33333"/>
   </object>
-  <object name="large tile object" gid="338" x="96" y="96"/>
+  <object id="8" name="large tile object" gid="338" x="96" y="96" width="32" height="32"/>
  </objectgroup>
  <imagelayer name="Image Layer 1">
   <image source="moon_overlay.png"/>
