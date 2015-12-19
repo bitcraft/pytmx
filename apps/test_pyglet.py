@@ -35,6 +35,7 @@ class TiledRenderer(object):
         self.batches = []   # list of batches, e.g. layers
         self.sprites = []   # container for tiles
         self.generate_sprites()
+        self.clock_display = pyglet.clock.ClockDisplay()
 
     def draw_rect(self, color, rect, width):
         pass
@@ -103,6 +104,7 @@ class TiledRenderer(object):
     def draw(self):
         for b in self.batches:
             b.draw()
+        self.clock_display.draw()
 
 
 class SimpleTest(object):
@@ -164,5 +166,7 @@ class TestWindow(pyglet.window.Window):
 
 
 if __name__ == '__main__':
-    window = TestWindow(600, 600)
+    window = TestWindow(600, 600, vsync=False)
+    # Add schedule_interval with a dummy callable to force speeding up fps
+    pyglet.clock.schedule_interval(int, 1./240)
     pyglet.app.run()
