@@ -364,7 +364,7 @@ class TiledMap(TiledElement):
 
             path = os.path.join(os.path.dirname(self.filename), ts.source)
             colorkey = getattr(ts, 'trans', None)
-            loader = self.image_loader(path, colorkey)
+            loader = self.image_loader(path, colorkey, tileset=ts)
 
             p = product(range(ts.margin,
                               ts.height + ts.margin - ts.tileheight + 1,
