@@ -365,9 +365,8 @@ for x, y, image in layer.tiles():
 #### Getting tile animations
 
 Tiled supports animated tiles, and pytmx has the ability to load them.
-Animations are stored in the properties for the tile. The GID => image
-conversion is already done for you.  Animations from pytmx are a list
-of AnimationFrame namedtuples.  Please see the example below.
+Animations are stored in the properties for the tile.  Animations from
+pytmx are a list of AnimationFrame namedtuples.  Please see the example below.
 
 ```python
 # just iterate over animated tiles and demo them

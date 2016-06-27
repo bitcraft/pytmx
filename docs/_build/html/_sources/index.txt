@@ -1,5 +1,5 @@
-PyTMX
-=====
+Introduction
+============
 
 PyTMX is a map loader for python/pygame designed for games.  It provides smart
 tile loading with a fast and efficient storage base.  Not only will does it
@@ -7,22 +7,21 @@ correctly handle most Tiled object types, it also will load metadata for
 them, so you can modify your maps and objects in Tiled, instead of modifying
 your source code.
 
+New support for pysdl2 and pyglet!  Check it out!
+
+Because PyTMX was built with games in mind, it differs slightly from Tiled in
+a few minor aspects:
+
+- Layers not aligned to the grid are not supported.
+- Some object metadata attribute names are not supported (see "Reserved Names")
+
 PyTMX strives to balance performance and flexibility.  Feel free to use the
 classes provided in pytmx.py as superclasses for your own maps, or simply
 load the data with PyTMX and copy the data into your own classes with the api.
 
-
-Design Goals and Features
-=========================
-
-* API with many handy functions
-* Memory efficient and performant
-* Loads data, "properties" metadata, and images from Tiled's TMX format
-* Supports base64, csv, gzip, zlib and uncompressed XML
-* Properties for all native Tiled object types
-* Point data for polygon and polyline objects
-* Automatic flipping and rotation of tiles
-* Image loading with pygame (will work without images as well)
+Finally, there is no save feature.  Once the map is loaded, it will be up to
+you to provide a way to save changes to the map.  I've used the pickle module
+with good results.
 
 
 Getting Help
@@ -60,13 +59,24 @@ From a XML string:
     >>> tmxdata = pytmx.TiledMap.fromstring(xml_string)
 
 
-Load with PyGame surfaces:
+Load with pygame surfaces:
 
-    >>> from test_pytmx import load_pygame
+    >>> from pytmx.util_pygame import load_pygame
     >>> tmxdata = load_pygame("map.tmx")
 
 
-Getting the tile surface:
+Load with pysdl2 images (experimental):
+
+    >>> from pytmx.util_pysdl2 import load_pysdl2
+    >>> tmx_data = load_pysdl2('map.tmx')
+
+
+Load with pyglet images (experimental):
+
+    >>> from pytmx.util_pyglet import pyglet_image_loader
+    >>> tmx_data = load_pygame('map.tmx')
+
+Getting the tile image:
 
     >>> image = tmx_data.get_tile_image(x, y, layer)
     >>> screen.blit(image, position)
@@ -75,9 +85,12 @@ Getting the tile surface:
 Tile, Object, and Map Properties
 ================================
 
-Properties are any key/value data added to an object/map/layer in Tiled
-through the properties dialog.  Tile properties are accessed through the the
-parent map object:
+Properties are a powerful feature of Tiled that allows the level designer to
+assign key/value data to individual maps, tilesets, tiles, and objects.  Pytmx
+includes full support for reading this data so you can set parameters for stuff
+in Tiled, instead of maintaining external data files, or even values in source.
+
+Individual tile properties are accessed through the the parent map object:
 
     >>> tmxdata = TiledMap('level1.tmx')
     >>> props = txmdata.get_tile_properties(x, y, layer)
@@ -95,12 +108,9 @@ python dictionary attribute called "properties":
 Scrolling Demo
 ==============
 
-Scrolling and Tiled maps go together, so I've created a library to make PyGame
-projects easy to use PyTMX maps and have a great scrolling map.
-
-pyscroll can use PyTMX maps to create an easy to use replacement for PyGame
-SpriteGroups.  Just use the PyScroll group and you can use fast, multilayered,
-scrolling maps.
+I have another repo with a working demo of a proper scrolling map using Tiled
+maps and pygame.  Please feel free to test drive it.  It isn't limited to Tiled
+maps, you can use any data structure you want, as long as PyGame is used.
 
 https://github.com/bitcraft/pyscroll
 

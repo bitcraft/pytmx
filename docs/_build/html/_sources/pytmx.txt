@@ -1,6 +1,9 @@
 pytmx package
 =============
 
+Submodules
+----------
+
 pytmx.pytmx module
 ------------------
 
@@ -17,11 +20,27 @@ pytmx.util_pygame module
     :undoc-members:
     :show-inheritance:
 
-pytmx.utils module
-------------------
+pytmx.util_pyglet module
+------------------------
 
 .. automodule:: pytmx.util_pyglet
     :members:
     :undoc-members:
     :show-inheritance:
 
+pytmx.util_pysdl2 module
+------------------------
+
+.. automodule:: pytmx.util_pysdl2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pytmx
+    :members:
+    :undoc-members:
+    :show-inheritance:
