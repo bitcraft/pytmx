@@ -379,15 +379,15 @@ of AnimationFrame namedtuples.  Please see the example below.
 for gid, props in tmx_map.tile_properties.items():
 
    # iterate over the frames of the animation
+   # if there is no animation, this list will be empty
    for animation_frame in props['frames']:
    
-       # do something with the image and duration of the frame
-       d = animation_frame.duration
-       i = animation_frame.image
+       # do something with the gid and duration of the frame
+       # this may change in the future, as it is a little awkward now
+       image = tmx_map.get_tile_image_by_gid(gid)
+       duration = animation_frame.duration
        ...
 
-    # or just store the animation (list of frames)
-    my_anim = props['frames']
 ```
 
 #### If you really want to work with layer data directly...
