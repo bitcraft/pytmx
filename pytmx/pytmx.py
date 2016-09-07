@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import print_function
+
 import logging
 import six
 import os
@@ -98,30 +101,32 @@ def convert_to_bool(text):
 
 # used to change the unicode string returned from xml to
 # proper python variable types.
-types = defaultdict(lambda: str)
+types = defaultdict(lambda: six.u)
+
+_str = six.u
 types.update({
     "version": float,
-    "orientation": str,
+    "orientation": _str,
     "width": float,
     "height": float,
     "tilewidth": int,
     "tileheight": int,
     "firstgid": int,
-    "source": str,
-    "name": str,
+    "source": _str,
+    "name": _str,
     "spacing": int,
     "margin": int,
-    "trans": str,
+    "trans": _str,
     "id": int,
     "opacity": float,
     "visible": convert_to_bool,
-    "encoding": str,
-    "compression": str,
+    "encoding": _str,
+    "compression": _str,
     "gid": int,
-    "type": str,
+    "type": _str,
     "x": float,
     "y": float,
-    "value": str,
+    "value": _str,
     "rotation": float,
 })
 
@@ -166,14 +171,22 @@ class TiledElement(object):
             return False
 
         for k, v in items:
-            if hasattr(self, k):
+            # i'm not sure why, but this has attr causes problems on python 2.7 with unicode
+            try:
+                # this will be called in py 3+
+                _hasattr = hasattr(self, k)
+            except UnicodeError:
+                # this will be called in py 2.7
+                _hasattr = hasattr(self, k.encode('utf-8'))
+
+            if _hasattr:
                 msg = duplicate_name_fmt.format(k, self.__class__.__name__, self.name)
                 logger.error(msg)
                 return True
         return False
 
     @staticmethod
-    def _log_property_error_message(self):
+    def _log_property_error_message():
         msg = 'Some name are reserved for {0} objects and cannot be used.'
         logger.error(msg)
 

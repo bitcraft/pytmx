@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff" nextobjectid="9">
  <properties>
-  <property name="custom0" value="value"/>
-  <property name="custom1" value="value"/>
+  <property name="custom0" value="nihao"/>
+  <property name="custom1" value="你好"/>
   <property name="custom2" value="value"/>
  </properties>
- <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16" tilecount="336">
+ <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16" tilecount="336" columns="16">
   <properties>
    <property name="overworld" value="test"/>
   </properties>
@@ -31,10 +31,10 @@
    </properties>
   </tile>
  </tileset>
- <tileset firstgid="337" name="tiles" tilewidth="32" tileheight="32" tilecount="4">
+ <tileset firstgid="337" name="tiles" tilewidth="32" tileheight="32" tilecount="4" columns="2">
   <image source="tiles.png" width="64" height="64"/>
  </tileset>
- <tileset firstgid="341" name="water" tilewidth="16" tileheight="16" tilecount="144">
+ <tileset firstgid="341" name="water" tilewidth="16" tileheight="16" tilecount="144" columns="12">
   <image source="water.png" width="192" height="192"/>
   <tile id="0">
    <animation>
@@ -148,6 +148,7 @@
   <object id="6" name="Road" x="224" y="48">
    <properties>
     <property name="MoveCost" value="2"/>
+    <property name="中文" value="路"/>
    </properties>
    <polyline points="0,0 0,48 -64,48 -64,64 -48,64"/>
   </object>
@@ -157,6 +158,6 @@
   <object id="8" name="large tile object" gid="338" x="96" y="96" width="32" height="32"/>
  </objectgroup>
  <imagelayer name="Image Layer 1">
-  <image source="moon_overlay.png"/>
+  <image source="moon_overlay.png" width="624" height="624"/>
  </imagelayer>
 </map>
