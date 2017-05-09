@@ -12,6 +12,7 @@ If you are not familiar with python classes, you might want to check the
 
 Missing tests:
 - object rotation
+- terrains
 """
 import pygame
 from pygame.locals import *
@@ -50,10 +51,11 @@ class TiledRenderer(object):
 
     def render_map(self, surface):
         """ Render our map to a pygame surface
+        
         Feel free to use this as a starting point for your pygame app.
         This method expects that the surface passed is the same pixel
         size as the map.
-
+        
         Scrolling is a often requested feature, but pytmx is a map
         loader, not a renderer!  If you'd like to have a scrolling map
         renderer, please see my pyscroll project.
@@ -65,6 +67,8 @@ class TiledRenderer(object):
 
         # iterate over all the visible layers, then draw them
         for layer in self.tmx_data.visible_layers:
+            # each layer can be handled differently by checking their type
+            
             if isinstance(layer, TiledTileLayer):
                 self.render_tile_layer(surface, layer)
 
@@ -75,16 +79,20 @@ class TiledRenderer(object):
                 self.render_image_layer(surface, layer)
 
     def render_tile_layer(self, surface, layer):
+        """ Render all TiledTiles in this layer
+        """
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         surface_blit = surface.blit
 
-        # iterate over the tiles in the layer
+        # iterate over the tiles in the layer, and blit them
         for x, y, image in layer.tiles():
             surface_blit(image, (x * tw, y * th))
 
     def render_object_layer(self, surface, layer):
+        """ Render all TiledObjects contained in this layer
+        """
         # deref these heavily used references for speed
         draw_rect = pygame.draw.rect
         draw_lines = pygame.draw.lines
@@ -96,6 +104,7 @@ class TiledRenderer(object):
         poly_color = (0, 255, 0)
 
         # iterate over all the objects in the layer
+        # These may be Tiled shapes like circles or polygons, GID objects, or Tiled Objects
         for obj in layer:
             logger.info(obj)
 
@@ -150,8 +159,9 @@ class SimpleTest(object):
         """ Draw our map to some surface (probably the display)
         """
         # first we make a temporary surface that will accommodate the entire
-        # size of the map because this demo does not implement scrolling, we
-        # render the entire map
+        # size of the map.
+        # because this demo does not implement scrolling, we render the
+        # entire map each frame
         temp = pygame.Surface(self.renderer.pixel_size)
 
         # render the map onto the temporary surface
