@@ -532,6 +532,9 @@ class TiledMap(TiledElement):
     def get_tile_locations_by_gid(self, gid):
         """ Search map for tile locations by the GID
 
+        Return (int, int, int) tuples, where the layer is index of
+        the visible tile layers.
+
         Note: Not a fast operation.  Cache results if used often.
 
         :param gid: GID to be searched for
@@ -542,7 +545,7 @@ class TiledMap(TiledElement):
 
         p = product(range(self.width),
                     range(self.height),
-                    range(len(self.layers)))
+                    self.visible_tile_layers)
 
         return ((x, y, l) for (x, y, l) in p if
                 self.layers[l].data[y][x] == gid)
