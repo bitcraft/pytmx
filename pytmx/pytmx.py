@@ -105,7 +105,7 @@ types = defaultdict(lambda: six.u)
 
 _str = six.u
 types.update({
-    "version": float,
+    "version": str,
     "orientation": _str,
     "width": float,
     "height": float,
