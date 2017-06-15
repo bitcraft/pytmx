@@ -49,13 +49,19 @@ class TiledRenderer(object):
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
+        for layer in self.tmx_data.visible_tile_layers:
+            layer = self.tmx_data.layers[layer]
+            for i in layer.tiles():
+                print(i)
+                continue
+
     def render_map(self, surface):
         """ Render our map to a pygame surface
-        
+
         Feel free to use this as a starting point for your pygame app.
         This method expects that the surface passed is the same pixel
         size as the map.
-        
+
         Scrolling is a often requested feature, but pytmx is a map
         loader, not a renderer!  If you'd like to have a scrolling map
         renderer, please see my pyscroll project.
@@ -106,8 +112,6 @@ class TiledRenderer(object):
         # iterate over all the objects in the layer
         # These may be Tiled shapes like circles or polygons, GID objects, or Tiled Objects
         for obj in layer:
-            logger.info(obj)
-
             # objects with points are polygons or lines
             if hasattr(obj, 'points'):
                 draw_lines(surface, poly_color, obj.closed, obj.points, 3)
@@ -144,16 +148,6 @@ class SimpleTest(object):
         """ Create a renderer, load data, and print some debug info
         """
         self.renderer = TiledRenderer(filename)
-
-        logger.info("Objects in map:")
-        for obj in self.renderer.tmx_data.objects:
-            logger.info(obj)
-            for k, v in obj.properties.items():
-                logger.info("%s\t%s", k, v)
-
-        logger.info("GID (tile) properties:")
-        for k, v in self.renderer.tmx_data.tile_properties.items():
-            logger.info("%s\t%s", k, v)
 
     def draw(self, surface):
         """ Draw our map to some surface (probably the display)
@@ -234,11 +228,19 @@ if __name__ == '__main__':
     logger.info(pytmx.__version__)
 
     # loop through a bunch of maps in the maps folder
+    import time
     try:
-        for filename in glob.glob(os.path.join('data', '0.9.1', '*.tmx')):
-            logger.info("Testing %s", filename)
-            if not SimpleTest(filename).run():
-                break
+        # 6.6
+        start = time.time()
+        for i in range(500):
+            for filename in glob.glob(os.path.join('*.tmx')):
+                pygame.event.clear()
+                SimpleTest(filename)
+
+        end = time.time() - start
+        print(end)
+
     except:
         pygame.quit()
         raise
+

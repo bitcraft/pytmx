@@ -1,14 +1,14 @@
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
 import logging
-import six
 import os
 from itertools import chain, product
 from collections import defaultdict, namedtuple
 from xml.etree import ElementTree
-from six.moves import zip, map
 from operator import attrgetter
+
+import six
+from six.moves import map
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -52,6 +52,7 @@ AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
 def default_image_loader(filename, flags, **kwargs):
     """ This default image loader just returns filename, rect, and any flags
     """
+
     def load(rect=None, flags=None):
         return filename, rect, flags
 
@@ -98,6 +99,7 @@ def convert_to_bool(text):
         return False
 
     raise ValueError
+
 
 # used to change the unicode string returned from xml to
 # proper python variable types.
@@ -540,15 +542,9 @@ class TiledMap(TiledElement):
         :param gid: GID to be searched for
         :rtype: generator of tile locations
         """
-        # use this func to make sure GID is valid
-        self.get_tile_image_by_gid(gid)
-
-        p = product(range(self.width),
-                    range(self.height),
-                    self.visible_tile_layers)
-
-        return ((x, y, l) for (x, y, l) in p if
-                self.layers[l].data[y][x] == gid)
+        for l in self.visible_tile_layers:
+            for x, y, _gid in [i for i in self.layers[l].iter_data() if i[2] == gid]:
+                yield x, y, l
 
     def get_tile_properties_by_gid(self, gid):
         """ Get the tile properties of a tile GID
@@ -879,8 +875,9 @@ class TiledTileLayer(TiledElement):
 
         :return: Generator
         """
-        for y, x in product(range(self.height), range(self.width)):
-            yield x, y, self.data[y][x]
+        for y, row in enumerate(self.data):
+            for x, gid in enumerate(row):
+                yield x, y, gid
 
     def tiles(self):
         """ Iterate over tile images of this layer
@@ -892,11 +889,8 @@ class TiledTileLayer(TiledElement):
         :return: (x, y, image) tuples
         """
         images = self.parent.images
-        data = self.data
-        for y, row in enumerate(data):
-            for x, gid in enumerate(row):
-                if gid:
-                    yield x, y, images[gid]
+        for x, y, gid in [i for i in self.iter_data() if i[2]]:
+            yield x, y, images[gid]
 
     def _set_properties(self, node):
         TiledElement._set_properties(self, node)
