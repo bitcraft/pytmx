@@ -128,6 +128,8 @@ types.update({
     "y": float,
     "value": _str,
     "rotation": float,
+    "offsetx": float,
+    "offsety": float,
 })
 
 
@@ -862,6 +864,8 @@ class TiledTileLayer(TiledElement):
 
         # defaults from the specification
         self.name = None
+        self.offsetx = 0
+        self.offsety = 0
         self.opacity = 1.0
         self.visible = True
         self.height = 0
@@ -1002,6 +1006,8 @@ class TiledObject(TiledElement):
         self.y = 0
         self.width = 0
         self.height = 0
+        self.tilewidth = 0
+        self.tileheight = 0
         self.rotation = 0
         self.gid = 0
         self.visible = 1
@@ -1071,6 +1077,8 @@ class TiledObjectGroup(TiledElement, list):
         # defaults from the specification
         self.name = None
         self.color = None
+        self.offsetx = 0
+        self.offsety = 0
         self.opacity = 1
         self.visible = 1
 
@@ -1104,6 +1112,8 @@ class TiledImageLayer(TiledElement):
 
         # defaults from the specification
         self.name = None
+        self.offsetx = 0
+        self.offsety = 0
         self.opacity = 1
         self.visible = 1
 
