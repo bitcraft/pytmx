@@ -11,10 +11,6 @@ import six
 from six.moves import map
 
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
 
 __all__ = ['TiledElement',
            'TiledMap',
@@ -273,12 +269,17 @@ class TiledMap(TiledElement):
 
         # defaults from the TMX specification
         self.version = 0.0
+        self.tiledversion = ''
         self.orientation = None
+        self.renderorder = 'right-down'
         self.width = 0       # width of map in tiles
         self.height = 0      # height of map in tiles
         self.tilewidth = 0   # width of a tile in pixels
         self.tileheight = 0  # height of a tile in pixels
+        self.hexsidelength = 0
+        self.staggeraxis = 'x'
         self.background_color = None
+        self.nextobjectid = None
 
         # initialize the gid mapping
         self.imagemap[(0, 0)] = 0
@@ -329,8 +330,6 @@ class TiledMap(TiledElement):
         # "tile objects", objects with a GID, have need to have their attributes
         # set after the tileset is loaded, so this step must be performed last
         # also, this step is performed for objects to load their tiles.
-        # height and width will automatically be set according to the tileset
-        # that the image is from
 
         # tiled stores the origin of GID objects by the lower right corner
         # this is different for all other types, so i just adjust it here
@@ -353,8 +352,6 @@ class TiledMap(TiledElement):
             else:
                 if self.invert_y:
                     o.y -= tileset.tileheight
-                o.height = tileset.tileheight
-                o.width = tileset.tilewidth
 
         self.reload_images()
         return self
@@ -755,6 +752,8 @@ class TiledTileset(TiledElement):
         self.tileheight = 0
         self.spacing = 0
         self.margin = 0
+        self.tilecount = 0
+        self.columns = 0
         self.trans = None
         self.width = 0
         self.height = 0
@@ -990,6 +989,7 @@ class TiledObject(TiledElement):
         self.parent = parent
 
         # defaults from the specification
+        self.id = 0
         self.name = None
         self.type = None
         self.x = 0
@@ -1064,6 +1064,8 @@ class TiledObjectGroup(TiledElement, list):
 
         # defaults from the specification
         self.name = None
+        self.offsetx = 0
+        self.offsety = 0
         self.color = None
         self.opacity = 1
         self.visible = 1
