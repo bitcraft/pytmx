@@ -351,7 +351,7 @@ class TiledMap(TiledElement):
                 logger.error(msg, o.gid, o)
             else:
                 if self.invert_y:
-                    o.y -= tileset.tileheight
+                    o.y -= o.height
 
         self.reload_images()
         return self
