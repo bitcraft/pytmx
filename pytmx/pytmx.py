@@ -344,14 +344,8 @@ class TiledMap(TiledElement):
             if p:
                 o.properties.update(p)
 
-            try:
-                tileset = self.get_tileset_from_gid(o.gid)
-            except ValueError:
-                msg = 'attempted to lookup invalid gid %s in object %s'
-                logger.error(msg, o.gid, o)
-            else:
-                if self.invert_y:
-                    o.y -= o.height
+            if self.invert_y:
+                o.y -= o.height
 
         self.reload_images()
         return self
