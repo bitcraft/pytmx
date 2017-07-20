@@ -37,8 +37,13 @@ def smart_convert(original, colorkey, pixelalpha):
     tile_size = original.get_size()
     threshold = 127   # the default
 
-    # count the number of pixels in the tile that are not transparent
-    px = pygame.mask.from_surface(original, threshold).count()
+    try:
+        # count the number of pixels in the tile that are not transparent
+        px = pygame.mask.from_surface(original, threshold).count()
+    except:
+        # pygame_sdl2 will fail because the mask module is not included
+        # in this case, just convert_alpha and return it
+        return original.convert_alpha()
 
     # there are no transparent pixels in the image
     if px == tile_size[0] * tile_size[1]:
