@@ -128,6 +128,16 @@ types.update({
     "rotation": float,
 })
 
+# casting for properties type
+prop_type = {
+    'string': str,
+    'int': int,
+    'float': float,
+    'bool': bool,
+    'color': str,
+    'file': str
+}
+
 
 def parse_properties(node):
     """ Parse a Tiled xml node and return a dict that represents a tiled "property"
@@ -725,6 +735,21 @@ class TiledMap(TiledElement):
             logger.debug(msg)
             raise TypeError
 
+    def map_gid2(self, tiled_gid):
+        """ WIP.  need to refactor the gid code
+
+        :param tiled_gid:
+        :return:
+        """
+        tiled_gid = int(tiled_gid)
+
+        # gidmap is a default dict, so cannot trust to raise KeyError
+        if tiled_gid in self.gidmap:
+            return self.gidmap[tiled_gid]
+        else:
+            gid = self.register_gid(tiled_gid)
+            return [(gid, None)]
+
 
 class TiledTileset(TiledElement):
     """ Represents a Tiled Tileset
@@ -763,8 +788,6 @@ class TiledTileset(TiledElement):
         :param node: ElementTree element
         :return: self
         """
-        import os
-
         # if true, then node references an external tileset
         source = node.get('source', None)
         if source:
@@ -818,7 +841,8 @@ class TiledTileset(TiledElement):
                     gid = register_gid(int(frame.get('tileid')) + self.firstgid)
                     frames.append(AnimationFrame(gid, duration))
 
-            for gid, flags in self.parent.map_gid(tiled_gid + self.firstgid):
+            for gid, flags in self.parent.map_gid2(tiled_gid + self.firstgid):
+                print(gid, flags, p)
                 self.parent.set_tile_properties(gid, p)
 
         # handle the optional 'tileoffset' node

@@ -15,6 +15,11 @@
     <property name="name" value="grass"/>
    </properties>
   </tile>
+  <tile id="20">
+   <properties>
+    <property name="name" value="SAND"/>
+   </properties>
+  </tile>
   <tile id="245">
    <properties>
     <property name="type" value="GrassCave"/>
