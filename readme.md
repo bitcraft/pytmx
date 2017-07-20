@@ -108,7 +108,6 @@ Why use PyTMX?
 ===============================================================================
 
 ### PyTMX is efficient:
-* Only the tiles used on a map are loaded into memory
 * Map information is stored as integers, not python objects (32+kb)
 * Extensive use of generators and iterators make it easy on memory
 * Code is designed for compact size and readability

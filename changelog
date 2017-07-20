@@ -8,6 +8,9 @@ Released under the LGPL v3
 
 ===============================================================================
 
+New in 3.21:
+      core: load_all_tiles is now default
+
 New in 3.20:
       core: option to disable duplicate property checks: allow_duplicate_names
       core: keyword arguments correctly passed with util_* loaders

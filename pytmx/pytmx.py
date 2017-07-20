@@ -244,7 +244,7 @@ class TiledMap(TiledElement):
 
         # optional keyword arguments checked here
         self.optional_gids = kwargs.get('optional_gids', set())
-        self.load_all_tiles = kwargs.get('load_all', False)
+        self.load_all_tiles = kwargs.get('load_all', True)
         self.invert_y = kwargs.get('invert_y', True)
 
         # allow duplicate names to be parsed and loaded
