@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division
 
 import logging
 import os
@@ -844,7 +844,6 @@ class TiledTileset(TiledElement):
                     frames.append(AnimationFrame(gid, duration))
 
             for gid, flags in self.parent.map_gid2(tiled_gid + self.firstgid):
-                print(gid, flags, p)
                 self.parent.set_tile_properties(gid, p)
 
         # handle the optional 'tileoffset' node

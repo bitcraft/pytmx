@@ -1,7 +1,7 @@
 Map loader for TMX Files
 Leif Theden, "bitcraft", 2012-2014
 
-v3.20.x - for python 2.7 and 3.3+
+v3.21.x - for python 2.7 and 3.3+
 Tested with Tiled 0.11.0.
 
 Released under the LGPL v3
@@ -9,7 +9,8 @@ Released under the LGPL v3
 ===============================================================================
 
 New in 3.21:
-      core: load_all_tiles is now default
+           core: load_all_tiles is now default
+    pygame_sdl2: support pygame_sdl2 basic image loading
 
 New in 3.20:
       core: option to disable duplicate property checks: allow_duplicate_names
