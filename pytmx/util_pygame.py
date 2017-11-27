@@ -1,12 +1,32 @@
-import logging
+# -*- coding: utf-8 -*-
+"""
+Copyright (C) 2012-2017, Leif Theden <leif.theden@gmail.com>
+
+This file is part of pytmx.
+
+pytmx is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+pytmx is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+"""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import itertools
+import logging
+
 import pytmx
 
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
 
 try:
     from pygame.transform import flip, rotate
@@ -35,7 +55,7 @@ def smart_convert(original, colorkey, pixelalpha):
     convert() the images on your own
     """
     tile_size = original.get_size()
-    threshold = 127   # the default
+    threshold = 127  # the default
 
     try:
         # count the number of pixels in the tile that are not transparent
@@ -230,6 +250,7 @@ def simplify(all_points, tilewidth, tileheight):
     but I haven't found that it is excessively bad.  certainly much better than
     making a list of rects, one for each tile on the map!
     """
+
     def pick_rect(points, rects):
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox

@@ -14,19 +14,19 @@ Missing tests:
 - object rotation
 - terrains
 """
+
 import logging
 
 import pygame
 from pygame.locals import *
 
-from pytmx import *
+import pytmx
+from pytmx import TiledImageLayer
+from pytmx import TiledObjectGroup
+from pytmx import TiledTileLayer
 from pytmx.util_pygame import load_pygame
 
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
 
 
 def init_screen(width, height):
@@ -224,7 +224,6 @@ class SimpleTest(object):
 if __name__ == '__main__':
     import os.path
     import glob
-    import pytmx
 
     pygame.init()
     pygame.font.init()

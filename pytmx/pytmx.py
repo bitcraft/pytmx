@@ -1,27 +1,52 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright (C) 2012-2017, Leif Theden <leif.theden@gmail.com>
+
+This file is part of pytmx.
+
+pytmx is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+pytmx is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+"""
+from __future__ import absolute_import
 from __future__ import division
+from __future__ import print_function
 
 import logging
 import os
-from itertools import chain, product
 from collections import defaultdict, namedtuple
-from xml.etree import ElementTree
+from itertools import chain, product
 from operator import attrgetter
+from xml.etree import ElementTree
 
 import six
 from six.moves import map
 
-logger = logging.getLogger(__name__)
+__all__ = (
+    'TiledElement',
+    'TiledMap',
+    'TiledTileset',
+    'TiledTileLayer',
+    'TiledObject',
+    'TiledObjectGroup',
+    'TiledImageLayer',
+    'TiledTerrain',
+    'TiledAnimation',
+    'TiledChunk',
+    'TileFlags',
+    'convert_to_bool',
+    'parse_properties')
 
-__all__ = ['TiledElement',
-           'TiledMap',
-           'TiledTileset',
-           'TiledTileLayer',
-           'TiledObject',
-           'TiledObjectGroup',
-           'TiledImageLayer',
-           'TileFlags',
-           'convert_to_bool',
-           'parse_properties']
+logger = logging.getLogger(__name__)
 
 # internal flags
 TRANS_FLIPX = 1
@@ -39,7 +64,7 @@ duplicate_name_fmt = 'Cannot set user {} property on {} "{}"; Tiled property alr
 flag_names = (
     'flipped_horizontally',
     'flipped_vertically',
-    'flipped_diagonally',)
+    'flipped_diagonally')
 
 TileFlags = namedtuple('TileFlags', flag_names)
 AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
@@ -79,6 +104,7 @@ def convert_to_bool(text):
     :return: boolean
     :raises: ValueError
     """
+    # handle "1" and "0"
     try:
         return bool(int(text))
     except:
@@ -104,30 +130,58 @@ types = defaultdict(lambda: six.u)
 _str = six.u
 types.update({
     "version": str,
+    "tiledversion": str,
     "orientation": _str,
+    "renderorder": str,
     "width": float,
     "height": float,
     "tilewidth": int,
     "tileheight": int,
+    "hexsidelength": float,
+    "staggeraxis": str,
+    "staggerindex": str,
+    "backgroundcolor": str,
+    "nextobjectid": int,
     "firstgid": int,
     "source": _str,
     "name": _str,
     "spacing": int,
     "margin": int,
+    "tilecount": int,
+    "columns": int,
+    "format": str,
     "trans": _str,
+    "tile": int,
+    "terrain": str,
+    "probability": float,
+    "tileid": int,
+    "duration": int,
+    "color": str,
     "id": int,
     "opacity": float,
     "visible": convert_to_bool,
+    "offsetx": int,
+    "offsety": int,
     "encoding": _str,
     "compression": _str,
+    "draworder": str,
+    "points": str,
+    "fontfamily": str,
+    "pixelsize": float,
+    "wrap": convert_to_bool,
+    "bold": convert_to_bool,
+    "italic": convert_to_bool,
+    "underline": convert_to_bool,
+    "strikeout": convert_to_bool,
+    "kerning": convert_to_bool,
+    "halign": str,
+    "valign": str,
     "gid": int,
     "type": _str,
     "x": float,
     "y": float,
     "value": _str,
     "rotation": float,
-    "offsetx": float,
-    "offsety": float,
 })
 
 # casting for properties type
@@ -181,7 +235,7 @@ class TiledElement(object):
             return False
 
         for k, v in items:
-            # i'm not sure why, but this has attr causes problems on python 2.7 with unicode
+            # i'm not sure why, but this hasattr causes problems on python 2.7 with unicode
             try:
                 # this will be called in py 3+
                 _hasattr = hasattr(self, k)
@@ -263,8 +317,8 @@ class TiledMap(TiledElement):
         TiledElement.allow_duplicate_names = \
             kwargs.get('allow_duplicate_names', False)
 
-        self.layers = list()           # all layers in proper order
-        self.tilesets = list()         # TiledTileset objects
+        self.layers = list()  # all layers in proper order
+        self.tilesets = list()  # TiledTileset objects
         self.tile_properties = dict()  # tiles that have properties
         self.layernames = dict()
 
@@ -272,7 +326,7 @@ class TiledMap(TiledElement):
         # between the GIDs in the Tiled map data (tmx) and the data in this
         # object and the layers.  This dictionary keeps track of that.
         self.gidmap = defaultdict(list)
-        self.imagemap = dict()     # mapping of gid and trans flags to real gids
+        self.imagemap = dict()  # mapping of gid and trans flags to real gids
         self.tiledgidmap = dict()  # mapping of tiledgid to pytmx gid
         self.maxgid = 1
 
@@ -280,18 +334,19 @@ class TiledMap(TiledElement):
         self.images = list()
 
         # defaults from the TMX specification
-        self.version = 0.0
+        self.version = '0.0'
         self.tiledversion = ''
-        self.orientation = None
+        self.orientation = 'orthogonal'
         self.renderorder = 'right-down'
-        self.width = 0       # width of map in tiles
-        self.height = 0      # height of map in tiles
-        self.tilewidth = 0   # width of a tile in pixels
+        self.width = 0  # width of map in tiles
+        self.height = 0  # height of map in tiles
+        self.tilewidth = 0  # width of a tile in pixels
         self.tileheight = 0  # height of a tile in pixels
         self.hexsidelength = 0
-        self.staggeraxis = 'x'
+        self.staggeraxis = None
+        self.staggerindex = None
         self.background_color = None
-        self.nextobjectid = None
+        self.nextobjectid = 0
 
         # initialize the gid mapping
         self.imagemap[(0, 0)] = 0
@@ -775,6 +830,8 @@ class TiledTileset(TiledElement):
         self.margin = 0
         self.tilecount = 0
         self.columns = 0
+
+        # image properties
         self.trans = None
         self.width = 0
         self.height = 0
@@ -790,6 +847,8 @@ class TiledTileset(TiledElement):
         :param node: ElementTree element
         :return: self
         """
+        import os
+
         # if true, then node references an external tileset
         source = node.get('source', None)
         if source:
@@ -876,12 +935,12 @@ class TiledTileLayer(TiledElement):
 
         # defaults from the specification
         self.name = None
-        self.offsetx = 0
-        self.offsety = 0
+        self.width = 0
+        self.height = 0
         self.opacity = 1.0
         self.visible = True
-        self.height = 0
-        self.width = 0
+        self.offsetx = 0
+        self.offsety = 0
 
         self.parse_xml(node)
 
@@ -943,8 +1002,7 @@ class TiledTileLayer(TiledElement):
 
         elif encoding == 'csv':
             next_gid = map(int, "".join(
-                line.strip() for line in data_node.text.strip()
-            ).split(","))
+                line.strip() for line in data_node.text.strip()).split(","))
 
         elif encoding:
             msg = 'TMX encoding type: {0} is not supported.'
@@ -999,6 +1057,40 @@ class TiledTileLayer(TiledElement):
         return self
 
 
+class TiledObjectGroup(TiledElement, list):
+    """ Represents a Tiled ObjectGroup
+
+    Supports any operation of a normal list.
+    """
+
+    def __init__(self, parent, node):
+        TiledElement.__init__(self)
+        self.parent = parent
+
+        # defaults from the specification
+        self.name = None
+        self.color = None
+        self.opacity = 1
+        self.visible = 1
+        self.offsetx = 0
+        self.offsety = 0
+        self.draworder = "topdown"
+
+        self.parse_xml(node)
+
+    def parse_xml(self, node):
+        """ Parse an Object Group from ElementTree xml node
+
+        :param node: ElementTree xml node
+        :return: self
+        """
+        self._set_properties(node)
+        self.extend(TiledObject(self.parent, child)
+                    for child in node.findall('object'))
+
+        return self
+
+
 class TiledObject(TiledElement):
     """ Represents a any Tiled Object
 
@@ -1020,6 +1112,7 @@ class TiledObject(TiledElement):
         self.rotation = 0
         self.gid = 0
         self.visible = 1
+        self.template = None
 
         self.parse_xml(node)
 
@@ -1073,41 +1166,6 @@ class TiledObject(TiledElement):
         return self
 
 
-class TiledObjectGroup(TiledElement, list):
-    """ Represents a Tiled ObjectGroup
-
-    Supports any operation of a normal list.
-    """
-
-    def __init__(self, parent, node):
-        TiledElement.__init__(self)
-        self.parent = parent
-
-        # defaults from the specification
-        self.name = None
-        self.offsetx = 0
-        self.offsety = 0
-        self.color = None
-        self.offsetx = 0
-        self.offsety = 0
-        self.opacity = 1
-        self.visible = 1
-
-        self.parse_xml(node)
-
-    def parse_xml(self, node):
-        """ Parse an Object Group from ElementTree xml node
-
-        :param node: ElementTree xml node
-        :return: self
-        """
-        self._set_properties(node)
-        self.extend(TiledObject(self.parent, child)
-                    for child in node.findall('object'))
-
-        return self
-
-
 class TiledImageLayer(TiledElement):
     """ Represents Tiled Image Layer
 
@@ -1123,8 +1181,6 @@ class TiledImageLayer(TiledElement):
 
         # defaults from the specification
         self.name = None
-        self.offsetx = 0
-        self.offsety = 0
         self.opacity = 1
         self.visible = 1
 
@@ -1150,3 +1206,21 @@ class TiledImageLayer(TiledElement):
         self.source = image_node.get('source', None)
         self.trans = image_node.get('trans', None)
         return self
+
+
+class TiledProperty(TiledElement):
+    """ Represents Tiled Property
+    """
+
+    def __init__(self, parent, node):
+        TiledElement.__init__(self)
+
+        # defaults from the specification
+        self.name = None
+        self.type = None
+        self.value = None
+
+        self.parse_xml(node)
+
+    def parse_xml(self, node):
+        pass
