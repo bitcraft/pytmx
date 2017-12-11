@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff" nextobjectid="10">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" backgroundcolor="#55aaff" nextobjectid="10">
  <properties>
-  <property name="custom0" value="nihao"/>
-  <property name="custom1" value="你好"/>
-  <property name="custom2" value="value"/>
+  <property name="bool-test" type="bool" value="true"/>
+  <property name="color-test" type="color" value="#ff55aa00"/>
+  <property name="file-test" type="file" value="tree.png"/>
+  <property name="float-test" type="float" value="1.5"/>
+  <property name="int-test" type="int" value="15"/>
+  <property name="string-test" value="hello world"/>
+  <property name="utf8-test" value="你好"/>
  </properties>
  <tileset firstgid="1" name="16x16-overworld" tilewidth="16" tileheight="16" tilecount="336" columns="16">
   <properties>
