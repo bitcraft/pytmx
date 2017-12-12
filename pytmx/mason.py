@@ -247,6 +247,9 @@ class Processor(object):
 
 
 class ProcessProperty(Processor):
+    def __init__(self):
+        self.value = None
+
     def start(self, element, stack):
         """
         :type element: xml.etree.ElementTree.Element
@@ -259,15 +262,18 @@ class ProcessProperty(Processor):
             value = _type(element.get('value'))
         else:
             value = element.get('value')
-        return {element.get('name'): value}
+        self.value = {element.get('name'): value}
 
 
 class ProcessProperties(Processor):
+    def __init__(self):
+        self.dictionary = dict()
+
     def start(self, element, stack):
         pass
 
-    def add_property(self):
-        pass
+    def add_property(self, property):
+        self.dictionary[property['name']] = property['value']
 
 
 class ProcessImage(Processor):
@@ -573,10 +579,9 @@ def slurp(filename):
             # remove from stack
             stack.pop()
 
-            parent = stack[-1][1]
+            parent = stack[-1][-1]
             if parent:
                 try:
-                    parent = parent[-1]
                     func = getattr(parent, 'add_' + element.tag)
                 except AttributeError:
                     print(parent)
