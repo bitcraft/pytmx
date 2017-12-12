@@ -7,16 +7,14 @@ Supports all major features to version 1.1.0
 
 * Embedded images are supported
 
-Mason is designed to read Tiled TMX files and
-prepare them for easy use for games.
+Mason is designed to read Tiled TMX files and prepare them for easy use for games.
 """
 from __future__ import absolute_import, division, print_function
 
 import logging
-import array
 import struct
+from collections import deque, namedtuple
 from unittest import TestCase
-from collections import defaultdict, namedtuple
 
 import six
 
@@ -63,68 +61,12 @@ class UnsupportedTilesetError(Exception):
     pass
 
 
-def convert_to_bool(text):
-    """ Convert a few common variations of "true" and "false" to boolean
+class UnsupportedFeature(Exception):
+    pass
 
-    :param text: string to test
-    :return: boolean
-    :raises: ValueError
-    """
-    try:
-        return bool(int(text))
-    except:
-        pass
-
-    text = str(text).lower()
-    if text == "true":
-        return True
-    if text == "yes":
-        return True
-    if text == "false":
-        return False
-    if text == "no":
-        return False
-
-    raise ValueError
-
-
-types = defaultdict(lambda: six.u)
-
-_str = six.u
-types.update({
-    "format": str,
-    "trans": _str,
-    "tile": int,
-    "tileid": int,
-    "duration": int,
-    "color": str,
-    "id": int,
-    "opacity": float,
-    "visible": convert_to_bool,
-    "offsetx": int,
-    "offsety": int,
-    "draworder": str,
-    "points": str,
-    "fontfamily": str,
-    "pixelsize": float,
-    "wrap": convert_to_bool,
-    "bold": convert_to_bool,
-    "italic": convert_to_bool,
-    "underline": convert_to_bool,
-    "strikeout": convert_to_bool,
-    "kerning": convert_to_bool,
-    "halign": str,
-    "valign": str,
-    "gid": int,
-    "type": _str,
-    "x": float,
-    "y": float,
-    "value": _str,
-    "rotation": float,
-})
 
 # casting for properties type
-prop_type = {
+tiled_property_type = {
     'string': str,
     'int': int,
     'float': float,
@@ -132,9 +74,6 @@ prop_type = {
     'color': str,
     'file': str
 }
-
-stack = list()
-TiledMap = namedtuple('TiledMap', 'beans')
 
 
 def decompress_zlib(data):
@@ -168,44 +107,41 @@ decoders = {
 }
 
 
-def get_data_thing(xform_name, exception):
-    def func(element):
-        xform = element.get(xform_name, None)
+def get_data_thing(xformers, exception):
+    def func(data, xform):
         if xform:
-            choocher = decoders.get(xform)
-            if choocher is None:
+            xformer = xformers.get(xform)
+            if xformer is None:
                 raise exception(xform)
-            return choocher(element.text)
+            return xformer(data)
 
     return func
 
 
-decompress = get_data_thing('compression', MissingDecompressorError)
-decode = get_data_thing('encoding', MissingDecoderError)
+decompress = get_data_thing(decompressors, MissingDecompressorError)
+decode = get_data_thing(decoders, MissingDecoderError)
 
 
-def unpack(element):
+def read_points(text):
+    """parse a text string of float tuples and return [(x,...),...]
+    """
+    return tuple(tuple(map(float, i.split(','))) for i in text.split())
+
+
+def unpack(data, encoding, compression):
     """ Decode and decompress level tile data
 
-    :param element:
     :return:
     """
-    raw_data = None
-
-    # encoding ===========================================================
-    temp = decode(element)
+    temp = decode(data, encoding)
     if temp is not None:
-        raw_data = temp
+        data = temp
 
-    # compression ========================================================
-    temp = decompress(element)
+    temp = decompress(data, compression)
     if temp is not None:
-        raw_data = temp
+        data = temp
 
-    if raw_data is None:
-        raise Exception
-
-    return raw_data
+    return data
 
 
 def decode_gid(raw_gid):
@@ -226,54 +162,102 @@ def decode_gid(raw_gid):
 
 
 def cast(element, types):
-    return {key: types[key](value) for key, value in element.items()}
+    try:
+        return {key: types[key](value) for key, value in element.items()}
+    except KeyError as e:
+        raise UnsupportedFeature(element.tag, e.args)
 
 
 class Processor(object):
-    def start(self, element, stack):
-        """
-        :type element: xml.etree.ElementTree.Element
-        :type stack: list
-        :return:
-        """
-        pass
+    types = {}
 
-    def end(self, element, stack):
-        """
-        :type element: xml.etree.ElementTree.Element
-        :type stack: list
-        :return:
-        """
-
-
-class ProcessProperty(Processor):
     def __init__(self):
-        self.value = None
+        self.properties = dict()
 
-    def start(self, element, stack):
+    def apply_attrib(self, element):
         """
         :type element: xml.etree.ElementTree.Element
-        :type stack: list
+        :return: None
+        """
+        try:
+            self.__dict__.update(cast(element, self.types))
+        except KeyError:
+            raise
+
+    def start(self, element, parent):
+        """
+        :type element: xml.etree.ElementTree.Element
+        :type parent: Processor
         :return:
         """
-        _type = element.get('type')
-        if _type:
-            _type = prop_type[_type]
-            value = _type(element.get('value'))
-        else:
-            value = element.get('value')
-        self.value = {element.get('name'): value}
+        self.apply_attrib(element)
+
+    def end(self, element, parent):
+        """
+        :type element: xml.etree.ElementTree.Element
+        :type parent: Processor
+        :return:
+        """
+
+    def add_properties(self, properties):
+        self.properties = properties.dictionary
 
 
-class ProcessProperties(Processor):
+class ProcessAnimation(Processor):
     def __init__(self):
-        self.dictionary = dict()
+        super(ProcessAnimation, self).__init__()
+        self.frames = list()
 
-    def start(self, element, stack):
-        pass
 
-    def add_property(self, property):
-        self.dictionary[property['name']] = property['value']
+class ProcessChunk(Processor):
+    pass
+
+
+class ProcessData(Processor):
+    types = {
+        'encoding': str,
+        'compression': str
+    }
+
+    def __init__(self):
+        super(ProcessData, self).__init__()
+        self.encoding = None
+        self.compression = None
+        self.data = None
+        self.tiles = list()
+
+    def end(self, element, parent):
+        # decode and decompress data
+        data = unpack(element.text, self.encoding, self.compression)
+        if data:
+            # unpack into list of 32-bit integers
+            fmt = struct.Struct('<L')
+            every_4 = range(0, len(data), 4)
+            gids = [decode_gid(fmt.unpack_from(data, i)[0]) for i in every_4]
+
+            # get map dimension info from the stack
+            w, h = parent.width, parent.height
+
+            # split data into several arrays
+            # self.data = tuple(array.array('H', gids[i * w:i * w + w]) for i in range(h))
+
+    def add_tile(self, item):
+        self.tiles.append(item)
+
+
+class ProcessEllipse(Processor):
+    pass
+
+
+class ProcessFrame(Processor):
+    types = {
+        'tileid': int,
+        'duration': int,
+    }
+
+
+class ProcessGroup(Processor):
+    pass
 
 
 class ProcessImage(Processor):
@@ -285,20 +269,210 @@ class ProcessImage(Processor):
         'height': int,
     }
 
-    def start(self, element, stack):
-        return element.attrib
+
+class ProcessImagelayer(Processor):
+    types = {
+        'name': str,
+        'offsetx': int,
+        'offsety': int,
+        'opacity': float,
+        'visbile': bool
+    }
+
+    def __init__(self):
+        super(ProcessImagelayer, self).__init__()
+        self.image = None
+
+    def add_image(self, item):
+        self.image = item
+
+
+class ProcessLayer(Processor):
+    types = {
+        "name": str,
+        "width": int,
+        "height": int,
+        "opacity": float,
+        "visible": bool,
+        "offsetx": int,
+        "offsety": int,
+    }
+
+    def __init__(self):
+        super(ProcessLayer, self).__init__()
+        self.data = None
+
+    def add_data(self, data):
+        self.data = data
+
+
+class ProcessMap(Processor):
+    types = {
+        "version": str,
+        "tiledversion": str,
+        "orientation": str,
+        "renderorder": str,
+        "width": int,
+        "height": int,
+        "tilewidth": int,
+        "tileheight": int,
+        "hexsidelength": float,
+        "staggeraxis": str,
+        "staggerindex": str,
+        "backgroundcolor": str,
+        "nextobjectid": int,
+    }
+
+    def __init__(self):
+        super(ProcessMap, self).__init__()
+        self.tilesets = list()
+        self.layers = list()
+        self.objectgroups = list()
+        self.tilelayers = list()
+        self.imagelayers = list()
+
+    def add_tileset(self, item):
+        self.tilesets.append(item)
+
+    def add_layer(self, item):
+        self.layers.append(item)
+        self.tilelayers.append(item)
+
+    def add_objectgroup(self, item):
+        self.layers.append(item)
+        self.objectgroups.append(item)
+
+    def add_imagelayer(self, item):
+        self.layers.append(item)
+        self.imagelayers.append(item)
+
+
+class ProcessObject(Processor):
+    types = {
+        'name': str,
+        'id': int,
+        'type': str,
+        'x': float,
+        'y': float,
+        'width': float,
+        'height': float,
+        'rotation': float,
+        'gid': int
+    }
+
+    def __init__(self):
+        super(ProcessObject, self).__init__()
+        self.points = list()
+
+    def add_polygon(self, item):
+        self.points = item
+
+    def add_polyline(self, item):
+        self.points = item
+
+
+class ProcessObjectgroup(Processor):
+    types = {
+        'name': str,
+        'x': float,
+        'y': float,
+        'width': int,
+        'height': int
+    }
+
+    def __init__(self):
+        super(ProcessObjectgroup, self).__init__()
+        self.objects = list()
+
+    def add_object(self, item):
+        self.objects.append(item)
+
+
+class ProcessOffset(Processor):
+    types = {
+        'x': int,
+        'y': int,
+    }
+
+    def end(self, element, parent):
+        return cast(element, self.types)
+
+
+class ProcessPolygon(Processor):
+    types = {
+        'points': read_points,
+    }
+
+
+class ProcessPolyline(Processor):
+    types = {
+        'points': read_points,
+    }
+
+
+class ProcessProperties(Processor):
+    def __init__(self):
+        super(ProcessProperties, self).__init__()
+        self.dictionary = dict()
+
+    def add_property(self, prop):
+        self.dictionary[prop.value['name']] = prop.value['value']
+
+
+class ProcessProperty(Processor):
+    def __init__(self):
+        super(ProcessProperty, self).__init__()
+        self.value = None
+
+    def apply_attrib(self, element):
+        """
+        :type element: xml.etree.ElementTree.Element
+        :return:
+        """
+        _type = element.get('type')
+        if _type:
+            _type = tiled_property_type[_type]
+            value = _type(element.get('value'))
+        else:
+            value = element.get('value')
+        self.value = {'name': element.get('name'), 'value': value}
+
+
+class ProcessTemplate(Processor):
+    pass
+
+
+class ProcessTerrain(Processor):
+    pass
+
+
+class ProcessTerraintypes(Processor):
+    pass
+
+
+class ProcessText(Processor):
+    pass
 
 
 class ProcessTile(Processor):
     types = {
         'id': int,
+        'gid': int,
         'type': str,
         'terrain': str,
         'probability': float,
     }
 
-    def start(self, element, stack):
-        return cast(element, self.types)
+    def __init__(self):
+        super(ProcessTile, self).__init__()
+        self.image = None
+
+    def add_image(self, item):
+        self.image = item
+
+
+class ProcessTileoffset(Processor):
+    pass
 
 
 class ProcessTileset(Processor):
@@ -314,17 +488,20 @@ class ProcessTileset(Processor):
         "columns": int,
     }
 
-    def start(self, element, stack):
-        """
-        :type element: xml.etree.ElementTree.Element
-        :type stack: list
-        :return:
-        """
-        attrib = cast(element, self.types)
+    def __init__(self):
+        super(ProcessTileset, self).__init__()
+        self.image = None
+        self.tiles = list()
+
+    def add_image(self, image):
+        self.image = image
+
+    def add_tile(self, tile):
+        self.tiles.append(tile)
 
 
 class ProcessTilesetSource(Processor):
-    def start(self, element, stack):
+    def end(self, element, parent):
         if source[-4:].lower() == ".tsx":
 
             # external tilesets don't save this, store it for later
@@ -346,258 +523,47 @@ class ProcessTilesetSource(Processor):
             raise UnsupportedTilesetError
 
 
-class ProcessOffset(Processor):
-    types = {
-        'x': int,
-        'y': int,
-    }
-
-    def end(self, element, stack):
-        return cast(element, self.types)
+def get_processor(element):
+    feature = element.tag.title()
+    try:
+        return globals()['Process' + feature]()
+    except KeyError:
+        raise UnsupportedFeature(feature)
 
 
-class ProcessData(Processor):
-    types = {
-        'encoding': str,
-        'compression': str
-    }
-
-    def end(self, element, stack):
-        # decode and decompress data
-        data = unpack(element)
-
-        # unpack into list of 32-bit integers
-        fmt = struct.Struct('<L')
-        every_4 = range(0, len(data), 4)
-        gids = [decode_gid(fmt.unpack_from(data, i)[0]) for i in every_4]
-
-        # get layer info from the stack
-        layer_data = stack[-2][2]
-        width, height = layer_data['width'], layer_data['height']
-
-        # split data into several arrays
-        return tuple(array.array('H', gids[i * width:i * width + width]) for i in range(height))
-
-
-class ProcessLayer(Processor):
-    types = {
-        "name": str,
-        "width": int,
-        "height": int,
-        "opacity": float,
-        "visible": bool,
-        "offsetx": int,
-        "offsety": int,
-    }
-
-    def start(self, element, stack):
-        data = {}
-        for key, value in element.items():
-            data[key] = self.types[key](value)
-        return data
-
-
-class ProcessPolygon(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessObject(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessPolyline(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessObjectgroup(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessImagelayer(Processor):
-    types = {
-        'name': str,
-        'offsetx': int,
-        'offsety': int,
-        'opacity': float,
-        'visbile': bool
-    }
-
-    def start(self, element, stack):
-        pass
-
-
-class ProcessMap(Processor):
-    types = {
-        "version": str,
-        "tiledversion": str,
-        "orientation": _str,
-        "renderorder": str,
-        "width": int,
-        "height": int,
-        "tilewidth": int,
-        "tileheight": int,
-        "hexsidelength": float,
-        "staggeraxis": str,
-        "staggerindex": str,
-        "backgroundcolor": str,
-        "nextobjectid": int,
-    }
-
-    def start(self, element, stack):
-        data = {}
-        for key, value in element.items():
-            data[key] = self.types[key](value)
-        return data
-
-
-class ProcessAnimation(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessChunk(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessFrame(Processor):
-    types = {
-        'tileid': int,
-        'duration': int,
-    }
-
-    def start(self, element, stack):
-        return cast(element, self.types)
-
-
-class ProcessGroup(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessEllipse(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessTerrain(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessTerraintypes(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessTemplate(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessText(Processor):
-    def start(self, element, stack):
-        pass
-
-
-class ProcessTileoffset(Processor):
-    def start(self, element, stack):
-        pass
-
-
-handled = [
-    'animation',
-    'chunk',
-    'data',
-    'frame',
-    'ellipse',
-    'group',
-    'image',
-    'imagelayer',
-    'layer',
-    'map',
-    'object',
-    'objectgroup',
-    'polygon',
-    'polyline',
-    'properties',
-    'property',
-    'template',
-    'terrain',
-    'terraintypes',
-    'text',
-    'tile',
-    'tileoffset',
-    'tileset',
-    # 'wangcolorcorner',
-    # 'wangedgecolor',
-    # 'wangset',
-    # 'wangsets',
-    # 'wangtile',
-]
-
-handlers = {i: globals()['Process' + i.title()]() for i in handled}
-print(handlers.keys())
+def combine(parent, child, tag):
+    try:
+        func = getattr(parent, 'add_' + tag)
+        func(child)
+    except AttributeError:
+        raise UnsupportedFeature(tag)
 
 
 def slurp(filename):
-    root = defaultdict(list)
-    sem = 0
-    flags = 0
-    stack.append((None, None, None))
+    stack = deque([None])
+    token = None
 
     for event, element in ElementTree.iterparse(filename, events=('start', 'end')):
-
-        try:
-            h = globals()['Process' + element.tag.title()]()
-
-        except KeyError:
-            raise
-
         if event == 'start':
-            sem += 1
-
-            v = h.start(element, stack)
-            # print('{}\t{}:\t\t{}'.format(event, element.tag, v))
-
-            # insert into stack
-            stack.append((element.tag, element, v, h))
+            parent = stack[-1]
+            token = get_processor(element)
+            token.start(element, parent)
+            stack.append(token)
 
         elif event == 'end':
-            sem -= 1
-
-            # close it up
-            h.end(element, stack)
-
-            # free memory from the element
+            token = stack.pop()
+            parent = stack[-1]
+            token.end(element, parent)
+            if parent:
+                combine(parent, token, element.tag)
             element.clear()
 
-            # remove from stack
-            stack.pop()
-
-            parent = stack[-1][-1]
-            if parent:
-                try:
-                    func = getattr(parent, 'add_' + element.tag)
-                except AttributeError:
-                    print(parent)
-                    raise
-                func(element)
-
-        print("=" * 80)
-        print(sem, element.tag, flags)
-        print([i[0] for i in stack])
-        print()
-
-    print(stack)
-    import pprint
-    pprint.pprint(dict(root))
+    return token
 
 
 class TestCase2(TestCase):
     def test_init(self):
-        slurp('../apps/data/0.9.1/formosa-base64.tmx')
+        import glob
+        for filename in glob.glob('../apps/data/0.9.1/*tmx'):
+            print(filename)
+            slurp(filename)
