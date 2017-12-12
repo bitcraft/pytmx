@@ -1,6 +1,14 @@
-#encoding: utf-8
+# encoding: utf-8
 """
+Mason: a fast library to read Tiled TMX files.
 
+For python 2.7 and python 3.3+
+Supports all major features to version 1.1.0
+
+* Embedded images are supported
+
+Mason is designed to read Tiled TMX files and
+prepare them for easy use for games.
 """
 from __future__ import absolute_import, division, print_function
 
@@ -84,31 +92,9 @@ types = defaultdict(lambda: six.u)
 
 _str = six.u
 types.update({
-    "version": str,
-    "tiledversion": str,
-    "orientation": _str,
-    "renderorder": str,
-    "width": float,
-    "height": float,
-    "tilewidth": int,
-    "tileheight": int,
-    "hexsidelength": float,
-    "staggeraxis": str,
-    "staggerindex": str,
-    "backgroundcolor": str,
-    "nextobjectid": int,
-    "firstgid": int,
-    "source": _str,
-    "name": _str,
-    "spacing": int,
-    "margin": int,
-    "tilecount": int,
-    "columns": int,
     "format": str,
     "trans": _str,
     "tile": int,
-    "terrain": str,
-    "probability": float,
     "tileid": int,
     "duration": int,
     "color": str,
@@ -117,8 +103,6 @@ types.update({
     "visible": convert_to_bool,
     "offsetx": int,
     "offsety": int,
-    "encoding": _str,
-    "compression": _str,
     "draworder": str,
     "points": str,
     "fontfamily": str,
@@ -153,26 +137,19 @@ stack = list()
 TiledMap = namedtuple('TiledMap', 'beans')
 
 
-def decode_data(element):
-    pass
-
-
 def decompress_zlib(data):
     import zlib
-
     return zlib.decompress(data)
 
 
 def decompress_gzip(data):
     import gzip
-
     with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
         return fh.read()
 
 
 def decode_base64(data):
     from base64 import b64decode
-
     return b64decode(data.strip())
 
 
@@ -205,6 +182,30 @@ def get_data_thing(xform_name, exception):
 
 decompress = get_data_thing('compression', MissingDecompressorError)
 decode = get_data_thing('encoding', MissingDecoderError)
+
+
+def unpack(element):
+    """ Decode and decompress level tile data
+
+    :param element:
+    :return:
+    """
+    raw_data = None
+
+    # encoding ===========================================================
+    temp = decode(element)
+    if temp is not None:
+        raw_data = temp
+
+    # compression ========================================================
+    temp = decompress(element)
+    if temp is not None:
+        raw_data = temp
+
+    if raw_data is None:
+        raise Exception
+
+    return raw_data
 
 
 def decode_gid(raw_gid):
@@ -265,6 +266,9 @@ class ProcessProperties(Processor):
     def start(self, element, stack):
         pass
 
+    def add_property(self):
+        pass
+
 
 class ProcessImage(Processor):
     types = {
@@ -312,27 +316,28 @@ class ProcessTileset(Processor):
         """
         attrib = cast(element, self.types)
 
-        source = attrib.get('source', None)
-        if source:
-            if source[-4:].lower() == ".tsx":
 
-                # external tilesets don't save this, store it for later
-                self.firstgid = int(element.get('firstgid'))
+class ProcessTilesetSource(Processor):
+    def start(self, element, stack):
+        if source[-4:].lower() == ".tsx":
 
-                # we need to mangle the path - tiled stores relative paths
-                dirname = os.path.dirname(self.parent.filename)
-                path = os.path.abspath(os.path.join(dirname, source))
-                try:
-                    element = ElementTree.parse(path).getroot()
-                except IOError:
-                    msg = "Cannot load external tileset: {0}"
-                    logger.error(msg.format(path))
-                    raise Exception
+            # external tilesets don't save this, store it for later
+            self.firstgid = int(element.get('firstgid'))
 
-            else:
-                msg = "Found external tileset, but cannot handle type: {0}"
-                logger.error(msg.format(self.source))
-                raise UnsupportTilesetError
+            # we need to mangle the path - tiled stores relative paths
+            dirname = os.path.dirname(self.parent.filename)
+            path = os.path.abspath(os.path.join(dirname, source))
+            try:
+                element = ElementTree.parse(path).getroot()
+            except IOError:
+                msg = "Cannot load external tileset: {0}"
+                logger.error(msg.format(path))
+                raise Exception
+
+        else:
+            msg = "Found external tileset, but cannot handle type: {0}"
+            logger.error(msg.format(self.source))
+            raise UnsupportedTilesetError
 
 
 class ProcessOffset(Processor):
@@ -346,34 +351,26 @@ class ProcessOffset(Processor):
 
 
 class ProcessData(Processor):
+    types = {
+        'encoding': str,
+        'compression': str
+    }
+
     def end(self, element, stack):
-        raw_data = None
+        # decode and decompress data
+        data = unpack(element)
 
-        # encoding ===========================================================
-        temp = decode(element)
-        if temp is not None:
-            raw_data = temp
-
-        # compression ========================================================
-        temp = decompress(element)
-        if temp is not None:
-            raw_data = temp
-
-        # choke!
-        if raw_data is None:
-            raise Exception
-
-        # unpack into 32-bit integers
+        # unpack into list of 32-bit integers
         fmt = struct.Struct('<L')
-        every_4 = range(0, len(raw_data), 4)
-        flat = [decode_gid(fmt.unpack_from(raw_data, i)[0]) for i in every_4]
+        every_4 = range(0, len(data), 4)
+        gids = [decode_gid(fmt.unpack_from(data, i)[0]) for i in every_4]
 
         # get layer info from the stack
         layer_data = stack[-2][2]
         width, height = layer_data['width'], layer_data['height']
 
-        # generate level data
-        return tuple(array.array('H', flat[i*width:i*width+width]) for i in range(height))
+        # split data into several arrays
+        return tuple(array.array('H', gids[i * width:i * width + width]) for i in range(height))
 
 
 class ProcessLayer(Processor):
@@ -542,29 +539,58 @@ print(handlers.keys())
 
 
 def slurp(filename):
+    root = defaultdict(list)
+    sem = 0
+    flags = 0
+    stack.append((None, None, None))
+
     for event, element in ElementTree.iterparse(filename, events=('start', 'end')):
 
         try:
-            h = handlers[element.tag]
+            h = globals()['Process' + element.tag.title()]()
 
         except KeyError:
             raise
 
         if event == 'start':
+            sem += 1
+
             v = h.start(element, stack)
             # print('{}\t{}:\t\t{}'.format(event, element.tag, v))
 
             # insert into stack
-            stack.append((element.tag, element, v))
+            stack.append((element.tag, element, v, h))
 
         elif event == 'end':
+            sem -= 1
+
             # close it up
             h.end(element, stack)
 
             # free memory from the element
             element.clear()
 
+            # remove from stack
+            stack.pop()
+
+            parent = stack[-1][1]
+            if parent:
+                try:
+                    parent = parent[-1]
+                    func = getattr(parent, 'add_' + element.tag)
+                except AttributeError:
+                    print(parent)
+                    raise
+                func(element)
+
+        print("=" * 80)
+        print(sem, element.tag, flags)
+        print([i[0] for i in stack])
+        print()
+
     print(stack)
+    import pprint
+    pprint.pprint(dict(root))
 
 
 class TestCase2(TestCase):
