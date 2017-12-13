@@ -12,11 +12,16 @@ Mason is designed to read Tiled TMX files and prepare them for easy use for game
 from __future__ import absolute_import, division, print_function
 
 import logging
+import pprint
 import struct
 from collections import deque, namedtuple
+from itertools import product
 from unittest import TestCase
 
+import os
 import six
+
+from pytmx import TiledTileset
 
 # required for python versions < 3.3
 try:
@@ -65,7 +70,7 @@ class UnsupportedFeature(Exception):
     pass
 
 
-# casting for properties type
+# casting for properties types
 tiled_property_type = {
     'string': str,
     'int': int,
@@ -74,6 +79,20 @@ tiled_property_type = {
     'color': str,
     'file': str
 }
+
+
+def default_image_loader(filename, flags, **kwargs):
+    """ This default image loader just returns filename, rect, and any flags
+    """
+
+    def load(rect=None, flags=None):
+        return filename, rect, flags
+
+    return load
+
+
+def noop(arg):
+    return arg
 
 
 def decompress_zlib(data):
@@ -166,12 +185,22 @@ def cast(element, types):
         return {key: types[key](value) for key, value in element.items()}
     except KeyError as e:
         raise UnsupportedFeature(element.tag, e.args)
+    except (TypeError, UnicodeEncodeError):
+        print(element.attrib, types)
+        raise
+
+
+class Dummy(object):
+    def __init__(self, *args, **kwargs):
+        pass
 
 
 class Processor(object):
-    types = {}
+    attrib_types = dict()
+    target_class = Dummy
 
     def __init__(self):
+        self.attrib = dict()
         self.properties = dict()
 
     def apply_attrib(self, element):
@@ -180,7 +209,7 @@ class Processor(object):
         :return: None
         """
         try:
-            self.__dict__.update(cast(element, self.types))
+            self.attrib = cast(element, self.attrib_types)
         except KeyError:
             raise
 
@@ -198,9 +227,13 @@ class Processor(object):
         :type parent: Processor
         :return:
         """
+        return self.as_instance(element, parent)
 
-    def add_properties(self, properties):
-        self.properties = properties.dictionary
+    def as_instance(self, element, parent):
+        return self.target_class(*self.attrib)
+
+    def add_properties(self, item):
+        self.properties = item
 
 
 class ProcessAnimation(Processor):
@@ -214,7 +247,7 @@ class ProcessChunk(Processor):
 
 
 class ProcessData(Processor):
-    types = {
+    attrib_types = {
         'encoding': str,
         'compression': str
     }
@@ -250,7 +283,7 @@ class ProcessEllipse(Processor):
 
 
 class ProcessFrame(Processor):
-    types = {
+    attrib_types = {
         'tileid': int,
         'duration': int,
     }
@@ -261,7 +294,7 @@ class ProcessGroup(Processor):
 
 
 class ProcessImage(Processor):
-    types = {
+    attrib_types = {
         'format': str,
         'source': str,
         'trans': str,
@@ -271,7 +304,7 @@ class ProcessImage(Processor):
 
 
 class ProcessImagelayer(Processor):
-    types = {
+    attrib_types = {
         'name': str,
         'offsetx': int,
         'offsety': int,
@@ -288,7 +321,7 @@ class ProcessImagelayer(Processor):
 
 
 class ProcessLayer(Processor):
-    types = {
+    attrib_types = {
         "name": str,
         "width": int,
         "height": int,
@@ -307,7 +340,7 @@ class ProcessLayer(Processor):
 
 
 class ProcessMap(Processor):
-    types = {
+    attrib_types = {
         "version": str,
         "tiledversion": str,
         "orientation": str,
@@ -330,6 +363,9 @@ class ProcessMap(Processor):
         self.objectgroups = list()
         self.tilelayers = list()
         self.imagelayers = list()
+        self.images = list()
+        self.image_loader = default_image_loader
+        self.filename = ''
 
     def add_tileset(self, item):
         self.tilesets.append(item)
@@ -346,9 +382,81 @@ class ProcessMap(Processor):
         self.layers.append(item)
         self.imagelayers.append(item)
 
+    def reload_images(self):
+        """ Load the map images from disk
+
+        This method will use the image loader passed in the constructor
+        to do the loading or will use a generic default, in which case no
+        images will be loaded.
+
+        :return: None
+        """
+        self.images = [None] * self.maxgid
+
+        # iterate through tilesets to get source images
+        for ts in self.tilesets:
+
+            # skip tilesets without a source
+            if ts.source is None:
+                continue
+
+            path = os.path.join(os.path.dirname(self.filename), ts.source)
+            colorkey = getattr(ts, 'trans', None)
+            loader = self.image_loader(path, colorkey, tileset=ts)
+
+            p = product(range(ts.margin,
+                              ts.height + ts.margin - ts.tileheight + 1,
+                              ts.tileheight + ts.spacing),
+                        range(ts.margin,
+                              ts.width + ts.margin - ts.tilewidth + 1,
+                              ts.tilewidth + ts.spacing))
+
+            # iterate through the tiles
+            for real_gid, (y, x) in enumerate(p, ts.firstgid):
+                rect = (x, y, ts.tilewidth, ts.tileheight)
+                gids = self.map_gid(real_gid)
+
+                # gids is None if the tile is never used
+                # but give another chance to load the gid anyway
+                if gids is None:
+                    if self.load_all_tiles or real_gid in self.optional_gids:
+                        # TODO: handle flags? - might never be an issue, though
+                        gids = [self.register_gid(real_gid, flags=0)]
+
+                if gids:
+                    # flags might rotate/flip the image, so let the loader
+                    # handle that here
+                    for gid, flags in gids:
+                        self.images[gid] = loader(rect, flags)
+
+        # load image layer images
+        for layer in (i for i in self.layers if isinstance(i, TiledImageLayer)):
+            source = getattr(layer, 'source', None)
+            if source:
+                colorkey = getattr(layer, 'trans', None)
+                real_gid = len(self.images)
+                gid = self.register_gid(real_gid)
+                layer.gid = gid
+                path = os.path.join(os.path.dirname(self.filename), source)
+                loader = self.image_loader(path, colorkey)
+                image = loader()
+                self.images.append(image)
+
+        # load images in tiles.
+        # instead of making a new gid, replace the reference to the tile that
+        # was loaded from the tileset
+        for real_gid, props in self.tile_properties.items():
+            source = props.get('source', None)
+            if source:
+                colorkey = props.get('trans', None)
+                path = os.path.join(os.path.dirname(self.filename), source)
+                loader = self.image_loader(path, colorkey)
+                image = loader()
+                self.images[real_gid] = image
+
 
 class ProcessObject(Processor):
-    types = {
+    attrib_types = {
         'name': str,
         'id': int,
         'type': str,
@@ -362,7 +470,7 @@ class ProcessObject(Processor):
 
     def __init__(self):
         super(ProcessObject, self).__init__()
-        self.points = list()
+        self.points = None
 
     def add_polygon(self, item):
         self.points = item
@@ -372,7 +480,7 @@ class ProcessObject(Processor):
 
 
 class ProcessObjectgroup(Processor):
-    types = {
+    attrib_types = {
         'name': str,
         'x': float,
         'y': float,
@@ -389,25 +497,39 @@ class ProcessObjectgroup(Processor):
 
 
 class ProcessOffset(Processor):
-    types = {
+    attrib_types = {
         'x': int,
         'y': int,
     }
 
     def end(self, element, parent):
-        return cast(element, self.types)
+        return cast(element, self.attrib_types)
 
 
 class ProcessPolygon(Processor):
-    types = {
+    attrib_types = {
         'points': read_points,
     }
+
+    def __init__(self):
+        super(ProcessPolygon, self).__init__()
+        self.points = None
+
+    def end(self, element, parent):
+        return self.points
 
 
 class ProcessPolyline(Processor):
-    types = {
+    attrib_types = {
         'points': read_points,
     }
+
+    def __init__(self):
+        super(ProcessPolyline, self).__init__()
+        self.points = None
+
+    def end(self, element, parent):
+        return self.points
 
 
 class ProcessProperties(Processor):
@@ -415,27 +537,37 @@ class ProcessProperties(Processor):
         super(ProcessProperties, self).__init__()
         self.dictionary = dict()
 
-    def add_property(self, prop):
-        self.dictionary[prop.value['name']] = prop.value['value']
+    def add_property(self, item):
+        self.dictionary[item['name']] = item['value']
+
+    def end(self, element, parent):
+        return self.dictionary
 
 
 class ProcessProperty(Processor):
+    attrib_types = {
+        'type': noop,
+        'name': noop,
+        'value': noop
+    }
+
     def __init__(self):
         super(ProcessProperty, self).__init__()
+        self.type = None
+        self.name = None
         self.value = None
 
-    def apply_attrib(self, element):
+    def end(self, element, parent):
         """
         :type element: xml.etree.ElementTree.Element
         :return:
         """
-        _type = element.get('type')
-        if _type:
-            _type = tiled_property_type[_type]
-            value = _type(element.get('value'))
+        if self.type:
+            _type = tiled_property_type[self.type]
+            value = _type(self.value)
         else:
-            value = element.get('value')
-        self.value = {'name': element.get('name'), 'value': value}
+            value = self.value
+        return {'name': self.name, 'value': value}
 
 
 class ProcessTemplate(Processor):
@@ -455,7 +587,7 @@ class ProcessText(Processor):
 
 
 class ProcessTile(Processor):
-    types = {
+    attrib_types = {
         'id': int,
         'gid': int,
         'type': str,
@@ -476,7 +608,7 @@ class ProcessTileoffset(Processor):
 
 
 class ProcessTileset(Processor):
-    types = {
+    attrib_types = {
         "firstgid": int,
         "source": str,
         "name": str,
@@ -487,6 +619,7 @@ class ProcessTileset(Processor):
         "tilecount": int,
         "columns": int,
     }
+    target_class = TiledTileset
 
     def __init__(self):
         super(ProcessTileset, self).__init__()
@@ -534,9 +667,9 @@ def get_processor(element):
 def combine(parent, child, tag):
     try:
         func = getattr(parent, 'add_' + tag)
-        func(child)
     except AttributeError:
         raise UnsupportedFeature(tag)
+    func(child)
 
 
 def slurp(filename):
@@ -553,9 +686,9 @@ def slurp(filename):
         elif event == 'end':
             token = stack.pop()
             parent = stack[-1]
-            token.end(element, parent)
+            value = token.end(element, parent)
             if parent:
-                combine(parent, token, element.tag)
+                combine(parent, value, element.tag)
             element.clear()
 
     return token
@@ -566,4 +699,5 @@ class TestCase2(TestCase):
         import glob
         for filename in glob.glob('../apps/data/0.9.1/*tmx'):
             print(filename)
-            slurp(filename)
+            token = slurp(filename)
+            pprint.pprint(token.properties)
