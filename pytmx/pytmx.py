@@ -39,9 +39,6 @@ __all__ = (
     'TiledObject',
     'TiledObjectGroup',
     'TiledImageLayer',
-    'TiledTerrain',
-    'TiledAnimation',
-    'TiledChunk',
     'TileFlags',
     'convert_to_bool',
     'parse_properties')

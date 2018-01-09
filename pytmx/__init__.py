@@ -19,16 +19,16 @@ along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 
-logger = logging.getLogger(__name__)
-
 from .pytmx import *
+
+logger = logging.getLogger(__name__)
 
 try:
     from pytmx.util_pygame import load_pygame
 except ImportError:
     logger.debug('cannot import pygame tools')
 
-__version__ = (3, 21, 4)
+__version__ = (3, 21, 5)
 __author__ = 'bitcraft'
 __author_email__ = 'leif.theden@gmail.com'
 __description__ = 'Map loader for TMX Files - Python 2 and 3'

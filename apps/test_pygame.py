@@ -229,6 +229,7 @@ if __name__ == '__main__':
     pygame.font.init()
     screen = init_screen(600, 600)
     pygame.display.set_caption('PyTMX Map Viewer')
+    logging.basicConfig(level=logging.DEBUG)
 
     logger.info(pytmx.__version__)
 
