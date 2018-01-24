@@ -12,21 +12,22 @@ Mason is designed to read Tiled TMX files and prepare them for easy use for game
 
 This file uses a template to generate the library for map loading.
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import
+from __future__ import division
 
 import logging
 import struct
+import os
+import array
 from collections import deque, namedtuple
 from itertools import product
 from unittest import TestCase
 
-import os
-
-import array
 import six
 
 __version__ = (3, 22, 0)
-target_version = '1.1.0'
+tiled_version = '1.1.0'
+
 logger = logging.getLogger(__name__)
 
 # internal flags
@@ -46,8 +47,9 @@ flag_names = (
 
 TileFlags = namedtuple('TileFlags', flag_names)
 AnimationFrame = namedtuple('AnimationFrame', ('gid', 'duration'))
-Attr = namedtuple('Attribute', ('name', 'klass', 'default', 'comment'))
+Attr = namedtuple('Attribute', ('name', 'cls', 'default', 'comment'))
 
+# Common attributes
 Visible = Attr('visible', bool, True, 'visible, or not')
 Opacity = Attr('opacity', float, 1.0, 'opacity')
 Color = Attr('color', str, None, 'color of the thing')
@@ -67,7 +69,7 @@ class UnsupportedFeature(Exception):
 
 # casting for properties types
 tiled_property_type = {
-    'string': str,
+    'string': six.u,
     'int': int,
     'float': float,
     'bool': bool,
@@ -77,7 +79,8 @@ tiled_property_type = {
 
 
 def default_image_loader(filename, flags, **kwargs):
-    """ This default image loader just returns filename, rect, and any flags
+    """ This default image loader just returns filename,
+        rect, and any flags
     """
 
     def load(rect=None, flags=None):
@@ -110,6 +113,29 @@ def decode_csv(data):
     return map(int, ''.join(i.strip() for i in data.strip()).split(','))
 
 
+def get_data_xform(prefix, exception):
+    """ Generic function to transform data and raise exception
+
+    :param prefix:
+    :param exception:
+    :return:
+    """
+    def func(data, xform):
+        if xform:
+            try:
+                xformer = globals()[prefix + xform]
+            except KeyError:
+                raise exception(xform)
+            return xformer(data)
+
+    return func
+
+
+# create generic decompress/decode function supporting multiple types
+decompress = get_data_xform('decompress_', MissingDecompressorError)
+decode = get_data_xform('decode_', MissingDecoderError)
+
+
 def unpack(data, encoding, compression):
     """ Decode and decompress level tile data
 
@@ -123,22 +149,6 @@ def unpack(data, encoding, compression):
     return data
 
 
-def get_datathing(prefix, exception):
-    def func(data, xform):
-        if xform:
-            try:
-                xformer = globals()[prefix + xform]
-            except KeyError:
-                raise exception(xform)
-            return xformer(data)
-
-    return func
-
-
-decompress = get_datathing('decompress_', MissingDecompressorError)
-decode = get_datathing('decode_', MissingDecoderError)
-
-
 def unroll_layer_data(data):
     fmt = struct.Struct('<L')
     every_4 = range(0, len(data), 4)
@@ -150,30 +160,42 @@ def rowify(gids, w, h):
 
 
 def read_points(text):
-    """parse a text string of float tuples and return [(x,...),...]
+    """ Parse a text string of float tuples and return [(x,...),...]
     """
     return tuple(tuple(map(float, i.split(','))) for i in text.split())
 
 
 def move_points(points, x, y):
+    """ Given list of points, return new one offset by (x, y)
+
+    :param points:
+    :param x:
+    :param y:
+    :return:
+    """
     return tuple((i[0] + x, i[1] + y) for i in points)
 
 
 def calc_bounds(points):
+    """ Given list of points, return mix/max of each axis
+
+    :param points:
+    :return:
+    """
     x1 = x2 = y1 = y2 = 0
     for x, y in points:
         if x < x1: x1 = x
-        if x > x2: x2 = x
+        elif x > x2: x2 = x
         if y < y1: y1 = y
-        if y > y2: y2 = y
+        elif y > y2: y2 = y
     return abs(x1) + abs(x2), abs(y1) + abs(y2)
 
 
 def decode_gid(raw_gid):
     """ Decode a GID from TMX data
 
-    as of 0.7.0 it determines if the tile should be flipped when rendered
-    as of 0.8.0 bit 30 determines if GID is rotated
+    as of Tiled 0.7.0 tile can be flipped when rendered
+    as of Tiled 0.8.0 bit 30 determines if GID is rotated
 
     :param raw_gid: 32-bit number from TMX layer data
     :return: gid, flags
@@ -201,6 +223,18 @@ class TokenMeta(type):
 
 
 class Token(object):
+    """ Tokens store and modify data found in Tiled map objects
+
+    Tokens allow abstraction of data format (xml/json) and to
+    define relationships between node types.
+
+    Data in the Tokens are used to generate pytmx.py, so that
+    code is not duplicated across loader and utility functions.
+
+    * Attributes are used to generate pytmx.py
+    * Tokens are nodes of a graph
+    * Define behavior when adding children with "add_" methods
+    """
     __metaclass__ = TokenMeta
 
     def __init__(self):
@@ -214,7 +248,13 @@ class Token(object):
             raise AttributeError
 
     def start(self, init, context):
-        """
+        """ Called when data is parsed from the source file
+
+        The content of the source file may not be ready,
+        but attributes (inside of xml tag) will be available.
+
+        Once `Token.end` is called, the node is considered
+        complete and will be added to graph.
 
         :type init: dict
         :type context: dict
@@ -235,10 +275,17 @@ class Token(object):
         # cast values to their type
         for key, value in attrib.items():
             if value is not None:
-                attrib[key] = self.attrib_types[key].klass(value)
+                attrib[key] = self.attrib_types[key].cls(value)
 
     def end(self, content, context):
-        """
+        """ Called when content of source data is available
+
+        After this method ends, all data transformation must be done
+        and all data in `content` will be lost.
+
+        :param content: Data contained in the tag of source file
+        :param context: Useful data about graph, shared across nodes
+
         :type content: str
         :type context: dict
         :return: Processor
@@ -246,6 +293,19 @@ class Token(object):
         pass
 
     def combine(self, child, tag):
+        """ Add child to this token in a meaningful way
+
+        This method will attempt to call another method of this
+        call named "add_ + tag".
+
+        For example, if the tag is "image", this method will attempt to
+        call Token.add_image().  An exception is raised if the method is not
+        available.
+
+        :param child:
+        :param tag:
+        :return:
+        """
         try:
             func = getattr(self, 'add_' + tag)
         except AttributeError:
@@ -403,8 +463,8 @@ class MapToken(Token):
         Attr('tilewidth', int, None, 'pixel width of tile'),
         Attr('tileheight', int, None, 'pixel height of tile'),
         Attr('hexsidelength', float, None, 'length of hex tile edge'),
-        Attr('staggeraxis', str, None, '[hex] x/y axis is staggered'),
-        Attr('staggerindex', str, None, '[hex] even/odd staggered axis'),
+        Attr('staggeraxis', str, None, '[hex map] x/y axis is staggered'),
+        Attr('staggerindex', str, None, '[hex map] even/odd staggered axis'),
         Attr('backgroundcolor', str, None, 'background color of map'),
         Attr('nextobjectid', int, None, 'the next gid available to use'),
     )
@@ -478,7 +538,7 @@ class ObjectgroupToken(Token):
 
 
 class PointToken(Token):
-    # No attributes defined
+    """ No attributes defined """
     pass
 
 
@@ -641,6 +701,11 @@ def get_processor(feature):
 
 
 def load_tmx(path):
+    """ Lazy-load XML data with sax
+
+    :param path:
+    :return:
+    """
     # required for python versions < 3.3
     try:
         from xml.etree import cElementTree as ElementTree
@@ -656,10 +721,17 @@ def load_tmx(path):
 
 
 def load_json(path):
+    """ Import JSON data by emulating a sax api
+
+    :param path:
+    :return:
+    """
     import json
 
     with open(path) as fp:
         root = json.load(fp)
+
+    # TODO: handle resursion (only supports 1st level)
 
     yield 'start', 'Map', root, None
     for key, value in root.items():
@@ -678,6 +750,13 @@ def get_loader(path):
 
 
 def write_codegen(name, func, fp):
+    """ Write generated code to a file
+
+    :param name:
+    :param func:
+    :param fp:
+    :return:
+    """
     attrib = globals()[name].attrib_types
 
     if func == '__init__':
@@ -686,12 +765,18 @@ def write_codegen(name, func, fp):
         fp.write('    def __init__(self{}):\n\n'.format(kwargs_str))
 
     elif func == 'attributes':
-        fp.write('        # Attributes, as of Tiled {}\n'.format(target_version))
+        fp.write('        # Attributes, as of Tiled {}\n'.format(tiled_version))
         for kwarg, info in sorted(attrib.items()):
             fp.write('        self.{0} = {0}  # {1}\n'.format(kwarg, info.comment))
 
 
 def write_pytmx(in_file, out_file):
+    """ Fill data into template
+
+    :param in_file: template
+    :param out_file: output
+    :return:
+    """
     for raw_line in in_file:
         line = raw_line.strip()
         if line.startswith('# codegen:'):
@@ -703,6 +788,20 @@ def write_pytmx(in_file, out_file):
 
 
 def slurp(path):
+    """ Read a Tiled map file
+
+    This is a high-level function.  In general, this and the functions it
+    uses search globals() using name strings to parse and manipulate data
+    from the source file.
+
+    The internal data is expected to follow a sax-like protocol, and
+    generates a graph of the map, using python objects.
+
+    At the end of the process, a pytmx.TiledMap object will be returned.
+
+    :param path:
+    :return:
+    """
     stack = deque([None])
     token = None
 
@@ -734,13 +833,16 @@ def slurp(path):
 
 class TestCase2(TestCase):
     def test_init(self):
-        # import glob
-        # for filename in glob.glob('../apps/data/0.9.1/*tmx'):
-        #     print(filename)
-        #     token = slurp(filename)
-        #     pprint.pprint((token, token.properties))
 
+        # test out various files
+        import glob
+        import pprint
+        for filename in glob.glob('../apps/data/0.9.1/*tmx'):
+            logger.info(filename)
+            token = slurp(filename)
+            pprint.pprint((token, token.properties))
+
+        # fill out the template with generated code
         with open('pytmx_template.py') as in_file:
             with open('pytmx.py', 'w') as out_file:
                 write_pytmx(in_file, out_file)
-
