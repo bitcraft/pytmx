@@ -1,7 +1,5 @@
 """
-This file was automatically generated during the pytmx build process.
-Any changes to this will be lost if the build process is run again.
-To make permanent changes, please edit the template and build again.
+VANITY
 """
 from __future__ import division
 
@@ -11,6 +9,16 @@ from itertools import chain, product
 from operator import attrgetter
 
 logger = logging.getLogger(__name__)
+
+
+def default_image_loader(filename, flags, **kwargs):
+    """ This default image loader just returns filename, rect, and any flags
+    """
+
+    def load(rect=None, flags=None):
+        return filename, rect, flags
+
+    return load
 
 
 class TiledElement(object):
@@ -26,9 +34,10 @@ class TiledMap(TiledElement):
     All operations are reasonably safe and should raise informative errors.
     """
 
-    def __init__(self, columns=None, firstgid=None, margin=None, name=None, source=None, spacing=None, tilecount=None, tileheight=None, tilewidth=None):
-
+    def __init__(self, root, **kwargs):
         """ Create new TiledMap
+
+        :type root: mason.MapToken
 
         :param filename: filename of tiled map to load
         :param image_loader: function that will load images (see below)
@@ -45,19 +54,19 @@ class TiledMap(TiledElement):
         # self.invert_y = kwargs.get('invert_y', True)
 
         # Attributes, as of Tiled 1.1.0
-        self.backgroundcolor = backgroundcolor  # background color of map
-        self.height = height  # tile height
-        self.hexsidelength = hexsidelength  # length of hex tile edge
-        self.nextobjectid = nextobjectid  # the next gid available to use
-        self.orientation = orientation  # map orientation
-        self.renderorder = renderorder  # order of tiles to be drawn
-        self.staggeraxis = staggeraxis  # [hex] x/y axis is staggered
-        self.staggerindex = staggerindex  # [hex] even/odd staggered axis
-        self.tiledversion = tiledversion  # software version
-        self.tileheight = tileheight  # pixel height of tile
-        self.tilewidth = tilewidth  # pixel width of tile
-        self.version = version  # TMX format version
-        self.width = width  # tile width
+        self.version = root.version
+        self.tiledversion = root.tiledversion
+        self.orientation = root.orientation
+        self.renderorder = root.renderorder
+        self.width = root.width
+        self.height = root.height
+        self.tilewidth = root.tilewidth
+        self.tileheight = root.tileheight
+        self.hexsidelength = root.hexsidelength
+        self.staggeraxis = root.staggeraxis
+        self.staggerindex = root.staggerindex
+        self.backgroundcolor = root.backgroundcolor
+        self.nextobjectid = root.nextobjectid
 
         # pytmx embellishments
         self.properties = root.properties
@@ -286,14 +295,6 @@ class TiledMap(TiledElement):
         raise ValueError
 
     @property
-    def objectgroups(self):
-        """Return iterator of ObjectGroup objects
-
-        :rtype: Iterator
-        """
-        return (l for l in self.layers if isinstance(l, TiledObjectGroup))
-
-    @property
     def objects(self):
         """Return iterator of all the objects associated with this map
 
@@ -333,20 +334,7 @@ class TiledTileset(TiledElement):
 
     External tilesets are supported.  GID/ID's from Tiled are not guaranteed to
     be the same after loaded.
-
     """
-    def __init__(self, columns=None, firstgid=None, margin=None, name=None, source=None, spacing=None, tilecount=None, tileheight=None, tilewidth=None):
-
-        # Attributes, as of Tiled 1.1.0
-        self.columns = columns  # 
-        self.firstgid = firstgid  # 
-        self.margin = margin  # pixels between tile and image edge
-        self.name = name  # 
-        self.source = source  # 
-        self.spacing = spacing  # pixels between each tile
-        self.tilecount = tilecount  # 
-        self.tileheight = tileheight  # 
-        self.tilewidth = tilewidth  # 
 
 
 class TiledTileLayer(TiledElement):
@@ -355,16 +343,8 @@ class TiledTileLayer(TiledElement):
     To just get the tile images, use TiledTileLayer.tiles()
     """
 
-    def __init__(self, height=None, name=None, offsetx=None, offsety=None, opacity=None, visible=None, width=None):
-
-        # Attributes, as of Tiled 1.1.0
-        self.height = height  # tile height
-        self.name = name  # name of layer
-        self.offsetx = offsetx  # Not used, per spec
-        self.offsety = offsety  # Not used, per spec
-        self.opacity = opacity  # opacity
-        self.visible = visible  # visible, or not
-        self.width = width  # tile width
+    def __init__(self, data):
+        self.data = data
 
     def __iter__(self):
         return self.iter_data()
@@ -400,22 +380,6 @@ class TiledObject(TiledElement):
     Supported types: Box, Ellipse, Tile Object, Polyline, Polygon
     """
 
-    def __init__(self, gid=None, height=None, id=None, name=None, opacity=None, rotation=None, template=None, type=None, visible=None, width=None, x=None, y=None):
-
-        # Attributes, as of Tiled 1.1.0
-        self.gid = gid  # reference a tile id
-        self.height = height  # pixel height
-        self.id = id  # unique id assigned to object
-        self.name = name  # name of object
-        self.opacity = opacity  # opacity
-        self.rotation = rotation  # rotation
-        self.template = template  # path, optional
-        self.type = type  # defined by editor
-        self.visible = visible  # visible, or not
-        self.width = width  # pixel widht
-        self.x = x  # tile x coordinate
-        self.y = y  # tile y coordinate
-
     @property
     def image(self):
         if self.gid:
@@ -428,17 +392,6 @@ class TiledObjectGroup(TiledElement, list):
 
     Supports any operation of a normal list.
     """
-    def __init__(self, color=None, height=None, name=None, opacity=None, visible=None, width=None, x=None, y=None):
-
-        # Attributes, as of Tiled 1.1.0
-        self.color = color  # color of the thing
-        self.height = height  # not used, per spec
-        self.name = name  # name of group
-        self.opacity = opacity  # opacity
-        self.visible = visible  # visible, or not
-        self.width = width  # not used, per spec
-        self.x = x  # not used, per spec
-        self.y = y  # not used, per spec
 
 
 class TiledImageLayer(TiledElement):
@@ -446,15 +399,6 @@ class TiledImageLayer(TiledElement):
 
     The image associated with this layer will be loaded and assigned a GID.
     """
-
-    def __init__(self, name=None, offsetx=None, offsety=None, opacity=None, visible=None):
-
-        # Attributes, as of Tiled 1.1.0
-        self.name = name  # name of layer
-        self.offsetx = offsetx  # not used, per spec.
-        self.offsety = offsety  # not used, per spec.
-        self.opacity = opacity  # opacity
-        self.visible = visible  # visible, or not
 
     @property
     def image(self):

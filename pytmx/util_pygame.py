@@ -35,7 +35,7 @@ def smart_convert(original, colorkey, pixelalpha):
     convert() the images on your own
     """
     tile_size = original.get_size()
-    threshold = 127   # the default
+    threshold = 127  # the default
 
     try:
         # count the number of pixels in the tile that are not transparent
@@ -117,8 +117,10 @@ def load_pygame(filename, *args, **kwargs):
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
+    from mason import slurp
     kwargs['image_loader'] = pygame_image_loader
-    return pytmx.TiledMap(filename, *args, **kwargs)
+    return slurp(filename)
+    # return pytmx.TiledMap(filename, *args, **kwargs)
 
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):
@@ -230,6 +232,7 @@ def simplify(all_points, tilewidth, tileheight):
     but I haven't found that it is excessively bad.  certainly much better than
     making a list of rects, one for each tile on the map!
     """
+
     def pick_rect(points, rects):
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox
