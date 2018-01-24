@@ -744,8 +744,3 @@ class TestCase2(TestCase):
             with open('pytmx.py', 'w') as out_file:
                 write_pytmx(in_file, out_file)
 
-            # with open('pytmx1.py', 'w') as fp:
-            #     for name, klass in globals().items():
-            #         if name.endswith('Token') and len(name) > 5:
-            #             new_name = 'Tiled' + name[:-5]
-            #             write_class_def(new_name, klass.attrib_types, fp)
