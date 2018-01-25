@@ -120,6 +120,7 @@ def get_data_xform(prefix, exception):
     :param exception:
     :return:
     """
+
     def func(data, xform):
         if xform:
             try:
@@ -184,10 +185,14 @@ def calc_bounds(points):
     """
     x1 = x2 = y1 = y2 = 0
     for x, y in points:
-        if x < x1: x1 = x
-        elif x > x2: x2 = x
-        if y < y1: y1 = y
-        elif y > y2: y2 = y
+        if x < x1:
+            x1 = x
+        elif x > x2:
+            x2 = x
+        if y < y1:
+            y1 = y
+        elif y > y2:
+            y2 = y
     return abs(x1) + abs(x2), abs(y1) + abs(y2)
 
 
@@ -309,13 +314,14 @@ class Token(object):
         try:
             func = getattr(self, 'add_' + tag)
         except AttributeError:
-            raise UnsupportedFeature(tag)
+            raise UnsupportedFeature(self.__class__.__name__, tag)
         func(child)
 
     def add_properties(self, item):
         self.properties = item.dictionary
 
 
+# ok
 class AnimationToken(Token):
     # No attributes defined
 
@@ -327,6 +333,7 @@ class AnimationToken(Token):
         self.frames.append(item)
 
 
+# ok
 class ChunkToken(Token):
     attributes = (
         Attr('x', int, None, 'x tile coord of chunk'),
@@ -335,7 +342,11 @@ class ChunkToken(Token):
         Attr('height', int, None, 'x tile height of chunk'),
     )
 
+    def add_tile(self, item):
+        raise UnsupportedFeature
 
+
+# ok
 class DataToken(Token):
     """ TILE DATA """
     attributes = (
@@ -377,18 +388,21 @@ class DataToken(Token):
         self.chunks.append(item)
 
 
+# ok
 class EllipseToken(Token):
     """ No attributes defined """
     pass
 
 
+# ok
 class FrameToken(Token):
     attributes = (
-        Attr('tileid', int, None, 'gid'),
+        Attr('tileid', int, None, 'local id within parent tileset'),
         Attr('duration', int, None, 'duration in milliseconds'),
     )
 
 
+# ok
 class GroupToken(Token):
     attributes = (
         Attr('name', str, None, 'name of group'),
@@ -397,7 +411,20 @@ class GroupToken(Token):
         Visible, Opacity
     )
 
+    def add_layer(self, item):
+        raise UnsupportedFeature
 
+    def add_objectgroup(self, item):
+        raise UnsupportedFeature
+
+    def add_imagelayer(self, item):
+        raise UnsupportedFeature
+
+    def add_group(self, item):
+        raise UnsupportedFeature
+
+
+# ok
 class ImageToken(Token):
     attributes = (
         Attr('format', str, None, 'png, jpg, etc'),
@@ -414,9 +441,10 @@ class ImageToken(Token):
 
     def add_data(self, item):
         # data is used to load image into memory.  uses ImageToken.format
-        raise NotImplementedError
+        raise UnsupportedFeature
 
 
+# ok
 class ImagelayerToken(Token):
     attributes = (
         Attr('name', str, 'ImageLayer', 'name of layer'),
@@ -433,6 +461,7 @@ class ImagelayerToken(Token):
         self.image = item
 
 
+# ok
 class LayerToken(Token):
     """ TILE LAYER """
     attributes = (
@@ -452,6 +481,7 @@ class LayerToken(Token):
         self.data = data
 
 
+# ok
 class MapToken(Token):
     attributes = (
         Attr('version', str, None, 'TMX format version'),
@@ -473,6 +503,7 @@ class MapToken(Token):
         super(MapToken, self).__init__()
         self.tilesets = list()
         self.layers = list()
+        self.objectgroups = list()
 
     def add_tileset(self, item):
         self.tilesets.append(item)
@@ -480,13 +511,17 @@ class MapToken(Token):
     def add_layer(self, item):
         self.layers.append(item)
 
-    def add_(self, item):
-        self.layers.append(item)
+    def add_objectgroup(self, item):
+        self.objectgroups.append(item)
 
     def add_imagelayer(self, item):
         self.layers.append(item)
 
+    def add_group(self, item):
+        raise UnsupportedFeature
 
+
+# ok
 class ObjectToken(Token):
     attributes = (
         Attr('name', str, None, 'name of object'),
@@ -518,7 +553,14 @@ class ObjectToken(Token):
         self.points = move_points(item.points, self.x, self.y)
         self.attrib['closed'] = False
 
+    def add_text(self, item):
+        raise UnsupportedFeature
 
+    def add_image(self, item):
+        raise UnsupportedFeature
+
+
+# ok
 class ObjectgroupToken(Token):
     attributes = (
         Attr('name', str, None, 'name of group'),
@@ -537,23 +579,27 @@ class ObjectgroupToken(Token):
         self.objects.append(item)
 
 
+# ok
 class PointToken(Token):
     """ No attributes defined """
     pass
 
 
+# ok
 class PolygonToken(Token):
     attributes = (
         Attr('points', read_points, None, 'coordinates of the polygon'),
     )
 
 
+# ok
 class PolylineToken(Token):
     attributes = (
         Attr('points', read_points, None, 'coordinates of the polyline'),
     )
 
 
+# ok
 class PropertiesToken(Token):
     def __init__(self):
         super(PropertiesToken, self).__init__()
@@ -563,11 +609,12 @@ class PropertiesToken(Token):
         self.dictionary[item.name] = item.value
 
 
+# ok
 class PropertyToken(Token):
     attributes = (
-        Attr('type', noop, None, ''),
-        Attr('name', noop, None, ''),
-        Attr('value', noop, None, ''),
+        Attr('type', noop, None, 'type of the property'),
+        Attr('name', noop, None, 'name of property'),
+        Attr('value', noop, None, 'value'),
     )
 
     def __init__(self):
@@ -582,29 +629,64 @@ class PropertyToken(Token):
             self.attrib['value'] = init['value']
 
 
+# ok
 class TemplateToken(Token):
-    pass
+    def __init__(self):
+        super(TemplateToken, self).__init__()
+        self.tilesets = list()
+        self.objects = list()
+
+    def add_terrain(self, item):
+        self.terrains.append(item)
+
+    def add_object(self, item):
+        self.objects.append(item)
 
 
+# ok
 class TerrainToken(Token):
-    pass
+    Attributes = {
+        Attr('name', str, '', 'name of terrain'),
+        Attr('tile', int, 0, 'local tile-id that represents terrain visually')
+    }
 
 
+# ok
 class TerraintypesToken(Token):
-    pass
+    def __init__(self):
+        super(TerraintypesToken, self).__init__()
+        self.terrains = list()
+
+    def add_terrain(self, item):
+        self.terrains.append(item)
 
 
+# ok
 class TextToken(Token):
-    pass
+    Attributes = (
+        Attr('fontfamily', str, 'sans-serif', 'font family used'),
+        Attr('pixelsize', int, 16, 'size of font in pixels'),
+        Attr('wrap', bool, False, 'word wrap'),
+        Attr('color', str, '#000000', 'color of text'),
+        Attr('bold', bool, False, 'bold?'),
+        Attr('italic', bool, False, 'italic?'),
+        Attr('underline', bool, False, 'underline?'),
+        Attr('strikeout', bool, False, 'strikeout?'),
+        Attr('kerning', bool, False, 'render kerning, or not'),
+        Attr('halign', str, 'left', 'horizontal alignment in object'),
+        Attr('valign', str, 'top', 'vertical alignment in object'),
+    )
 
 
+# ok
 class TileToken(Token):
+    # from tileset
     attributes = (
-        Attr('id', int, None, ''),
+        Attr('id', int, None, 'local id'),
         Attr('gid', int, None, 'global id'),
         Attr('type', str, None, 'defined in editor'),
-        Attr('terrain', str, None, ''),
-        Attr('probability', float, None, ''),
+        Attr('terrain', str, None, 'optional'),
+        Attr('probability', float, None, 'optional'),
     )
 
     def __init__(self):
@@ -614,7 +696,14 @@ class TileToken(Token):
     def add_image(self, item):
         self.image = item
 
+    def add_objectgroup(self, item):
+        raise UnsupportedFeature
 
+    def add_animation(self, item):
+        raise UnsupportedFeature
+
+
+# ok
 class TileoffsetToken(Token):
     attributes = (
         Attr('x', int, None, 'horizontal (left) tile offset'),
@@ -622,17 +711,18 @@ class TileoffsetToken(Token):
     )
 
 
+# ok
 class TilesetToken(Token):
     attributes = (
-        Attr('firstgid', int, None, ''),
-        Attr('source', str, None, ''),
-        Attr('name', str, None, ''),
-        Attr('tilewidth', int, None, ''),
-        Attr('tileheight', int, None, ''),
+        Attr('firstgid', int, None, 'first gid of tileset'),
+        Attr('source', str, None, 'filename of external data or None'),
+        Attr('name', str, None, 'name of tileset'),
+        Attr('tilewidth', int, None, 'max width in tiles'),
+        Attr('tileheight', int, None, 'max height in tiles'),
         Attr('spacing', int, 0, 'pixels between each tile'),
         Attr('margin', int, 0, 'pixels between tile and image edge'),
-        Attr('tilecount', int, None, ''),
-        Attr('columns', int, None, ''),
+        Attr('tilecount', int, None, 'number of tiles in tileset'),
+        Attr('columns', int, None, 'number of columns'),
     )
 
     def __init__(self):
@@ -663,13 +753,26 @@ class TilesetToken(Token):
             flags = None
             image = loader((x, y, tw, th), flags)
 
+    def add_tileoffset(self, item):
+        raise UnsupportedFeature
+
+    def add_grid(self, item):
+        raise UnsupportedFeature
+
     def add_image(self, image):
         self.image = image
+
+    def add_terraintypes(self, item):
+        raise UnsupportedFeature
 
     def add_tile(self, tile):
         self.tiles.append(tile)
 
+    def add_wangsets(self, item):
+        raise UnsupportedFeature
 
+
+# idk
 class TilesetSourceToken(Token):
     def end(self, content, context):
         if source[-4:].lower() == '.tsx':
@@ -826,21 +929,19 @@ def slurp(path):
             if parent:
                 parent.combine(token, tag.lower())
 
-    from pytmx import TiledMap
-
-    return TiledMap(token)
+                # from pytmx import TiledMap
+                # return TiledMap(token)
 
 
 class TestCase2(TestCase):
     def test_init(self):
-
         # test out various files
         import glob
         import pprint
         for filename in glob.glob('../apps/data/0.9.1/*tmx'):
             logger.info(filename)
             token = slurp(filename)
-            pprint.pprint((token, token.properties))
+            # pprint.pprint((token, token.properties))
 
         # fill out the template with generated code
         with open('pytmx_template.py') as in_file:

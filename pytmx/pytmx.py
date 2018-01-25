@@ -30,6 +30,8 @@ class TiledMap(TiledElement):
 
         """ Create new TiledMap
 
+        :type root: mason.MapToken
+
         :param filename: filename of tiled map to load
         :param image_loader: function that will load images (see below)
         :param invert_y: invert the y axis
@@ -51,8 +53,8 @@ class TiledMap(TiledElement):
         self.nextobjectid = nextobjectid  # the next gid available to use
         self.orientation = orientation  # map orientation
         self.renderorder = renderorder  # order of tiles to be drawn
-        self.staggeraxis = staggeraxis  # [hex] x/y axis is staggered
-        self.staggerindex = staggerindex  # [hex] even/odd staggered axis
+        self.staggeraxis = staggeraxis  # [hex map] x/y axis is staggered
+        self.staggerindex = staggerindex  # [hex map] even/odd staggered axis
         self.tiledversion = tiledversion  # software version
         self.tileheight = tileheight  # pixel height of tile
         self.tilewidth = tilewidth  # pixel width of tile
