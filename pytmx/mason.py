@@ -48,6 +48,7 @@ flag_names = (
 TileFlags = namedtuple('TileFlags', flag_names)
 AnimationFrame = namedtuple('AnimationFrame', ('gid', 'duration'))
 Attr = namedtuple('Attribute', ('name', 'cls', 'default', 'comment'))
+Child = namedtuple('ChildType', ('name', 'cls'))
 
 # Common attributes
 Visible = Attr('visible', bool, True, 'visible, or not')
@@ -242,15 +243,31 @@ class Token(object):
     """
     __metaclass__ = TokenMeta
 
+    childtypes = []
+    attributes = []
+
     def __init__(self):
         self.attrib = dict()
         self.properties = dict()
+
+        for child in self.childtypes:
+            setattr(self, child.name, child.cls())
 
     def __getattr__(self, name):
         try:
             return self.attrib[name]
         except KeyError:
             raise AttributeError
+
+    def as_object(self):
+        """ Return representation of object as a generic python type
+
+        :return:
+        """
+        obj = dict()
+        obj.update(self.attrib)
+        obj['properties'] = self.properties
+        return obj
 
     def start(self, init, context):
         """ Called when data is parsed from the source file
@@ -498,12 +515,28 @@ class MapToken(Token):
         Attr('backgroundcolor', str, None, 'background color of map'),
         Attr('nextobjectid', int, None, 'the next gid available to use'),
     )
+    childtypes = (
+        Child('tilesets', list),
+        Child('layers', list),
+        Child('objectgroups', list)
+    )
 
     def __init__(self):
         super(MapToken, self).__init__()
         self.tilesets = list()
         self.layers = list()
         self.objectgroups = list()
+
+    def as_object(self):
+        obj = super(MapToken, self).as_object()
+        for name in "tilesets layers objectgroups".split():
+            r = list()
+            obj[name] = r
+            o = getattr(self, name)
+            for thing in o:
+                r.append(thing.as_object())
+
+        return obj
 
     def add_tileset(self, item):
         self.tilesets.append(item)
@@ -759,14 +792,14 @@ class TilesetToken(Token):
     def add_grid(self, item):
         raise UnsupportedFeature
 
-    def add_image(self, image):
-        self.image = image
+    def add_image(self, item):
+        self.image = item
 
     def add_terraintypes(self, item):
         raise UnsupportedFeature
 
-    def add_tile(self, tile):
-        self.tiles.append(tile)
+    def add_tile(self, item):
+        self.tiles.append(item)
 
     def add_wangsets(self, item):
         raise UnsupportedFeature
@@ -929,8 +962,10 @@ def slurp(path):
             if parent:
                 parent.combine(token, tag.lower())
 
-                # from pytmx import TiledMap
-                # return TiledMap(token)
+    import pprint
+    pprint.pprint(token.as_object())
+    # from pytmx import TiledMap
+    # return TiledMap(token)
 
 
 class TestCase2(TestCase):

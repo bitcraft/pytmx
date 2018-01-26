@@ -340,15 +340,15 @@ class TiledTileset(TiledElement):
     def __init__(self, columns=None, firstgid=None, margin=None, name=None, source=None, spacing=None, tilecount=None, tileheight=None, tilewidth=None):
 
         # Attributes, as of Tiled 1.1.0
-        self.columns = columns  # 
-        self.firstgid = firstgid  # 
+        self.columns = columns  # number of columns
+        self.firstgid = firstgid  # first gid of tileset
         self.margin = margin  # pixels between tile and image edge
-        self.name = name  # 
-        self.source = source  # 
+        self.name = name  # name of tileset
+        self.source = source  # filename of external data or None
         self.spacing = spacing  # pixels between each tile
-        self.tilecount = tilecount  # 
-        self.tileheight = tileheight  # 
-        self.tilewidth = tilewidth  # 
+        self.tilecount = tilecount  # number of tiles in tileset
+        self.tileheight = tileheight  # max height in tiles
+        self.tilewidth = tilewidth  # max width in tiles
 
 
 class TiledTileLayer(TiledElement):
