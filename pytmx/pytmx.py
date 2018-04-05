@@ -406,7 +406,8 @@ class TiledMap(TiledElement):
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
             if p:
-                o.properties.update(p)
+                for key in p:
+                    o.properties.setdefault(key, p[key])
 
             if self.invert_y:
                 o.y -= o.height
