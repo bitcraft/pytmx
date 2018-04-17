@@ -565,6 +565,35 @@ object:      id, name, type, x, y, width, height, gid, properties, polygon,
              polyline, image
 
 
+SDL2/SDL1 incompatibility issues
+===========================
+
+PyTMX always automatically imports the pygame library even when you are not using it.
+Pygame uses the SDL 1.2 graphics library. If you are using an SDL 2 graphics library in your code,
+ such as `pysdl2` or `pygame_sdl2`, you may encounter crashes or other issues when using PyTMX.
+ It is known that there is a repeatable crash on the windows platform when using a frozen executable 
+ combining PyTMX with Pygame_sdl2, as just one example.
+
+To avoid these crashes when using PyTMX it is advised that you exclude the pygame library from your code
+when freezing your scripts. PyTMX doesn't actually use the pygame library, unless you are using the `util_pygame`
+submodule.
+
+To exclude pygame using the popular PyInstaller library, for example, you will need an analysis block in your spec
+file that looks something like this:
+```python
+    a = Analysis(['my_program.py'],
+             pathex=['C:\\my_programs_path'],
+             binaries=[],
+             datas=[],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=['pygame'],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+```
+
 #### Please consider the following:
 
 PyTMX is a map __loader__.  Pytmx takes the pain out of parsing XML, variable type conversion, shape loading, properties, and of course image loading.  When asking for help, please understand that I want people to make their own games or utilities, and that PyTMX is able to make Tiled Maps easy to use.
