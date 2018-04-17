@@ -564,6 +564,28 @@ objectgroup: name, color, x, y, width, height, opacity, object, properties
 object:      id, name, type, x, y, width, height, gid, properties, polygon,  
              polyline, image
 
+pygame_sdl2 and pyinstaller issues
+==================================
+
+Pygame_sdl2 is not compatible with pygame and could cause problems when they both exist in your python installation.
+If you are considering using pygame_sdl2, you should consider using a virtual environment until these issues are fixed
+with that other project.  To be clear, this is not a problem with pytmx.
+
+To exclude pygame with pyinstaller, for example, you will need an analysis block in your spec
+file that looks something like this:
+```python
+    a = Analysis(['my_program.py'],
+             pathex=['C:\\my_programs_path'],
+             binaries=[],
+             datas=[],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=['pygame'],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+```
 
 #### Please consider the following:
 
