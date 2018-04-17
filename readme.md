@@ -564,21 +564,14 @@ objectgroup: name, color, x, y, width, height, opacity, object, properties
 object:      id, name, type, x, y, width, height, gid, properties, polygon,  
              polyline, image
 
+pygame_sdl2 and pyinstaller issues
+==================================
 
-SDL2/SDL1 incompatibility issues
-===========================
+Pygame_sdl2 is not compatible with pygame and could cause problems when they both exist in your python installation.
+If you are considering using pygame_sdl2, you should consider using a virtual environment until these issues are fixed
+with that other project.  To be clear, this is not a problem with pytmx.
 
-PyTMX always automatically imports the pygame library even when you are not using it.
-Pygame uses the SDL 1.2 graphics library. If you are using an SDL 2 graphics library in your code,
- such as `pysdl2` or `pygame_sdl2`, you may encounter crashes or other issues when using PyTMX.
- It is known that there is a repeatable crash on the windows platform when using a frozen executable 
- combining PyTMX with Pygame_sdl2, as just one example.
-
-To avoid these crashes when using PyTMX it is advised that you exclude the pygame library from your code
-when freezing your scripts. PyTMX doesn't actually use the pygame library, unless you are using the `util_pygame`
-submodule.
-
-To exclude pygame using the popular PyInstaller library, for example, you will need an analysis block in your spec
+To exclude pygame with pyinstaller, for example, you will need an analysis block in your spec
 file that looks something like this:
 ```python
     a = Analysis(['my_program.py'],
