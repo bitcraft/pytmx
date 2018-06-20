@@ -876,7 +876,9 @@ class TiledTileset(TiledElement):
         register_gid = self.parent.register_gid
         for child in node.getiterator('tile'):
             tiled_gid = int(child.get("id"))
-            p = parse_properties(child)
+
+            p = {k: types[k](v) for k, v in child.items()}
+            p.update(parse_properties(child))
 
             # handle tiles that have their own image
             image = child.find('image')
