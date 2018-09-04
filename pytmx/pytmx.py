@@ -274,7 +274,7 @@ class TiledElement(object):
         if (not self.allow_duplicate_names and
                 self._contains_invalid_property_name(properties.items())):
             self._log_property_error_message()
-            raise ValueError
+            raise ValueError("Reserved names and duplicate names are not allowed. Please rename your property inside the .tmx-file")
 
         self.properties = properties
 
