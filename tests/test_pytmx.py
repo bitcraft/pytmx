@@ -51,6 +51,14 @@ class TiledMapTest(TestCase):
     def test_import_pytmx_doesnt_import_pygame(self):
         self.assertTrue('pygame' not in sys.modules)
 
+    def test_properties_are_converted_to_builtin_types(self):
+        self.assertIsInstance(self.m.properties['test_bool'], bool)
+        self.assertIsInstance(self.m.properties['test_color'], str)
+        self.assertIsInstance(self.m.properties['test_file'], str)
+        self.assertIsInstance(self.m.properties['test_float'], float)
+        self.assertIsInstance(self.m.properties['test_int'], int)
+        self.assertIsInstance(self.m.properties['test_string'], str)
+
 
 class handle_bool_TestCase(TestCase):
     def test_when_passed_true_it_should_return_true(self):
