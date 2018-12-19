@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 # python setup.py sdist upload -r pypi
+# twine upload dist/*
 from setuptools import setup
 
 setup(name="PyTMX",
