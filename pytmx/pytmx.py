@@ -27,7 +27,6 @@ from collections import defaultdict, namedtuple
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
-import importlib
 
 import six
 from six.moves import map
@@ -202,14 +201,18 @@ def parse_properties(node):
     d = dict()
     for child in node.findall('properties'):
         for subnode in child.findall('property'):
-            cls = None
-            try:
-                if "type" in subnode.keys():
-                    module = importlib.import_module('builtins')
-                    cls = getattr(module, subnode.get("type"))
-            except AttributeError:
-                logger.info("Type [} Not a built-in type. Defaulting to string-cast.")
-            d[subnode.get('name')] = cls(subnode.get('value')) if cls is not None else subnode.get('value')
+            type_name =  subnode.get('type')
+            name = subnode.get('name')
+            value = subnode.get('value')
+
+            if type_name == "bool":
+                d[name] = convert_to_bool(value)
+            elif type_name in prop_type:
+                cls = prop_type.get(type_name)
+                d[name] = cls(value)
+            else:
+                logger.info("Type {} Not a built-in type. Defaulting to string-cast.".format(type_name))
+                d[name]=value
     return d
 
 
