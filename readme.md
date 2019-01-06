@@ -9,7 +9,7 @@ I am also often lurking #pygame on freenode.  Feel free to contact me.
 
 Requires the six module.
 
-*Released under the LGPL v3*
+*Released under the GPL v3*
 
 ### See the "apps" folder for example use and cut/paste code.
 
