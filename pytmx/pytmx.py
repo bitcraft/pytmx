@@ -27,6 +27,7 @@ from collections import defaultdict, namedtuple
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
+import importlib
 
 import six
 from six.moves import map
@@ -894,7 +895,7 @@ class TiledTileset(TiledElement):
             
             # images are listed as relative to the .tsx file, not the .tmx file:
             if source and "path" in p:
-                p['path'] = os.path.join(os.path.dirname(source), p['path'])
+                    p["path"] = os.path.join(os.path.dirname(source), p["path"])
 
             # handle tiles that have their own image
             image = child.find('image')
