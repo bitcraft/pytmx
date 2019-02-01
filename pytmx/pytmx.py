@@ -890,8 +890,8 @@ class TiledTileset(TiledElement):
             p.update(parse_properties(child))
             
             # images are listed as relative to the .tsx file, not the .tmx file:
-            if source:
-                p["path"] = os.path.join(os.path.dirname(source), p["path"])
+            if source and "path" in p:
+                    p["path"] = os.path.join(os.path.dirname(source), p["path"])
 
             # handle tiles that have their own image
             image = child.find('image')
