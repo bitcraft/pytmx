@@ -61,8 +61,9 @@ class TiledMapTest(TestCase):
 
     def test_properties_bool_are_parsed_correctly(self):
         self.assertTrue(self.m.properties['test_bool'])
+        self.assertTrue(self.m.properties['test_bool_1'])
         self.assertFalse(self.m.properties['test_bool_false'])
-        import pudb; pudb.set_trace()
+        self.assertFalse(self.m.properties['test_bool_0'])
 
 
 class handle_bool_TestCase(TestCase):

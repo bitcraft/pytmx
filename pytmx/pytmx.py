@@ -210,7 +210,7 @@ def parse_properties(node):
             except AttributeError:
                 logger.info("Type [} Not a built-in type. Defaulting to string-cast.")
             value = subnode.get('value')
-            d[subnode.get('name')] = cls(value if value.lower() != "false" else "") if cls is not None else subnode.get('value')
+            d[subnode.get('name')] = cls("" if value.lower() == "false" or (value.isdigit() and int(value) == 0) else value) if cls is not None else subnode.get('value')
     return d
 
 
