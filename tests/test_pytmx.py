@@ -59,6 +59,11 @@ class TiledMapTest(TestCase):
         self.assertIsInstance(self.m.properties['test_int'], int)
         self.assertIsInstance(self.m.properties['test_string'], str)
 
+    def test_properties_bool_are_parsed_correctly(self):
+        self.assertTrue(self.m.properties['test_bool'])
+        self.assertFalse(self.m.properties['test_bool_false'])
+        import pudb; pudb.set_trace()
+
 
 class handle_bool_TestCase(TestCase):
     def test_when_passed_true_it_should_return_true(self):

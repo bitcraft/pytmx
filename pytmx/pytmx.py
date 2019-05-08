@@ -209,7 +209,8 @@ def parse_properties(node):
                     cls = getattr(module, subnode.get("type"))
             except AttributeError:
                 logger.info("Type [} Not a built-in type. Defaulting to string-cast.")
-            d[subnode.get('name')] = cls(subnode.get('value')) if cls is not None else subnode.get('value')
+            value = subnode.get('value')
+            d[subnode.get('name')] = cls(value if value.lower() != "false" else "") if cls is not None else subnode.get('value')
     return d
 
 
@@ -888,7 +889,7 @@ class TiledTileset(TiledElement):
 
             p = {k: types[k](v) for k, v in child.items()}
             p.update(parse_properties(child))
-            
+
             # images are listed as relative to the .tsx file, not the .tmx file:
             if source and "path" in p:
                 p["path"] = os.path.join(os.path.dirname(source), p["path"])
@@ -901,7 +902,7 @@ class TiledTileset(TiledElement):
             else:
                 tile_source = image.get('source')
                 # images are listed as relative to the .tsx file, not the .tmx file:
-                if tile_source: 
+                if tile_source:
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p['source'] = tile_source
                 p['trans'] = image.get('trans', None)
@@ -931,11 +932,11 @@ class TiledTileset(TiledElement):
         image_node = node.find('image')
         if image_node is not None:
             self.source = image_node.get('source')
-            
+
             # When loading from tsx, tileset image path is relative to the tsx file, not the tmx:
             if source:
                 self.source = os.path.join(os.path.dirname(source), self.source)
-            
+
             self.trans = image_node.get('trans', None)
             self.width = int(image_node.get('width'))
             self.height = int(image_node.get('height'))
