@@ -901,7 +901,7 @@ class TiledTileset(TiledElement):
             else:
                 tile_source = image.get('source')
                 # images are listed as relative to the .tsx file, not the .tmx file:
-                if tile_source: 
+                if source:
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p['source'] = tile_source
                 p['trans'] = image.get('trans', None)
