@@ -23,11 +23,6 @@ from .pytmx import *
 
 logger = logging.getLogger(__name__)
 
-try:
-    from pytmx.util_pygame import load_pygame
-except ImportError:
-    logger.debug('cannot import pygame tools')
-
 __version__ = (3, 21, 7)
 __author__ = 'bitcraft'
 __author_email__ = 'leif.theden@gmail.com'
