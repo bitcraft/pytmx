@@ -895,7 +895,7 @@ class TiledTileset(TiledElement):
             
             # images are listed as relative to the .tsx file, not the .tmx file:
             if source and "path" in p:
-                    p["path"] = os.path.join(os.path.dirname(source), p["path"])
+                p["path"] = os.path.join(os.path.dirname(source), p["path"])
 
             # handle tiles that have their own image
             image = child.find('image')
@@ -903,7 +903,11 @@ class TiledTileset(TiledElement):
                 p['width'] = self.tilewidth
                 p['height'] = self.tileheight
             else:
-                p['source'] = image.get('source')
+                tile_source = image.get('source')
+                # images are listed as relative to the .tsx file, not the .tmx file:
+                if tile_source: 
+                    tile_source = os.path.join(os.path.dirname(source), tile_source)
+                p['source'] = tile_source
                 p['trans'] = image.get('trans', None)
                 p['width'] = image.get('width')
                 p['height'] = image.get('height')
