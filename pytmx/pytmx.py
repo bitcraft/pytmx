@@ -282,7 +282,10 @@ class TiledElement(object):
         try:
             return self.properties[item]
         except KeyError:
-            raise AttributeError
+            if self.properties.get("name", None):
+                raise AttributeError("Element '{0}' has no property {1}".format(self.name, item))
+            else:
+                raise AttributeError("Element has no property {0}".format(item))
 
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.name)
@@ -503,26 +506,24 @@ class TiledMap(TiledElement):
         :param layer: layer number
         :rtype: surface if found, otherwise 0
         """
-        try:
-            assert (x >= 0 and y >= 0)
-        except AssertionError:
-            raise ValueError
+        if not (x >= 0 and y >= 0):
+            raise ValueError("Tile coordinates must be non-negative, were ({0}, {1})".format(x,y))
 
         try:
             layer = self.layers[layer]
         except IndexError:
-            raise ValueError
+            raise ValueError("Layer not found")
 
         assert (isinstance(layer, TiledTileLayer))
 
         try:
             gid = layer.data[y][x]
         except (IndexError, ValueError):
-            raise ValueError
+            raise ValueError("GID not found")
         except TypeError:
             msg = "Tiles must be specified in integers."
             logger.debug(msg)
-            raise TypeError
+            raise TypeError(msg)
 
         else:
             return self.get_tile_image_by_gid(gid)
@@ -539,11 +540,11 @@ class TiledMap(TiledElement):
         except TypeError:
             msg = "GIDs must be expressed as a number.  Got: {0}"
             logger.debug(msg.format(gid))
-            raise TypeError
+            raise TypeError(msg.format(gid))
         except (AssertionError, IndexError):
             msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
             logger.debug(msg.format(gid))
-            raise ValueError
+            raise ValueError(msg.format(gid))
 
     def get_tile_gid(self, x, y, layer):
         """ Return the tile image GID for this location
@@ -553,17 +554,15 @@ class TiledMap(TiledElement):
         :param layer: layer number
         :rtype: surface if found, otherwise ValueError
         """
-        try:
-            assert (x >= 0 and y >= 0 and layer >= 0)
-        except AssertionError:
-            raise ValueError
+        if not (x >= 0 and y >= 0 and layer >= 0):
+            raise ValueError("Tile coordinates and layers must be non-negative, were ({0}, {1}), layer={2}".format(x,y, layer))
 
         try:
             return self.layers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid"
-            logger.debug(msg, (x, y, layer))
-            raise ValueError
+            logger.debug(msg.format(x, y, layer))
+            raise ValueError(msg.format(x, y, layer))
 
     def get_tile_properties(self, x, y, layer):
         """ Return the tile image GID for this location
@@ -573,17 +572,15 @@ class TiledMap(TiledElement):
         :param layer: layer number
         :rtype: python dict if found, otherwise None
         """
-        try:
-            assert (x >= 0 and y >= 0 and layer >= 0)
-        except AssertionError:
-            raise ValueError
+        if not (x >= 0 and y >= 0 and layer >= 0):
+            raise ValueError("Tile coordinates and layers must be non-negative, were ({0}, {1}), layer={2}".format(x,y, layer))
 
         try:
             gid = self.layers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid."
             logger.debug(msg.format(x, y, layer))
-            raise Exception
+            raise Exception(msg.format(x, y, layer))
 
         else:
             try:
@@ -591,7 +588,7 @@ class TiledMap(TiledElement):
             except (IndexError, ValueError):
                 msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
                 logger.debug(msg.format(x, y, layer, gid))
-                raise Exception
+                raise Exception(msg.format(x, y, layer, gid))
             except KeyError:
                 return None
 
@@ -683,7 +680,7 @@ class TiledMap(TiledElement):
         except KeyError:
             msg = 'Layer "{0}" not found.'
             logger.debug(msg.format(name))
-            raise ValueError
+            raise ValueError(msg.format(name))
 
     def get_object_by_name(self, name):
         """Find an object
@@ -694,7 +691,7 @@ class TiledMap(TiledElement):
         for obj in self.objects:
             if obj.name == name:
                 return obj
-        raise ValueError
+        raise ValueError("Object {0} not found".format(name))
 
     def get_tileset_from_gid(self, gid):
         """ Return tileset that owns the gid
@@ -708,14 +705,14 @@ class TiledMap(TiledElement):
         try:
             tiled_gid = self.tiledgidmap[gid]
         except KeyError:
-            raise ValueError
+            raise ValueError("Tile GID not found")
 
         for tileset in sorted(self.tilesets, key=attrgetter('firstgid'),
                               reverse=True):
             if tiled_gid >= tileset.firstgid:
                 return tileset
 
-        raise ValueError
+        raise ValueError("Tileset not found")
 
     @property
     def objectgroups(self):
@@ -796,7 +793,7 @@ class TiledMap(TiledElement):
         except TypeError:
             msg = "GIDs must be an integer"
             logger.debug(msg)
-            raise TypeError
+            raise TypeError(msg)
 
     def map_gid2(self, tiled_gid):
         """ WIP.  need to refactor the gid code
@@ -866,17 +863,20 @@ class TiledTileset(TiledElement):
                 # we need to mangle the path - tiled stores relative paths
                 dirname = os.path.dirname(self.parent.filename)
                 path = os.path.abspath(os.path.join(dirname, source))
+                if not os.path.exists(path):
+                    #raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), path)
+                    raise Exception("Cannot find tileset file {0} from {1}, should be at {2}".format(source, self.parent.filename, path))
+                
                 try:
                     node = ElementTree.parse(path).getroot()
-                except IOError:
-                    msg = "Cannot load external tileset: {0}"
+                except IOError as io:
+                    msg = "Error loading external tileset: {0}"
                     logger.error(msg.format(path))
-                    raise Exception
-
+                    raise Exception(msg.format(path)) from io
             else:
                 msg = "Found external tileset, but cannot handle type: {0}"
                 logger.error(msg.format(self.source))
-                raise Exception
+                raise Exception(msg.format(self.source))
 
         self._set_properties(node)
 
@@ -1028,7 +1028,7 @@ class TiledTileLayer(TiledElement):
         elif encoding:
             msg = 'TMX encoding type: {0} is not supported.'
             logger.error(msg.format(encoding))
-            raise Exception
+            raise Exception(msg.format(encoding))
 
         compression = data_node.get('compression', None)
         if compression == 'gzip':
@@ -1045,7 +1045,7 @@ class TiledTileLayer(TiledElement):
         elif compression:
             msg = 'TMX compression type: {0} is not supported.'
             logger.error(msg.format(compression))
-            raise Exception
+            raise Exception(msg.format(compression))
 
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
@@ -1065,7 +1065,7 @@ class TiledTileLayer(TiledElement):
             else:
                 msg = 'layer data not in expected format ({})'
                 logger.error(msg.format(type(data)))
-                raise Exception
+                raise Exception(msg.format(type(data)))
 
         init = lambda: [0] * self.width
         reg = self.parent.register_gid
