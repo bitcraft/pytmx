@@ -111,6 +111,10 @@ class TiledMapTest(unittest.TestCase):
         self.assertIsInstance(self.m.properties['test_int'], int)
         self.assertIsInstance(self.m.properties['test_string'], str)
 
+    def test_properties_are_converted_to_correct_values(self):
+        self.assertFalse(self.m.properties['test_bool'])
+        self.assertTrue(self.m.properties['test_bool_true'])
+
 
 class TiledElementTestCase(unittest.TestCase):
     def setUp(self):
