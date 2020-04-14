@@ -200,7 +200,7 @@ def parse_properties(node):
                 if "type" in subnode.keys():
                     cls = prop_type[subnode.get("type")]
             except AttributeError:
-                logger.info("Type [} Not a built-in type. Defaulting to string-cast.")
+                logger.info("Type {} Not a built-in type. Defaulting to string-cast.".format(subnode.get("type")))
             d[subnode.get('name')] = cls(subnode.get('value')) if cls is not None else subnode.get('value')
     return d
 

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#000000" nextobjectid="9">
  <properties>
-  <property name="test_bool" type="bool" value="true"/>
+  <property name="test_bool" type="bool" value="false"/>
+  <property name="test_bool_true" type="bool" value="true"/>
   <property name="test_color" type="color" value="#ffff0000"/>
   <property name="test_file" type="file" value="tileset.png"/>
   <property name="test_float" type="float" value="37"/>
