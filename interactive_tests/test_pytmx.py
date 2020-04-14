@@ -1,5 +1,5 @@
 """
-some tests for pytmx
+some interactive_tests for pytmx
 
 WIP - all code that isn't abandoned is WIP
 """

@@ -48,7 +48,7 @@ def handle_transformation(tile, flags):
 
 def smart_convert(original, colorkey, pixelalpha):
     """
-    this method does several tests on a surface to determine the optimal
+    this method does several interactive_tests on a surface to determine the optimal
     flags and pixel format for each tile surface.
 
     this is done for the best rendering speeds and removes the need to

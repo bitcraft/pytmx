@@ -135,7 +135,7 @@ class SimpleTest(object):
 def all_filenames():
     import os.path
     import glob
-    _list = glob.glob(os.path.join('data', '0.9.1', '*.tmx'))
+    _list = glob.glob(os.path.join('data', '*.tmx'))
     try:
         while _list:
             yield _list.pop(0)

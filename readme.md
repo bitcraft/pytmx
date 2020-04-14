@@ -59,6 +59,13 @@ I need to clarify a few things:
 - pytmx is not the Tiled Map Editor
 
 
+Python 2.7 Support
+===============================================================================
+As Python 2.7 is now EOL, any changes moving forward past version 3.21.7 will
+not take python 2.7 support into consideration and any breaking changes will
+not be fixed.
+
+
 Documentation
 ===============================================================================
 

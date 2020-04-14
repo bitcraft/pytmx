@@ -125,7 +125,7 @@ class SimpleTest(object):
 def all_filenames():
     import os.path
     import glob
-    return glob.glob(os.path.join('data', '0.9.1', '*.tmx'))
+    return glob.glob(os.path.join('data', '*.tmx'))
 
 
 if __name__ == '__main__':

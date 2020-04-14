@@ -10,7 +10,7 @@ Tests all Tiled features -except- terrains and object rotation.
 If you are not familiar with python classes, you might want to check the
 'tutorial' app.
 
-Missing tests:
+Missing interactive_tests:
 - object rotation
 - terrains
 """
