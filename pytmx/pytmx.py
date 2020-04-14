@@ -95,30 +95,23 @@ def decode_gid(raw_gid):
     return gid, flags
 
 
-def convert_to_bool(text):
+def convert_to_bool(value):
     """ Convert a few common variations of "true" and "false" to boolean
 
-    :param text: string to test
-    :return: boolean
+    :param Any value: string to test
+    :rtype: boolean
     :raises: ValueError
     """
-    # handle "1" and "0"
-    try:
-        return bool(int(text))
-    except:
-        pass
-
-    text = str(text).lower()
-    if text == "true":
-        return True
-    if text == "yes":
-        return True
-    if text == "false":
+    value = str(value).strip()
+    if value:
+        value = value.lower()[0]
+        if value in ("1", "y", "t"):
+            return True
+        if value in ("-", "0", "n", "f"):
+            return False
+    else:
         return False
-    if text == "no":
-        return False
-
-    raise ValueError
+    raise ValueError('cannot parse "{}" as bool'.format(value))
 
 
 # used to change the unicode string returned from xml to
@@ -187,7 +180,7 @@ prop_type = {
     'string': str,
     'int': int,
     'float': float,
-    'bool': bool,
+    'bool': convert_to_bool,
     'color': str,
     'file': str
 }
@@ -205,8 +198,7 @@ def parse_properties(node):
             cls = None
             try:
                 if "type" in subnode.keys():
-                    module = importlib.import_module('builtins')
-                    cls = getattr(module, subnode.get("type"))
+                    cls = prop_type[subnode.get("type")]
             except AttributeError:
                 logger.info("Type [} Not a built-in type. Defaulting to string-cast.")
             d[subnode.get('name')] = cls(subnode.get('value')) if cls is not None else subnode.get('value')
@@ -901,7 +893,7 @@ class TiledTileset(TiledElement):
             else:
                 tile_source = image.get('source')
                 # images are listed as relative to the .tsx file, not the .tmx file:
-                if tile_source: 
+                if source and tile_source:
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p['source'] = tile_source
                 p['trans'] = image.get('trans', None)
