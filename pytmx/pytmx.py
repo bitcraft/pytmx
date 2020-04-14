@@ -1006,6 +1006,11 @@ class TiledTileLayer(TiledElement):
         data = None
         next_gid = None
         data_node = node.find('data')
+        chunk_nodes = data_node.findall('chunk')
+        if chunk_nodes:
+            msg = 'TMX map size: infinite is not supported.'
+            logger.error(msg)
+            raise Exception
 
         encoding = data_node.get('encoding', None)
         if encoding == 'base64':
