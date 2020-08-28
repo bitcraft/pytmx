@@ -27,7 +27,6 @@ from collections import defaultdict, namedtuple
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
-import importlib
 
 import six
 from six.moves import map
