@@ -1,5 +1,8 @@
 ## PyTMX
-##### For Python 2.7 and 3.3+
+##### For Python 3.3+
+
+MASON TEST BRANCH
+
 
 This is the most up-to-date version of PyTMX available and works with
 Python 2.7 and 3.3+.
