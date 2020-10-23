@@ -874,7 +874,7 @@ class TiledTileset(TiledElement):
         # since tile objects [probably] don't have a lot of metadata,
         # we store it separately in the parent (a TiledMap instance)
         register_gid = self.parent.register_gid
-        for child in node.getiterator('tile'):
+        for child in node.iter('tile'):
             tiled_gid = int(child.get("id"))
 
             p = {k: types[k](v) for k, v in child.items()}
