@@ -1,11 +1,7 @@
 ## PyTMX
-##### For Python 2.7 and 3.3+
-
-This is the most up-to-date version of PyTMX available and works with
-Python 2.7 and 3.3+.
+##### For Python 3.3+
 
 If you have any problems or suggestions, please open an issue.
-I am also often lurking #pygame on freenode.  Feel free to contact me.
 
 Requires the six module.
 
