@@ -54,33 +54,36 @@ def smart_convert(original, colorkey, pixelalpha):
     this is done for the best rendering speeds and removes the need to
     convert() the images on your own
     """
-    tile_size = original.get_size()
-    threshold = 127  # the default
-
-    try:
-        # count the number of pixels in the tile that are not transparent
-        px = pygame.mask.from_surface(original, threshold).count()
-    except:
-        # pygame_sdl2 will fail because the mask module is not included
-        # in this case, just convert_alpha and return it
-        return original.convert_alpha()
-
-    # there are no transparent pixels in the image
-    if px == tile_size[0] * tile_size[1]:
-        tile = original.convert()
-
-    # there are transparent pixels, and tiled set a colorkey
-    elif colorkey:
+    # tiled set a colorkey
+    if colorkey:
         tile = original.convert()
         tile.set_colorkey(colorkey, pygame.RLEACCEL)
+        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL sould be used
 
-    # there are transparent pixels, and set for perpixel alpha
-    elif pixelalpha:
-        tile = original.convert_alpha()
-
-    # there are transparent pixels, and we won't handle them
+    # no colorkey, so use a mask to determine if there are transparent pixels
     else:
-        tile = original.convert()
+        tile_size = original.get_size()
+        threshold = 127  # the default
+
+        try:
+            # count the number of pixels in the tile that are not transparent
+            px = pygame.mask.from_surface(original, threshold).count()
+        except:
+            # pygame_sdl2 will fail because the mask module is not included
+            # in this case, just convert_alpha and return it
+            return original.convert_alpha()
+
+        # there are no transparent pixels in the image
+        if px == tile_size[0] * tile_size[1]:
+            tile = original.convert()
+
+        # there are transparent pixels, and set for perpixel alpha
+        elif pixelalpha:
+            tile = original.convert_alpha()
+
+        # there are transparent pixels, and we won't handle them
+        else:
+            tile = original.convert()
 
     return tile
 
