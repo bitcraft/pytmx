@@ -28,7 +28,7 @@ try:
 except ImportError:
     logger.debug('cannot import pygame tools')
 
-__version__ = (3, 22, 2)
+__version__ = (3, 23, 0)
 __author__ = 'bitcraft'
 __author_email__ = 'leif.theden@gmail.com'
 __description__ = 'Map loader for TMX Files - Python 3.3 +'

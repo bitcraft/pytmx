@@ -6,12 +6,11 @@ from setuptools import setup
 
 setup(
     name="PyTMX",
-    version='3.22.2',
+    version='3.23.0',
     description='loads tiled tmx maps.  for python 3.3+',
     author='bitcraft',
     author_email='leif.theden@gmail.com',
     packages=['pytmx'],
-    install_requires=['six'],
     license="LGPLv3",
     long_description='https://github.com/bitcraft/PyTMX',
     classifiers=[

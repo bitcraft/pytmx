@@ -17,19 +17,13 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import logging
 import os
 from collections import defaultdict, namedtuple
+from io import BytesIO
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
-
-import six
-from six.moves import map
 
 __all__ = (
     'TiledElement',
@@ -115,13 +109,12 @@ def convert_to_bool(value):
 
 # used to change the unicode string returned from xml to
 # proper python variable types.
-types = defaultdict(lambda: six.u)
+types = defaultdict(lambda: str)
 
-_str = six.u
 types.update({
     "version": str,
     "tiledversion": str,
-    "orientation": _str,
+    "orientation": str,
     "renderorder": str,
     "width": float,
     "height": float,
@@ -133,14 +126,14 @@ types.update({
     "backgroundcolor": str,
     "nextobjectid": int,
     "firstgid": int,
-    "source": _str,
-    "name": _str,
+    "source": str,
+    "name": str,
     "spacing": int,
     "margin": int,
     "tilecount": int,
     "columns": int,
     "format": str,
-    "trans": _str,
+    "trans": str,
     "tile": int,
     "terrain": str,
     "probability": float,
@@ -152,8 +145,8 @@ types.update({
     "visible": convert_to_bool,
     "offsetx": int,
     "offsety": int,
-    "encoding": _str,
-    "compression": _str,
+    "encoding": str,
+    "compression": str,
     "draworder": str,
     "points": str,
     "fontfamily": str,
@@ -167,10 +160,10 @@ types.update({
     "halign": str,
     "valign": str,
     "gid": int,
-    "type": _str,
+    "type": str,
     "x": float,
     "y": float,
-    "value": _str,
+    "value": str,
     "rotation": float,
 })
 
@@ -1030,7 +1023,7 @@ class TiledTileLayer(TiledElement):
         if compression == 'gzip':
             import gzip
 
-            with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
+            with gzip.GzipFile(fileobj=BytesIO(data)) as fh:
                 data = fh.read()
 
         elif compression == 'zlib':

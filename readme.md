@@ -3,8 +3,6 @@
 
 If you have any problems or suggestions, please open an issue.
 
-Requires the six module.
-
 *Released under the LGPL v3*
 
 ### See the "apps" folder for example use and cut/paste code.
