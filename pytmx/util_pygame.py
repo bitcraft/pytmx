@@ -1,12 +1,28 @@
-import logging
+# -*- coding: utf-8 -*-
+"""
+Copyright (C) 2012-2017, Leif Theden <leif.theden@gmail.com>
+
+This file is part of pytmx.
+
+pytmx is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+pytmx is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import itertools
+import logging
+
 import pytmx
 
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
 
 try:
     from pygame.transform import flip, rotate
@@ -28,39 +44,42 @@ def handle_transformation(tile, flags):
 
 def smart_convert(original, colorkey, pixelalpha):
     """
-    this method does several tests on a surface to determine the optimal
+    this method does several interactive_tests on a surface to determine the optimal
     flags and pixel format for each tile surface.
 
     this is done for the best rendering speeds and removes the need to
     convert() the images on your own
     """
-    tile_size = original.get_size()
-    threshold = 127  # the default
-
-    try:
-        # count the number of pixels in the tile that are not transparent
-        px = pygame.mask.from_surface(original, threshold).count()
-    except:
-        # pygame_sdl2 will fail because the mask module is not included
-        # in this case, just convert_alpha and return it
-        return original.convert_alpha()
-
-    # there are no transparent pixels in the image
-    if px == tile_size[0] * tile_size[1]:
-        tile = original.convert()
-
-    # there are transparent pixels, and tiled set a colorkey
-    elif colorkey:
+    # tiled set a colorkey
+    if colorkey:
         tile = original.convert()
         tile.set_colorkey(colorkey, pygame.RLEACCEL)
+        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL sould be used
 
-    # there are transparent pixels, and set for perpixel alpha
-    elif pixelalpha:
-        tile = original.convert_alpha()
-
-    # there are transparent pixels, and we won't handle them
+    # no colorkey, so use a mask to determine if there are transparent pixels
     else:
-        tile = original.convert()
+        tile_size = original.get_size()
+        threshold = 127  # the default
+
+        try:
+            # count the number of pixels in the tile that are not transparent
+            px = pygame.mask.from_surface(original, threshold).count()
+        except:
+            # pygame_sdl2 will fail because the mask module is not included
+            # in this case, just convert_alpha and return it
+            return original.convert_alpha()
+
+        # there are no transparent pixels in the image
+        if px == tile_size[0] * tile_size[1]:
+            tile = original.convert()
+
+        # there are transparent pixels, and set for perpixel alpha
+        elif pixelalpha:
+            tile = original.convert_alpha()
+
+        # there are transparent pixels, and we won't handle them
+        else:
+            tile = original.convert()
 
     return tile
 
@@ -117,10 +136,8 @@ def load_pygame(filename, *args, **kwargs):
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
     """
-    from mason import slurp
     kwargs['image_loader'] = pygame_image_loader
-    return slurp(filename)
-    # return pytmx.TiledMap(filename, *args, **kwargs)
+    return pytmx.TiledMap(filename, *args, **kwargs)
 
 
 def build_rects(tmxmap, layer, tileset=None, real_gid=None):

@@ -20,10 +20,10 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 from collections import defaultdict, namedtuple
+from io import BytesIO
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
-
 
 __all__ = (
     'TiledElement',
@@ -109,13 +109,12 @@ def convert_to_bool(value):
 
 # used to change the unicode string returned from xml to
 # proper python variable types.
-types = defaultdict(lambda: six.u)
+types = defaultdict(lambda: str)
 
-_str = six.u
 types.update({
     "version": str,
     "tiledversion": str,
-    "orientation": _str,
+    "orientation": str,
     "renderorder": str,
     "width": float,
     "height": float,
@@ -127,14 +126,14 @@ types.update({
     "backgroundcolor": str,
     "nextobjectid": int,
     "firstgid": int,
-    "source": _str,
-    "name": _str,
+    "source": str,
+    "name": str,
     "spacing": int,
     "margin": int,
     "tilecount": int,
     "columns": int,
     "format": str,
-    "trans": _str,
+    "trans": str,
     "tile": int,
     "terrain": str,
     "probability": float,
@@ -146,8 +145,8 @@ types.update({
     "visible": convert_to_bool,
     "offsetx": int,
     "offsety": int,
-    "encoding": _str,
-    "compression": _str,
+    "encoding": str,
+    "compression": str,
     "draworder": str,
     "points": str,
     "fontfamily": str,
@@ -161,10 +160,10 @@ types.update({
     "halign": str,
     "valign": str,
     "gid": int,
-    "type": _str,
+    "type": str,
     "x": float,
     "y": float,
-    "value": _str,
+    "value": str,
     "rotation": float,
 })
 
@@ -851,7 +850,7 @@ class TiledTileset(TiledElement):
                 if not os.path.exists(path):
                     #raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), path)
                     raise Exception("Cannot find tileset file {0} from {1}, should be at {2}".format(source, self.parent.filename, path))
-
+                
                 try:
                     node = ElementTree.parse(path).getroot()
                 except IOError as io:
@@ -868,12 +867,12 @@ class TiledTileset(TiledElement):
         # since tile objects [probably] don't have a lot of metadata,
         # we store it separately in the parent (a TiledMap instance)
         register_gid = self.parent.register_gid
-        for child in node.getiterator('tile'):
+        for child in node.iter('tile'):
             tiled_gid = int(child.get("id"))
 
             p = {k: types[k](v) for k, v in child.items()}
             p.update(parse_properties(child))
-
+            
             # images are listed as relative to the .tsx file, not the .tmx file:
             if source and "path" in p:
                 p["path"] = os.path.join(os.path.dirname(source), p["path"])
@@ -916,11 +915,11 @@ class TiledTileset(TiledElement):
         image_node = node.find('image')
         if image_node is not None:
             self.source = image_node.get('source')
-
+            
             # When loading from tsx, tileset image path is relative to the tsx file, not the tmx:
             if source:
                 self.source = os.path.join(os.path.dirname(source), self.source)
-
+            
             self.trans = image_node.get('trans', None)
             self.width = int(image_node.get('width'))
             self.height = int(image_node.get('height'))
@@ -1024,7 +1023,7 @@ class TiledTileLayer(TiledElement):
         if compression == 'gzip':
             import gzip
 
-            with gzip.GzipFile(fileobj=six.BytesIO(data)) as fh:
+            with gzip.GzipFile(fileobj=BytesIO(data)) as fh:
                 data = fh.read()
 
         elif compression == 'zlib':

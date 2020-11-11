@@ -1,18 +1,73 @@
-"""
-some tests for pytmx
-
-WIP - all code that isn't abandoned is WIP
-"""
-from unittest import TestCase, skip
-import sys
+import unittest
 
 import pytmx
-from pytmx import convert_to_bool
 from pytmx import TiledElement
+from pytmx import convert_to_bool
 
 
-class TiledMapTest(TestCase):
-    filename = 'test01.tmx'
+class TestConvertToBool(unittest.TestCase):
+    def test_string_string_true(self):
+        self.assertTrue(convert_to_bool("1"))
+        self.assertTrue(convert_to_bool("y"))
+        self.assertTrue(convert_to_bool("Y"))
+        self.assertTrue(convert_to_bool("t"))
+        self.assertTrue(convert_to_bool("T"))
+        self.assertTrue(convert_to_bool("yes"))
+        self.assertTrue(convert_to_bool("Yes"))
+        self.assertTrue(convert_to_bool("YES"))
+        self.assertTrue(convert_to_bool("true"))
+        self.assertTrue(convert_to_bool("True"))
+        self.assertTrue(convert_to_bool("TRUE"))
+
+    def test_string_string_false(self):
+        self.assertFalse(convert_to_bool("0"))
+        self.assertFalse(convert_to_bool("n"))
+        self.assertFalse(convert_to_bool("N"))
+        self.assertFalse(convert_to_bool("f"))
+        self.assertFalse(convert_to_bool("F"))
+        self.assertFalse(convert_to_bool("no"))
+        self.assertFalse(convert_to_bool("No"))
+        self.assertFalse(convert_to_bool("NO"))
+        self.assertFalse(convert_to_bool("false"))
+        self.assertFalse(convert_to_bool("False"))
+        self.assertFalse(convert_to_bool("FALSE"))
+
+    def test_string_number_true(self):
+        self.assertTrue(convert_to_bool(1))
+        self.assertTrue(convert_to_bool(1.0))
+
+    def test_string_number_false(self):
+        self.assertFalse(convert_to_bool(0))
+        self.assertFalse(convert_to_bool(0.0))
+        self.assertFalse(convert_to_bool(-1))
+        self.assertFalse(convert_to_bool(-1.1))
+
+    def test_string_bool_true(self):
+        self.assertTrue(convert_to_bool(True))
+
+    def test_string_bool_false(self):
+        self.assertFalse(convert_to_bool(False))
+
+    def test_string_bool_none(self):
+        self.assertFalse(convert_to_bool(None))
+
+    def test_string_bool_empty(self):
+        self.assertFalse(convert_to_bool(""))
+
+    def test_string_bool_whitespace_only(self):
+        self.assertFalse(convert_to_bool(" "))
+
+    def test_non_boolean_string_raises_error(self):
+        with self.assertRaises(ValueError):
+            convert_to_bool("garbage")
+
+    def test_non_boolean_number_raises_error(self):
+        with self.assertRaises(ValueError):
+            convert_to_bool("200")
+
+
+class TiledMapTest(unittest.TestCase):
+    filename = '../resources/test01.tmx'
 
     def setUp(self):
         self.m = pytmx.TiledMap(self.filename)
@@ -47,40 +102,20 @@ class TiledMapTest(TestCase):
         self.assertIsInstance(self.m.layers[0].width, int)
         self.assertIsInstance(self.m.layers[0].height, int)
 
-    @skip('Need to make a better test')
-    def test_import_pytmx_doesnt_import_pygame(self):
-        self.assertTrue('pygame' not in sys.modules)
+    def test_properties_are_converted_to_builtin_types(self):
+        self.assertIsInstance(self.m.properties['test_bool'], bool)
+        self.assertIsInstance(self.m.properties['test_color'], str)
+        self.assertIsInstance(self.m.properties['test_file'], str)
+        self.assertIsInstance(self.m.properties['test_float'], float)
+        self.assertIsInstance(self.m.properties['test_int'], int)
+        self.assertIsInstance(self.m.properties['test_string'], str)
+
+    def test_properties_are_converted_to_correct_values(self):
+        self.assertFalse(self.m.properties['test_bool'])
+        self.assertTrue(self.m.properties['test_bool_true'])
 
 
-class handle_bool_TestCase(TestCase):
-    def test_when_passed_true_it_should_return_true(self):
-        self.assertTrue(convert_to_bool("true"))
-
-    def test_when_passed_yes_it_should_return_true(self):
-        self.assertTrue(convert_to_bool("yes"))
-
-    def test_when_passed_false_it_should_return_false(self):
-        self.assertFalse(convert_to_bool("false"))
-
-    def test_when_passed_no_it_should_return_false(self):
-        self.assertFalse(convert_to_bool("no"))
-
-    def test_when_passed_zero_it_should_return_false(self):
-        self.assertFalse(convert_to_bool("0"))
-
-    def test_when_passed_non_zero_it_should_return_true(self):
-        self.assertTrue(convert_to_bool("1337"))
-
-    def test_when_passed_garbage_it_should_raise_value_error(self):
-        with self.assertRaises(ValueError):
-            convert_to_bool("garbage")
-
-    def test_when_passed_None_it_should_raise_value_error(self):
-        with self.assertRaises(ValueError):
-            convert_to_bool(None)
-
-
-class TiledElementTestCase(TestCase):
+class TiledElementTestCase(unittest.TestCase):
     def setUp(self):
         self.element = TiledElement()
 
@@ -94,7 +129,7 @@ class TiledElementTestCase(TestCase):
             specification.  We check that new properties are not named same
             as existing attributes.
         """
-        self.element.name ='foo'
+        self.element.name = 'foo'
         items = {'name': None}
         result = self.element._contains_invalid_property_name(items.items())
         self.assertTrue(result)

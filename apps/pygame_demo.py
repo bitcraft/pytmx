@@ -10,16 +10,20 @@ Tests all Tiled features -except- terrains and object rotation.
 If you are not familiar with python classes, you might want to check the
 'tutorial' app.
 
-Missing tests:
+Missing interactive_tests:
 - object rotation
 - terrains
 """
+
 import logging
 
 import pygame
 from pygame.locals import *
 
-from pytmx import *
+import pytmx
+from pytmx import TiledImageLayer
+from pytmx import TiledObjectGroup
+from pytmx import TiledTileLayer
 from pytmx.util_pygame import load_pygame
 
 logger = logging.getLogger(__name__)
@@ -220,18 +224,18 @@ class SimpleTest(object):
 if __name__ == '__main__':
     import os.path
     import glob
-    import pytmx
 
     pygame.init()
     pygame.font.init()
     screen = init_screen(600, 600)
     pygame.display.set_caption('PyTMX Map Viewer')
+    logging.basicConfig(level=logging.DEBUG)
 
     logger.info(pytmx.__version__)
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('data', '0.9.1', '*.tmx')):
+        for filename in glob.glob(os.path.join('data', '*.tmx')):
             logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break

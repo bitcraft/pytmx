@@ -6,3 +6,4 @@ thumbs.db
 .idea/*
 build
 dist
+venv

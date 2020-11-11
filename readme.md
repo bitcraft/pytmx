@@ -1,16 +1,7 @@
 ## PyTMX
 ##### For Python 3.3+
 
-MASON TEST BRANCH
-
-
-This is the most up-to-date version of PyTMX available and works with
-Python 2.7 and 3.3+.
-
 If you have any problems or suggestions, please open an issue.
-I am also often lurking #pygame on freenode.  Feel free to contact me.
-
-Requires the six module.
 
 *Released under the LGPL v3*
 
@@ -20,6 +11,7 @@ Requires the six module.
 News
 ===============================================================================
 
+__08/28/20__ - Python 2.7 support removed.  Use the "py27-legacy" branch.  
 __11/13/15__ - Animations are now loaded  
 __07/08/15__ - Documentation overhaul  
 __04/18/15__ - Document support for pysdl2 and pyglet  
@@ -60,6 +52,13 @@ with good results.
 I need to clarify a few things:
 - pytmx is not a rendering engine
 - pytmx is not the Tiled Map Editor
+
+
+Python 2.7 Support
+===============================================================================
+As Python 2.7 is now EOL, any changes moving forward past version 3.21.7 will
+not take python 2.7 support into consideration and any breaking changes will
+not be fixed.
 
 
 Documentation
@@ -567,6 +566,28 @@ objectgroup: name, color, x, y, width, height, opacity, object, properties
 object:      id, name, type, x, y, width, height, gid, properties, polygon,  
              polyline, image
 
+pygame_sdl2 and pyinstaller issues
+==================================
+
+Pygame_sdl2 is not compatible with pygame and could cause problems when they both exist in your python installation.
+If you are considering using pygame_sdl2, you should consider using a virtual environment until these issues are fixed
+with that other project.  To be clear, this is not a problem with pytmx.
+
+To exclude pygame with pyinstaller, for example, you will need an analysis block in your spec
+file that looks something like this:
+```python
+    a = Analysis(['my_program.py'],
+             pathex=['C:\\my_programs_path'],
+             binaries=[],
+             datas=[],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=['pygame'],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+```
 
 #### Please consider the following:
 
