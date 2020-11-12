@@ -20,13 +20,15 @@ import logging
 import pygame
 from pygame.locals import *
 
+from pytmx.dc import Map, TileLayer, ObjectGroup, ImageLayer
 from pytmx.mason import load_tmx
+from util_pygame import pygame_image_loader
 
 logger = logging.getLogger(__name__)
 
 
-def load_pygame(path):
-    map = load_tmx(path)
+def load_pygame(path) -> Map:
+    map = load_tmx(path, pygame_image_loader)
     return map
 
 
@@ -44,9 +46,6 @@ class TiledRenderer(object):
 
     def __init__(self, filename):
         tm = load_pygame(filename)
-
-        # self.size will be the pixel size of the map
-        # this value is used later to render the entire map to a pygame surface
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
@@ -66,28 +65,18 @@ class TiledRenderer(object):
         if self.tmx_data.background_color:
             surface.fill(pygame.Color(self.tmx_data.background_color))
 
-        # iterate over all the visible layers, then draw them
         for layer in self.tmx_data.visible_layers:
-            # each layer can be handled differently by checking their type
-
-            if isinstance(layer, TiledTileLayer):
+            if type(layer) == TileLayer:
                 self.render_tile_layer(surface, layer)
-
-            elif isinstance(layer, TiledObjectGroup):
+            elif isinstance(layer, ObjectGroup):
                 self.render_object_layer(surface, layer)
-
-            elif isinstance(layer, TiledImageLayer):
+            elif isinstance(layer, ImageLayer):
                 self.render_image_layer(surface, layer)
 
     def render_tile_layer(self, surface, layer):
-        """ Render all TiledTiles in this layer
-        """
-        # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         surface_blit = surface.blit
-
-        # iterate over the tiles in the layer, and blit them
         for x, y, image in layer.tiles():
             surface_blit(image, (x * tw, y * th))
 
@@ -140,6 +129,7 @@ class SimpleTest(object):
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
+        self.screen = None
 
     def load_map(self, filename):
         """ Create a renderer, load data, and print some debug info
@@ -152,9 +142,9 @@ class SimpleTest(object):
             for k, v in obj.properties.items():
                 logger.info("%s\t%s", k, v)
 
-        logger.info("GID (tile) properties:")
-        for k, v in self.renderer.tmx_data.tile_properties.items():
-            logger.info("%s\t%s", k, v)
+        # logger.info("GID (tile) properties:")
+        # for tile, properties in self.renderer.tmx_data.tile_properties():
+        #     logger.info("%s\t%s", k, v)
 
     def draw(self, surface):
         """ Draw our map to some surface (probably the display)
@@ -220,11 +210,12 @@ class SimpleTest(object):
                 pygame.display.flip()
 
         return self.exit_status
-
+screen = None
 
 def main():
     import os.path
     import glob
+    global screen
 
     pygame.init()
     pygame.font.init()
@@ -236,7 +227,7 @@ def main():
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('data', '*.tmx')):
+        for filename in glob.glob(os.path.join("apps", 'data', '*.tmx')):
             logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break
