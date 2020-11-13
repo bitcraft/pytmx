@@ -14,6 +14,27 @@ MapCoordinates = namedtuple("MapCoordinates", ["x", "y", "layer"])
 
 
 @dataclass
+class Point:
+    x: int
+    y: int
+
+
+@dataclass
+class Text:
+    fontfamily: str
+    pixelsize: int
+    wrap: bool
+    color: str
+    bold: bool
+    italic: bool
+    underline: bool
+    strikeout: bool
+    kerning: bool
+    halign: str
+    valign: str
+
+
+@dataclass
 class Animation:
     frames: List[AnimationFrame]
 
@@ -23,9 +44,17 @@ class AnimationFrame:
     tile: Tile
     duration: int
 
+
+# this is a reserved python word, renaming to circle
+@dataclass
+class Circle:
+    pass
+
+
 @dataclass
 class Tile:
-    gid: str = None  # delet this
+    id: int = None
+    gid: str = None
     type: str = None
     terrain: str = None
     image: TileImageType = None
@@ -35,10 +64,10 @@ class Tile:
 
 @dataclass
 class Image:
-    source: str = None
-    width: int = None
-    height: int = None
-    trans: str = None
+    source: str
+    width: int
+    height: int
+    trans: str
 
 
 @dataclass
@@ -58,19 +87,21 @@ class TileLayer:
                     yield x, y, gid
 
 
+@dataclass
 class ObjectGroup:
-    def __init__(
-        self,
-        name: str = None,
-        color: str = None,
-        opacity: float = None,
-        visible: bool = None,
-        tintcolor: str = None,
-        offsetx: int = None,
-        offsety: int = None,
-        draworder: int = None,
-    ):
-        self.objects = list()
+    name: str
+    color: str
+    opacity: float
+    visible: bool
+    tintcolor: str
+    offsetx: int
+    offsety: int
+    draworder: int
+    # mason
+    objects: List = field(default_factory=list)
+
+    def __iter__(self):
+        return iter(self.objects)
 
 
 @dataclass
@@ -81,22 +112,26 @@ class Group:
     tintcolor: str
     offsetx: int
     offsety: int
+    # mason
+    layers: List = field(default_factory=list)
 
 
 @dataclass
 class Tileset:
-    firstgid: int = None
-    source: str = None
-    name: str = None
-    tilewidth: int = None
-    tileheight: int = None
-    spacing: int = None
-    margin: int = None
-    tilecount: int = None
-    columns: int = None
-    objectalignment: str = None
+    firstgid: int
+    source: str
+    name: str
+    tilewidth: int
+    tileheight: int
+    spacing: int
+    margin: int
+    tilecount: int
+    columns: int
+    objectalignment: str
     # mason
+    orientation: str = None
     images: List = field(default_factory=list)
+    tiles: List = field(default_factory=list)
 
 
 @dataclass
@@ -118,8 +153,11 @@ class Object:
     width: float
     height: float
     rotation: float
-    tile: Tile
+    gid: int
     visible: bool
+    # mason
+    image: Image = None
+    shapes: list = field(default_factory=list)
 
 
 @dataclass
@@ -131,8 +169,9 @@ class Property:
 
 @dataclass
 class ImageLayer:
-    def __init__(self, name: str = None, visible: bool = None, image: Image = None):
-        pass
+    name: str
+    visible: bool
+    image: Image
 
 
 @dataclass
@@ -181,7 +220,9 @@ class Map:
         try:
             assert x >= 0 and y >= 0 and layer >= 0
         except (AssertionError, ValueError, TypeError):
-            raise ValueError(f"Tile coordinates and layers must be non-negative, were ({x}, {y}), layer={layer}")
+            raise ValueError(
+                f"Tile coordinates and layers must be non-negative, were ({x}, {y}), layer={layer}"
+            )
         try:
             layer = self.layers[layer]
         except IndexError:
@@ -279,7 +320,11 @@ class Map:
 
         :rtype: Iterator
         """
-        return (i for (i, l) in enumerate(self.layers) if l.visible and isinstance(l, TiledTileLayer))
+        return (
+            i
+            for (i, l) in enumerate(self.layers)
+            if l.visible and isinstance(l, TiledTileLayer)
+        )
 
     @property
     def visible_object_groups(self):
@@ -287,7 +332,11 @@ class Map:
 
         :rtype: Iterator
         """
-        return (i for (i, l) in enumerate(self.layers) if l.visible and isinstance(l, TiledObjectGroup))
+        return (
+            i
+            for (i, l) in enumerate(self.layers)
+            if l.visible and isinstance(l, TiledObjectGroup)
+        )
 
     @property
     def tile_layers(self):

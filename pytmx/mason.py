@@ -4,24 +4,27 @@ import struct
 import zlib
 from base64 import b64decode
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import product
-from typing import Any
+from typing import Any, Dict
 from xml.etree import ElementTree
 
 from pytmx.dc import (
-    Map,
-    Property,
-    Tileset,
-    Tile,
+    Circle,
     Group,
-    TileLayer,
-    ObjectGroup,
+    Image,
+    ImageLayer,
+    Map,
     Object,
+    ObjectGroup,
     Polygon,
     Polyline,
-    ImageLayer,
-    Image,
+    Property,
+    Tile,
+    TileLayer,
+    Tileset,
+    Text,
+    Point,
 )
 
 # internal flags
@@ -37,12 +40,17 @@ GID_TRANS_ROT = 1 << 29
 TileFlags = namedtuple("TileFlags", ["horizontal", "vertical", "diagonal"])
 
 
+class MasonException(Exception):
+    pass
+
+
 def decode_gid(raw_gid):
     """Decode a GID from TMX data"""
     flags = TileFlags(
         raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
         raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
-        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT)
+        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
+    )
     gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
     return gid, flags
 
@@ -67,7 +75,7 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
         elif compression:
             raise Exception(f"layer compression {compression} is not supported.")
         fmt = struct.Struct("<L")
-        iterator = (data[i: i + 4] for i in range(0, len(data), 4))
+        iterator = (data[i : i + 4] for i in range(0, len(data), 4))
         return [fmt.unpack(i)[0] for i in iterator]
     elif encoding == "csv":
         return [int(i) for i in text.split(",")]
@@ -77,14 +85,18 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
 
 def reshape_data(gids, width):
     """Change the shape of the data"""
-    return [gids[i:i + width] for i in range(0, len(gids), width)]
+    return [gids[i : i + width] for i in range(0, len(gids), width)]
 
 
 @dataclass
 class Context:
     map: Map = None
     path: str = None
+    folder: str = None
     image_loader: Any = None
+    invert_y: bool = None
+    tiles: Dict = field(default_factory=dict)
+    firstgid: int = 0
 
 
 @dataclass
@@ -127,6 +139,13 @@ def getdefault(d):
     return get
 
 
+@dataclass
+class Grid:
+    orientation: str
+    width: int
+    height: int
+
+
 def start(ctx, name, attrib, text):
     get = getdefault(attrib)
 
@@ -136,12 +155,28 @@ def start(ctx, name, attrib, text):
             compression=get("compression", None),
             text=text,
         )
+    elif name == "Ellipse":
+        return Circle()
+    elif name == "Grid":
+        return Grid(get("orientation"), get("width", int), get("height", int))
     elif name == "Group":
-        return Group(**attrib)
+        return Group(
+            name=get("name"),
+            opacity=get("opacity", float, 1.0),
+            visible=get("visible", bool, True),
+            tintcolor=get("tintcolor"),
+            offsetx=get("offsetx"),
+            offsety=get("offsety"),
+        )
     elif name == "Image":
-        return Image(source=get("source"), width=get("width", int), height=get("height", int), trans=get("trans"))
+        return Image(
+            source=get("source"),
+            width=get("width", int),
+            height=get("height", int),
+            trans=get("trans"),
+        )
     elif name == "Imagelayer":
-        return ImageLayer(name=get("name"), visible=get("visible"))
+        return ImageLayer(name=get("name"), visible=get("visible"), image=get("image"))
     elif name == "Layer":
         return TileLayer(
             name=get("name"),
@@ -171,15 +206,19 @@ def start(ctx, name, attrib, text):
             filename=ctx.path,
         )
     elif name == "Object":
+        y = get("y", float)
+        height = get("height", float)
+        if ctx.invert_y and height:
+            y -= height
         return Object(
             name=get("name"),
             type=get("type"),
             x=get("x", float),
-            y=get("y", float),
+            y=y,
             width=get("width", float),
-            height=get("height", float),
+            height=height,
             rotation=get("rotation", float),
-            tile=get("tile"),
+            gid=get("gid", int, 0),
             visible=get("visible", bool, True),
         )
     elif name == "Objectgroup":
@@ -193,8 +232,12 @@ def start(ctx, name, attrib, text):
             offsety=get("offsety", float),
             draworder=get("draworder"),
         )
+    elif name == "Point":
+        return Point(get("x", int), get("y", int))
     elif name == "Polygon":
-        return Polygon(points=get("points"))
+        text = get("points")
+        points = list(tuple(map(float, i.split(","))) for i in text.split())
+        return Polygon(points=points)
     elif name == "Polyline":
         return Polyline(points=get("points"))
     elif name == "Properties":
@@ -202,10 +245,38 @@ def start(ctx, name, attrib, text):
     elif name == "Property":
         return Property(attrib["name"], attrib.get("type", None), attrib["value"])
     elif name == "Tile":
-        return Tile(**attrib)
+        return Tile(
+            id=get("id", int, None),
+            gid=get("gid", int, None),
+            type=get("type"),
+            terrain=get("terrain"),
+        )
+    elif name == "Text":
+        return Text(
+            fontfamily=get("fontfamily"),
+            pixelsize=get("pixelsize"),
+            wrap=get("wrap"),
+            color=get("color"),
+            bold=get("bold"),
+            italic=get("italic"),
+            underline=get("underline"),
+            strikeout=get("strikeout"),
+            kerning=get("kerning"),
+            halign=get("halign"),
+            valign=get("valign"),
+        )
     elif name == "Tileset":
+        # load external tileset and return that object instead
+        source = get("source")
+        firstgid = get("firstgid", int)
+        if firstgid:
+            ctx.firstgid = firstgid
+        if source:
+            path = os.path.join(ctx.folder, source)
+            tileset = list(iter_tmx(ctx, path))[-1]
+            return tileset
         return Tileset(
-            firstgid=get("firstgid", int),
+            firstgid=get("firstgid", int, 0),
             source=get("source"),
             name=get("name"),
             tilewidth=get("tilewidth", int),
@@ -220,28 +291,29 @@ def start(ctx, name, attrib, text):
 
 
 def end(ctx, path, parent, child, stack):
-    if path == "Properties.Property":
-        parent.data[child.name] = child.value
+    if path == "Data.Tile":
+        raise MasonException(
+            "Map using XML Tile elements not supported.  Save file under a new format."
+        )
+    elif path == "Group.Layer":
+        parent.layers.append(child)
+    elif path == "Group.Objectgroup":
+        parent.layers.append(child)
     elif path == "Imagelayer.Image":
         parent.image = child
     elif path == "Layer.Data":
         parent.data = unpack_gids(child.text, child.encoding, child.compression)
+    elif path == "Layer.Properties":
+        parent.properties = child.data
     elif path == "Map":
-        tiles = {0: None}
-        for ts in child.tilesets:
-            assert len(ts.images) == 1
-            image = ts.images[0]
-            path = os.path.join(os.path.dirname(child.filename), image.source)
-            loader = ctx.image_loader(path, image.trans, tileset=ts)
-            p = iter_image_tiles(image.width, image.height, ts.tilewidth, ts.tileheight, ts.margin, ts.spacing)
-            for raw_gid, (y, x) in enumerate(p, ts.firstgid):
-                gid, flags = decode_gid(raw_gid)
-                rect = (x, y, ts.tilewidth, ts.tileheight)
-                tiles[gid] = Tile(gid=gid, image=loader(rect, flags))
         for tl in child.tile_layers:
-            data = [tiles[gid] for gid in tl.data]
+            data = [ctx.tiles[decode_gid(gid)[0]] for gid in tl.data]
             tl.data = reshape_data(data, child.width)
-        pass
+        # for o in child.objects:
+        #     if o.gid:
+        #         o.image = ctx.tiles[o.gid].image
+    elif path == "Map.Group":
+        parent.add_layer(child)
     elif path == "Map.Imagelayer":
         parent.add_layer(child)
     elif path == "Map.Layer":
@@ -252,22 +324,55 @@ def end(ctx, path, parent, child, stack):
         parent.properties = child.data
     elif path == "Map.Tileset":
         parent.add_tileset(child)
+    elif path == "Object.Ellipse":
+        parent.shapes.append(child)
+    elif path == "Object.Point":
+        parent.shapes.append(child)
     elif path == "Object.Properties":
         parent.properties = child.data
     elif path == "Object.Polygon":
-        parent.shape = child
+        parent.shapes.append(child)
     elif path == "Object.Polyline":
-        parent.shape = child
+        parent.shapes.append(child)
     elif path == "Objectgroup.Object":
         parent.objects.append(child)
+    elif path == "Object.Text":
+        parent.shapes.append(child)
+    elif path == "Properties.Property":
+        parent.data[child.name] = child.value
+    elif path == "Tileset.Grid":
+        parent.orientation = child.orientation
+        assert parent.orientation == "orthogonal"
     elif path == "Tileset.Image":
-        parent.images.append(child)
+        path = os.path.join(ctx.folder, child.source)
+        loader = ctx.image_loader(path, child.trans, tileset=parent)
+        p = iter_image_tiles(
+            child.width,
+            child.height,
+            parent.tilewidth,
+            parent.tileheight,
+            parent.margin,
+            parent.spacing,
+        )
+        for raw_gid, (y, x) in enumerate(p, parent.firstgid):
+            gid, flags = decode_gid(raw_gid)
+            rect = (x, y, parent.tilewidth, parent.tileheight)
+            ctx.tiles[gid] = Tile(gid=gid, image=loader(rect, flags))
     elif path == "Tileset.Properties":
         parent.properties = child.data
     elif path == "Tile.Properties":
         parent.properties = child.data
-    elif path == "Tileset.Tile":
+    elif path == "Tile.Image":
+        path = os.path.join(ctx.folder, child.source)
+        image = ctx.image_loader(path)()
+        parent.image = image
+    elif path == "Tileset":
         pass
+    elif path == "Tileset.Tile":
+        # external tilesets need firstgid from the context
+        if not parent.firstgid:
+            parent.firstgid = ctx.firstgid
+        ctx.tiles[parent.firstgid + child.id] = child
     else:
         raise ValueError(path)
 
@@ -278,10 +383,7 @@ def search(stack, type):
             return token.obj
 
 
-def iter_tmx(path, image_loader):
-    ctx = Context()
-    ctx.path = path
-    ctx.image_loader = image_loader
+def iter_tmx(ctx, path):
     stack = list()
     root = ElementTree.iterparse(path, events=("start", "end"))
     for event, element in root:
@@ -308,5 +410,12 @@ def iter_tmx(path, image_loader):
 
 
 def load_tmx(path, image_loader):
-    mason_map = list(iter_tmx(path, image_loader))[-1]
+    invert_y = True
+    ctx = Context()
+    ctx.path = path
+    ctx.folder = os.path.dirname(path)
+    ctx.image_loader = image_loader
+    ctx.invert_y = invert_y
+    ctx.tiles = {0: None}
+    mason_map = list(iter_tmx(ctx, path))[-1]
     return mason_map

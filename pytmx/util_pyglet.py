@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyglet
 except ImportError:
-    logger.error('cannot import pyglet (is it installed?)')
+    logger.error("cannot import pyglet (is it installed?)")
     raise
 
 import pytmx
@@ -44,7 +44,7 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
     This is slow as well.
     """
     if colorkey:
-        logger.debug('colorkey not implemented')
+        logger.debug("colorkey not implemented")
 
     image = pyglet.image.load(filename)
 
@@ -55,13 +55,13 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
                 y = image.height - y - h
                 tile = image.get_region(x, y, w, h)
             except:
-                logger.error('cannot get region %s of image', rect)
+                logger.error("cannot get region %s of image", rect)
                 raise
         else:
             tile = image
 
         if flags:
-            logger.error('tile flags are not implemented')
+            logger.error("tile flags are not implemented")
 
         return tile
 
@@ -69,6 +69,6 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
 
 
 def load_pyglet(filename, *args, **kwargs):
-    kwargs['image_loader'] = pyglet_image_loader
-    kwargs['invert_y'] = True
+    kwargs["image_loader"] = pyglet_image_loader
+    kwargs["invert_y"] = True
     return pytmx.TiledMap(filename, *args, **kwargs)

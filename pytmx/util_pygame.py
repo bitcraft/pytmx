@@ -30,7 +30,9 @@ def handle_transformation(tile: pygame.Surface, flags) -> pygame.Surface:
     return tile
 
 
-def smart_convert(surface: pygame.Surface, colorkey: str, pixelalpha: bool) -> pygame.Surface:
+def smart_convert(
+    surface: pygame.Surface, colorkey: str, pixelalpha: bool
+) -> pygame.Surface:
     """Return new surface optimized for blitting"""
     if colorkey:
         # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL should be used
@@ -46,7 +48,7 @@ def smart_convert(surface: pygame.Surface, colorkey: str, pixelalpha: bool) -> p
         return surface.convert()
 
 
-def pygame_image_loader(filename: str, colorkey: str, **kwargs):
+def pygame_image_loader(filename: str, colorkey: str = None, **kwargs):
     def load_image(rect=None, flags=None):
         if rect:
             tile = image.subsurface(rect)
@@ -56,8 +58,9 @@ def pygame_image_loader(filename: str, colorkey: str, **kwargs):
             tile = handle_transformation(tile, flags)
         return smart_convert(tile, colorkey, pixelalpha)
 
-    pixelalpha = kwargs.get('pixelalpha', True)
+    pixelalpha = kwargs.get("pixelalpha", True)
+    print(filename)
     image = pygame.image.load(filename)
     if colorkey:
-        colorkey = pygame.Color('#{0}'.format(colorkey))
+        colorkey = pygame.Color("#{0}".format(colorkey))
     return load_image
