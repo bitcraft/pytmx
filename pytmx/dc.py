@@ -23,18 +23,14 @@ class AnimationFrame:
     tile: Tile
     duration: int
 
-
+@dataclass
 class Tile:
-    def __init__(
-        self,
-        id: str = None,  # delet this
-        type: str = None,
-        terrain: str = None,
-        image: TileImageType = None,
-        properties: dict = None,
-        animation: Animation = None,
-    ):
-        pass
+    gid: str = None  # delet this
+    type: str = None
+    terrain: str = None
+    image: TileImageType = None
+    properties: dict = None
+    animation: Animation = None
 
 
 @dataclass

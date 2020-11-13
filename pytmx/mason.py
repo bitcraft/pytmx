@@ -68,19 +68,16 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
             raise Exception(f"layer compression {compression} is not supported.")
         fmt = struct.Struct("<L")
         iterator = (data[i: i + 4] for i in range(0, len(data), 4))
-        return (fmt.unpack(i)[0] for i in iterator)
+        return [fmt.unpack(i)[0] for i in iterator]
     elif encoding == "csv":
         return [int(i) for i in text.split(",")]
     elif encoding:
         raise Exception(f"layer encoding {encoding} is not supported.")
 
 
-def shape_data(gids, width, height):
+def reshape_data(gids, width):
     """Change the shape of the data"""
-    data = [[None] * width] * height
-    for (y, x) in product(range(height), range(width)):
-        data[y][x] = next(gids)
-    return data
+    return [gids[i:i + width] for i in range(0, len(gids), width)]
 
 
 @dataclass
@@ -240,11 +237,10 @@ def end(ctx, path, parent, child, stack):
             for raw_gid, (y, x) in enumerate(p, ts.firstgid):
                 gid, flags = decode_gid(raw_gid)
                 rect = (x, y, ts.tilewidth, ts.tileheight)
-                assert raw_gid not in tiles
-                tiles[raw_gid] = loader(rect, flags)
+                tiles[gid] = Tile(gid=gid, image=loader(rect, flags))
         for tl in child.tile_layers:
-            data = (tiles[gid] for gid in tl.data)
-            tl.data = shape_data(data, child.width, child.height)
+            data = [tiles[gid] for gid in tl.data]
+            tl.data = reshape_data(data, child.width)
         pass
     elif path == "Map.Imagelayer":
         parent.add_layer(child)
