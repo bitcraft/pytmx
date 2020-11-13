@@ -21,7 +21,7 @@ import pygame
 from pygame.locals import *
 
 from pytmx.dc import Map, TileLayer, ObjectGroup, ImageLayer
-from pytmx.mason import load_tmx
+from pytmx.mason import load_tmx, MasonException
 from util_pygame import pygame_image_loader
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ class TiledRenderer(object):
         tm = load_pygame(filename)
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
+        print(self.pixel_size)
 
     def render_map(self, surface):
         if self.tmx_data.background_color:
@@ -79,9 +80,13 @@ class TiledRenderer(object):
                 draw_lines(surface, poly_color, obj.closed, obj.points, 3)
             elif obj.image:
                 surface_blit(obj.image, (obj.x, obj.y))
+            elif obj.shapes:
+                for shape in obj.shapes:
+                    logger.info(shape)
             else:
-                draw_rect(surface, rect_color,
-                          (obj.x, obj.y, obj.width, obj.height), 3)
+                if obj.width and obj.height:
+                    draw_rect(surface, rect_color,
+                              (obj.x, obj.y, obj.width, obj.height), 3)
 
     def render_image_layer(self, surface, layer):
         if layer.image:
@@ -106,10 +111,10 @@ class SimpleTest(object):
         self.renderer = TiledRenderer(filename)
 
         logger.info("Objects in map:")
-        for obj in self.renderer.tmx_data.objects:
-            logger.info(obj)
-            for k, v in obj.properties.items():
-                logger.info("%s\t%s", k, v)
+        # for obj in self.renderer.tmx_data.objects:
+        #     logger.info(obj)
+        #     for k, v in obj.properties.items():
+        #         logger.info("%s\t%s", k, v)
 
         # logger.info("GID (tile) properties:")
         # for tile, properties in self.renderer.tmx_data.tile_properties():
@@ -177,7 +182,7 @@ def main():
 
     pygame.init()
     pygame.font.init()
-    screen = init_screen(600, 600)
+    screen = init_screen(800, 600)
     pygame.display.set_caption('PyTMX Map Viewer')
     logging.basicConfig(level=logging.DEBUG)
 
@@ -187,8 +192,11 @@ def main():
     try:
         for filename in glob.glob(os.path.join("apps", 'data', '*.tmx')):
             logger.info("Testing %s", filename)
-            if not SimpleTest(filename).run():
-                break
+            try:
+                if not SimpleTest(filename).run():
+                    break
+            except MasonException:
+                pass
     except:
         pygame.quit()
         raise
