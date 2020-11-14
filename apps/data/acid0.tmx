@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="38">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#55aaff" nextlayerid="15" nextobjectid="38">
  <tileset firstgid="1" name="acid0" tilewidth="16" tileheight="16" tilecount="4" columns="2">
   <image source="acid0.png" width="32" height="32"/>
  </tileset>
@@ -21,16 +21,16 @@
  <tileset firstgid="10" source="acid.tsx"/>
  <layer id="1" name="Tile Layer 1" width="10" height="10">
   <data encoding="csv">
-1,1,1,1,1,1,1,1,8,8,
-8,8,8,8,8,8,8,8,8,8,
-8,8,8,8,8,8,8,8,8,8,
-8,8,7,7,7,7,7,7,7,7,
-8,8,8,8,8,8,8,8,8,8,
-8,8,8,8,8,8,8,8,8,8,
-8,8,8,8,8,8,8,8,8,8,
-8,8,8,8,8,8,8,8,8,8,
-8,8,8,8,8,8,8,8,8,8,
-10,8,8,8,8,8,8,8,8,8
+1,1,1,1,1,1,1,1,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,7,7,7,7,7,7,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+10,8,8,8,8,8,8,8,0,0
 </data>
  </layer>
  <layer id="2" name="Tile Layer 2" width="10" height="10">
@@ -66,8 +66,8 @@
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
 0,0,1,0,0,0,0,0,0,0,
 0,0,1,0,0,0,0,0,0,0,
 0,0,1,0,0,0,0,0,0,0,

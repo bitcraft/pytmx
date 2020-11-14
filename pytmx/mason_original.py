@@ -305,12 +305,7 @@ class ChunkToken(Token):
 class DataToken(Token):
     attributes = (
         Attr("encoding", str, None, "base64, csv, None"),
-        Attr(
-            "compression",
-            str,
-            None,
-            "gzip, zip, None",
-        ),
+        Attr("compression", str, None, "gzip, zip, None",),
     )
 
     def __init__(self):

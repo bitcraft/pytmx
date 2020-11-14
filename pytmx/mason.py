@@ -1,3 +1,4 @@
+import dataclasses
 import gzip
 import os
 import struct
@@ -26,6 +27,7 @@ from pytmx.dc import (
     Text,
     Point,
 )
+from pytmx.util_pygame import smart_convert, handle_transformation
 
 # internal flags
 TRANS_FLIPX = 1
@@ -42,50 +44,6 @@ TileFlags = namedtuple("TileFlags", ["horizontal", "vertical", "diagonal"])
 
 class MasonException(Exception):
     pass
-
-
-def decode_gid(raw_gid):
-    """Decode a GID from TMX data"""
-    flags = TileFlags(
-        raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
-        raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
-        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
-    )
-    gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
-    return gid, flags
-
-
-def default_image_loader(filename, flags, **kwargs):
-    """This default image loader just returns filename, rect, and any flags"""
-
-    def load(rect=None, flags=None):
-        return filename, rect, flags
-
-    return load
-
-
-def unpack_gids(text: str, encoding: str = None, compression: str = None):
-    """Return iterator of all gids from encoded/compressed layer data"""
-    if encoding == "base64":
-        data = b64decode(text)
-        if compression == "gzip":
-            data = gzip.decompress(data)
-        elif compression == "zlib":
-            data = zlib.decompress(data)
-        elif compression:
-            raise Exception(f"layer compression {compression} is not supported.")
-        fmt = struct.Struct("<L")
-        iterator = (data[i : i + 4] for i in range(0, len(data), 4))
-        return [fmt.unpack(i)[0] for i in iterator]
-    elif encoding == "csv":
-        return [int(i) for i in text.split(",")]
-    elif encoding:
-        raise Exception(f"layer encoding {encoding} is not supported.")
-
-
-def reshape_data(gids, width):
-    """Change the shape of the data"""
-    return [gids[i : i + width] for i in range(0, len(gids), width)]
 
 
 @dataclass
@@ -119,7 +77,65 @@ class Data:
     text: str
 
 
+@dataclass
+class Grid:
+    orientation: str
+    width: int
+    height: int
+
+
+@dataclass
+class TilesetTile:
+    gid: int
+    image: Any
+
+
+def decode_gid(raw_gid):
+    """Decode a GID from TMX data"""
+    flags = TileFlags(
+        raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
+        raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
+        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
+    )
+    gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
+    return gid, flags
+
+
+def default_image_loader(filename, flags, **kwargs):
+    """This default image loader just returns filename, rect, and any flags"""
+
+    def load(rect=None, flags=None):
+        return filename, rect, flags
+
+    return load
+
+
+def unpack_gids(text: str, encoding: str = None, compression: str = None):
+    """Return all gids from encoded/compressed layer data"""
+    if encoding == "base64":
+        data = b64decode(text)
+        if compression == "gzip":
+            data = gzip.decompress(data)
+        elif compression == "zlib":
+            data = zlib.decompress(data)
+        elif compression:
+            raise MasonException(f"layer compression {compression} is not supported.")
+        fmt = struct.Struct("<L")
+        iterator = (data[i : i + 4] for i in range(0, len(data), 4))
+        return [fmt.unpack(i)[0] for i in iterator]
+    elif encoding == "csv":
+        return [int(i) for i in text.split(",")]
+    elif encoding:
+        raise MasonException(f"layer encoding {encoding} is not supported.")
+
+
+def reshape_data(gids, width):
+    """Change the shape of the data"""
+    return [gids[i : i + width] for i in range(0, len(gids), width)]
+
+
 def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
+    """Iterate tiles in the image"""
     return product(
         range(margin, height + margin - tileheight + 1, tileheight + spacing),
         range(margin, width + margin - tilewidth + 1, tilewidth + spacing),
@@ -127,6 +143,8 @@ def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
 
 
 def getdefault(d):
+    """Return dictionary key as optional type, with a default"""
+
     def get(key, type=None, default=None):
         try:
             value = d[key]
@@ -139,16 +157,8 @@ def getdefault(d):
     return get
 
 
-@dataclass
-class Grid:
-    orientation: str
-    width: int
-    height: int
-
-
 def start(ctx, name, attrib, text):
     get = getdefault(attrib)
-
     if name == "Data":
         return Data(
             encoding=get("encoding", None),
@@ -176,7 +186,9 @@ def start(ctx, name, attrib, text):
             trans=get("trans"),
         )
     elif name == "Imagelayer":
-        return ImageLayer(name=get("name"), visible=get("visible"), image=get("image"))
+        return ImageLayer(
+            name=get("name"), visible=get("visible", bool, True), image=get("image")
+        )
     elif name == "Layer":
         return TileLayer(
             name=get("name"),
@@ -190,7 +202,6 @@ def start(ctx, name, attrib, text):
     elif name == "Map":
         return Map(
             version=get("version"),
-            tiledversion=get("tiledversion"),
             orientation=get("orientation"),
             renderorder=get("renderorder"),
             compressionlevel=get("compressionlevel"),
@@ -208,8 +219,6 @@ def start(ctx, name, attrib, text):
     elif name == "Object":
         y = get("y", float)
         height = get("height", float)
-        if ctx.invert_y and height:
-            y -= height
         return Object(
             name=get("name"),
             type=get("type"),
@@ -266,14 +275,13 @@ def start(ctx, name, attrib, text):
             valign=get("valign"),
         )
     elif name == "Tileset":
-        # load external tileset and return that object instead
         source = get("source")
         firstgid = get("firstgid", int)
         if firstgid:
             ctx.firstgid = firstgid
         if source:
             path = os.path.join(ctx.folder, source)
-            tileset = list(iter_tmx(ctx, path))[-1]
+            tileset = parse_tmxdata(ctx, path)
             return tileset
         return Tileset(
             firstgid=get("firstgid", int, 0),
@@ -293,25 +301,38 @@ def start(ctx, name, attrib, text):
 def end(ctx, path, parent, child, stack):
     if path == "Data.Tile":
         raise MasonException(
-            "Map using XML Tile elements not supported.  Save file under a new format."
+            "Map using XML Tile elements not supported.  Save file under a newer format."
         )
     elif path == "Group.Layer":
         parent.layers.append(child)
     elif path == "Group.Objectgroup":
         parent.layers.append(child)
     elif path == "Imagelayer.Image":
-        parent.image = child
+        path = os.path.join(ctx.folder, child.source)
+        image = ctx.image_loader(path)()
+        parent.image = image
     elif path == "Layer.Data":
-        parent.data = unpack_gids(child.text, child.encoding, child.compression)
+        data = list()
+        for raw_gid in unpack_gids(child.text, child.encoding, child.compression):
+            if raw_gid:
+                gid, flags = decode_gid(raw_gid)
+                tile = ctx.tiles[gid]
+                if gid != raw_gid:
+                    # TODO: get the colorkey/pixelapha from the tileset
+                    image = smart_convert(
+                        handle_transformation(tile.image, flags), None, True
+                    )
+                    tile = dataclasses.replace(tile, image=image)
+                    ctx.tiles[raw_gid] = tile
+                data.append(tile)
+            else:
+                data.append(None)
+        map = search(stack, "Map")
+        parent.data = reshape_data(data, map.width)
     elif path == "Layer.Properties":
         parent.properties = child.data
     elif path == "Map":
-        for tl in child.tile_layers:
-            data = [ctx.tiles[decode_gid(gid)[0]] for gid in tl.data]
-            tl.data = reshape_data(data, child.width)
-        # for o in child.objects:
-        #     if o.gid:
-        #         o.image = ctx.tiles[o.gid].image
+        pass
     elif path == "Map.Group":
         parent.add_layer(child)
     elif path == "Map.Imagelayer":
@@ -323,7 +344,7 @@ def end(ctx, path, parent, child, stack):
     elif path == "Map.Properties":
         parent.properties = child.data
     elif path == "Map.Tileset":
-        parent.add_tileset(child)
+        pass
     elif path == "Object.Ellipse":
         parent.shapes.append(child)
     elif path == "Object.Point":
@@ -335,6 +356,8 @@ def end(ctx, path, parent, child, stack):
     elif path == "Object.Polyline":
         parent.shapes.append(child)
     elif path == "Objectgroup.Object":
+        if child.gid:
+            child.image = ctx.tiles[child.gid].image
         parent.objects.append(child)
     elif path == "Object.Text":
         parent.shapes.append(child)
@@ -354,10 +377,9 @@ def end(ctx, path, parent, child, stack):
             parent.margin,
             parent.spacing,
         )
-        for raw_gid, (y, x) in enumerate(p, parent.firstgid):
-            gid, flags = decode_gid(raw_gid)
+        for gid, (y, x) in enumerate(p, parent.firstgid):
             rect = (x, y, parent.tilewidth, parent.tileheight)
-            ctx.tiles[gid] = Tile(gid=gid, image=loader(rect, flags))
+            ctx.tiles[gid] = Tile(gid=gid, image=loader(rect, None))
     elif path == "Tileset.Properties":
         parent.properties = child.data
     elif path == "Tile.Properties":
@@ -369,7 +391,6 @@ def end(ctx, path, parent, child, stack):
     elif path == "Tileset":
         pass
     elif path == "Tileset.Tile":
-        # external tilesets need firstgid from the context
         if not parent.firstgid:
             parent.firstgid = ctx.firstgid
         ctx.tiles[parent.firstgid + child.id] = child
@@ -383,7 +404,7 @@ def search(stack, type):
             return token.obj
 
 
-def iter_tmx(ctx, path):
+def parse_tmxdata(ctx, path):
     stack = list()
     root = ElementTree.iterparse(path, events=("start", "end"))
     for event, element in root:
@@ -404,18 +425,16 @@ def iter_tmx(ctx, path):
             else:
                 end(ctx, t.type, None, t.obj, stack)
             element.clear()
-            yield t.obj
-        else:
-            raise Exception
+    return t.obj
 
 
-def load_tmx(path, image_loader):
-    invert_y = True
+def load_tmxmap(path, image_loader):
+    invert_y = False
     ctx = Context()
     ctx.path = path
     ctx.folder = os.path.dirname(path)
     ctx.image_loader = image_loader
     ctx.invert_y = invert_y
     ctx.tiles = {0: None}
-    mason_map = list(iter_tmx(ctx, path))[-1]
+    mason_map = parse_tmxdata(ctx, path)
     return mason_map

@@ -1,34 +1,24 @@
 """
-This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2017
-
-Rendering demo for the TMXLoader.
-
-Typically this is run to verify that any code changes do do break the loader.
-Tests all Tiled features -except- terrains and object rotation.
-
-If you are not familiar with python classes, you might want to check the
-'tutorial' app.
-
-Missing interactive_tests:
-- object rotation
-- terrains
+Leif Theden "bitcraft", 2012-2020
 """
 
 import logging
+from math import sin, cos
+from math import radians
 
 import pygame
+from pygame import math
 from pygame.locals import *
 
 from pytmx.dc import Map, TileLayer, ObjectGroup, ImageLayer
-from pytmx.mason import load_tmx, MasonException
+from pytmx.mason import load_tmxmap, MasonException
 from util_pygame import pygame_image_loader
 
 logger = logging.getLogger(__name__)
 
 
 def load_pygame(path) -> Map:
-    map = load_tmx(path, pygame_image_loader)
+    map = load_tmxmap(path, pygame_image_loader)
     return map
 
 
@@ -48,13 +38,14 @@ class TiledRenderer(object):
         tm = load_pygame(filename)
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
-        print(self.pixel_size)
+        self.count = 0
 
     def render_map(self, surface):
+        self.count += 1
         if self.tmx_data.background_color:
             surface.fill(pygame.Color(self.tmx_data.background_color))
         for layer in self.tmx_data.visible_layers:
-            if type(layer) == TileLayer:
+            if isinstance(layer, TileLayer):
                 self.render_tile_layer(surface, layer)
             elif isinstance(layer, ObjectGroup):
                 self.render_object_layer(surface, layer)
@@ -66,27 +57,55 @@ class TiledRenderer(object):
         th = self.tmx_data.tileheight
         surface_blit = surface.blit
         for x, y, tile in layer.tiles():
-            surface_blit(tile.image, (x * tw, y * th))
+            x = x * tw
+            y = y * th - tile.image.get_height() + self.tmx_data.tileheight
+            surface_blit(tile.image, (x, y))
+
+    @staticmethod
+    def rotate(points, origin, angle):
+        sinT = sin(radians(angle))
+        cosT = cos(radians(angle))
+        new_points = list()
+        # clockwise, per tmx spec
+        for point in points:
+            p = (origin.x + (cosT * (point.x - origin.x) - sinT * (point.y - origin.y)),
+                 origin.y + (sinT * (point.x - origin.x) + cosT * (point.y - origin.y)))
+            new_points.append(p)
+        return new_points
 
     def render_object_layer(self, surface, layer):
         draw_rect = pygame.draw.rect
         draw_lines = pygame.draw.lines
         surface_blit = surface.blit
-        rect_color = (255, 0, 0)
-        poly_color = (0, 255, 0)
+        rect_color = (128, 128, 128)
+        poly_color = (128, 128, 128)
         for obj in layer:
             logger.info(obj)
-            if hasattr(obj, 'points'):
-                draw_lines(surface, poly_color, obj.closed, obj.points, 3)
-            elif obj.image:
-                surface_blit(obj.image, (obj.x, obj.y))
-            elif obj.shapes:
-                for shape in obj.shapes:
-                    logger.info(shape)
-            else:
-                if obj.width and obj.height:
-                    draw_rect(surface, rect_color,
-                              (obj.x, obj.y, obj.width, obj.height), 3)
+            # if hasattr(obj, 'points'):
+            #     draw_lines(surface, poly_color, obj.closed, obj.points, 3)
+            # tiled will invert the y axis if there is an image
+            if obj.image:
+                if obj.rotation:
+                    r = obj.rotation
+                    # r = (self.count / 2) + obj.rotation
+                    print(obj, obj.as_points)
+                    print(self.rotate(obj.as_points, obj, r))
+                    points = self.rotate(obj.as_points, obj, r)
+                    # clockwise -> counterclockwise
+                    image = pygame.transform.rotate(obj.image, 360 - r)
+                    position = sorted(points)[0]
+                    surface_blit(image, (position[0], position[1]))
+                else:
+                    image = obj.image
+                    position = obj.x, obj.y - obj.height
+                    surface_blit(image, position)
+            # elif obj.shapes:
+            #     for shape in obj.shapes:
+            #         logger.info(shape)
+            # else:
+            #     points = obj.points
+            #     if len(points) > 1:
+            #         draw_lines(surface, poly_color, True, obj.points, 1)
 
     def render_image_layer(self, surface, layer):
         if layer.image:
@@ -125,55 +144,45 @@ class SimpleTest(object):
         """
         temp = pygame.Surface(self.renderer.pixel_size)
         self.renderer.render_map(temp)
-        pygame.transform.smoothscale(temp, surface.get_size(), surface)
+        pygame.transform.scale(temp, surface.get_size(), surface)
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
         i = f.render('press any key for next map or ESC to quit',
                      1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self):
-        try:
-            event = pygame.event.wait()
-
+        for event in pygame.event.get():
             if event.type == QUIT:
                 self.exit_status = 0
                 self.running = False
-
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     self.exit_status = 0
                     self.running = False
                 else:
                     self.running = False
-
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
                 self.dirty = True
-
-        except KeyboardInterrupt:
-            self.exit_status = 0
-            self.running = False
 
     def run(self):
         """ This is our app main loop
         """
         self.dirty = True
         self.running = True
-        self.exit_status = 1
+        clock = pygame.time.Clock()
 
         while self.running:
             self.handle_input()
-
-            # we don't want to constantly draw on the display, as that is way
-            # inefficient.  so, this 'dirty' values is used.  If dirty is True,
-            # then re-render the map, display it, then mark 'dirty' False.
-            if self.dirty:
-                self.draw(screen)
-                self.dirty = False
-                pygame.display.flip()
+            self.draw(screen)
+            pygame.display.flip()
+            clock.tick(165)
 
         return self.exit_status
+
+
 screen = None
+
 
 def main():
     import os.path
@@ -182,7 +191,7 @@ def main():
 
     pygame.init()
     pygame.font.init()
-    screen = init_screen(800, 600)
+    screen = init_screen(800, 800)
     pygame.display.set_caption('PyTMX Map Viewer')
     logging.basicConfig(level=logging.DEBUG)
 
@@ -203,6 +212,7 @@ def main():
 
 
 import unittest
+
 
 class Test(unittest.TestCase):
     def test_main(self):

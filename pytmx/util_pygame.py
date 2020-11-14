@@ -59,7 +59,6 @@ def pygame_image_loader(filename: str, colorkey: str = None, **kwargs):
         return smart_convert(tile, colorkey, pixelalpha)
 
     pixelalpha = kwargs.get("pixelalpha", True)
-    print(filename)
     image = pygame.image.load(filename)
     if colorkey:
         colorkey = pygame.Color("#{0}".format(colorkey))

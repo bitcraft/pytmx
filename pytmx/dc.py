@@ -53,12 +53,13 @@ class Circle:
 
 @dataclass
 class Tile:
+    gid: int
     id: int = None
-    gid: str = None
     type: str = None
     terrain: str = None
+    # mason
     image: TileImageType = None
-    properties: dict = None
+    properties: dict = field(default_factory=dict)
     animation: Animation = None
 
 
@@ -159,6 +160,38 @@ class Object:
     image: Image = None
     shapes: list = field(default_factory=list)
 
+    @property
+    def as_points(self):
+        return [
+            Point(*i)
+            for i in [
+                (self.x, self.y),
+                (self.x, self.y - self.height),
+                (self.x + self.width, self.y - self.height),
+                (self.x + self.width, self.y),
+            ]
+        ]
+
+    @property
+    def points(self):
+        if self.width and self.height:
+            if self.image:
+                return [
+                    (self.x, self.y - self.height),
+                    (self.x + self.width, self.y - self.height),
+                    (self.x + self.width, self.y),
+                    (self.x, self.y),
+                ]
+            else:
+                return [
+                    (self.x, self.y),
+                    (self.x + self.width, self.y),
+                    (self.x + self.width, self.y + self.height),
+                    (self.x, self.y + self.height),
+                ]
+        else:
+            return [(self.x, self.y)]
+
 
 @dataclass
 class Property:
@@ -177,22 +210,19 @@ class ImageLayer:
 @dataclass
 class Map:
     # defaults from the spec
-    version: str = None
-    tiledversion: str = None
-    orientation: str = None
-    renderorder: str = None
-    compressionlevel: str = None
-    width: int = None
-    height: int = None
-    tilewidth: int = None
-    tileheight: int = None
-    hexsidelength: str = None
-    staggeraxis: str = None
-    staggerindex: str = None
-    background_color: str = None
-    nextlayerid: str = None
-    nextobjectid: str = None
-    infinite: str = None
+    version: str
+    orientation: str
+    renderorder: str
+    compressionlevel: str
+    width: int
+    height: int
+    tilewidth: int
+    tileheight: int
+    hexsidelength: int
+    staggeraxis: str
+    staggerindex: str
+    background_color: str
+    infinite: bool
     # mason
     filename: str = None
     layers: List = field(default_factory=list)
@@ -245,12 +275,6 @@ class Map:
         """Add a layer"""
         self.layers.append(layer)
 
-    def add_tileset(self, tileset: Tileset):
-        """Add a tileset to the map"""
-        assert isinstance(tileset, Tileset)
-        # sort
-        self.tilesets.append(tileset)
-
     def get_layer_by_name(self, name):
         """Return a layer by name
 
@@ -272,23 +296,6 @@ class Map:
             if obj.name == name:
                 return obj
         raise ValueError(f'Object "{name}" not found')
-
-    def get_tileset_from_gid(self, gid: int) -> Tileset:
-        """Return tileset that owns the gid
-
-        Note: this is a slow operation, so if you are expecting to do this
-              often, it would be worthwhile to cache the results of this.
-        """
-        try:
-            tiled_gid = self.tiledgidmap[gid]
-        except KeyError:
-            raise ValueError("Tile GID not found")
-
-        for tileset in sorted(self.tilesets, key=attrgetter("firstgid"), reverse=True):
-            if tiled_gid >= tileset.firstgid:
-                return tileset
-
-        raise ValueError("Tileset not found")
 
     @property
     def objectgroups(self):
@@ -314,17 +321,12 @@ class Map:
         """
         return (l for l in self.layers if l.visible)
 
-    @property
-    def visible_tile_layers(self):
-        """Return iterator of layer indexes that are set 'visible'
-
-        :rtype: Iterator
-        """
-        return (
-            i
-            for (i, l) in enumerate(self.layers)
-            if l.visible and isinstance(l, TiledTileLayer)
-        )
+    def tile_layers(self, include_invisible=False):
+        layers = (layer for layer in self.layers if isinstance(layer, TileLayer))
+        if include_invisible:
+            return layers
+        else:
+            return (layer for layer in layers if layer.visible)
 
     @property
     def visible_object_groups(self):
@@ -337,10 +339,6 @@ class Map:
             for (i, l) in enumerate(self.layers)
             if l.visible and isinstance(l, TiledObjectGroup)
         )
-
-    @property
-    def tile_layers(self):
-        return (i for i in self.layers if isinstance(i, TileLayer))
 
     def tile_properties(self):
         for layer in self.tile_layers:
