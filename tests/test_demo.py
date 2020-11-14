@@ -58,7 +58,7 @@ class TiledRenderer(object):
         surface_blit = surface.blit
         for x, y, tile in layer.tiles():
             x = x * tw
-            y = y * th - tile.image.get_height() + self.tmx_data.tileheight
+            y = y * th + tile.offsety
             surface_blit(tile.image, (x, y))
 
     @staticmethod

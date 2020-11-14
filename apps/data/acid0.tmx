@@ -16,6 +16,10 @@
   </tile>
   <tile id="2">
    <image width="16" height="16" source="acid8.png"/>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="8" width="15.7895" height="8"/>
+    <object id="2" x="8" y="0" width="8" height="8"/>
+   </objectgroup>
   </tile>
  </tileset>
  <tileset firstgid="10" source="acid.tsx"/>

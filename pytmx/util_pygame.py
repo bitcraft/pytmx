@@ -48,7 +48,7 @@ def smart_convert(
         return surface.convert()
 
 
-def pygame_image_loader(filename: str, colorkey: str = None, **kwargs):
+def pygame_image_loader(filename: str, colorkey: str = None, pixelalpha=True):
     def load_image(rect=None, flags=None):
         if rect:
             tile = image.subsurface(rect)
@@ -58,7 +58,7 @@ def pygame_image_loader(filename: str, colorkey: str = None, **kwargs):
             tile = handle_transformation(tile, flags)
         return smart_convert(tile, colorkey, pixelalpha)
 
-    pixelalpha = kwargs.get("pixelalpha", True)
+    # TODO: turn off pixel alpha if source image doesn't have alpha channel
     image = pygame.image.load(filename)
     if colorkey:
         colorkey = pygame.Color("#{0}".format(colorkey))

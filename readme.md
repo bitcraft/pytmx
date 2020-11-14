@@ -352,7 +352,7 @@ pygame_surface = tile_map.get_tile_image(x, y, layer)
 image = obj.image
 
 # get image using gid (not needed for normal use!)
-gid = layer.data[y][x]
+gid = layer.value[y][x]
 image = tiled_map.images[gid]
 ```
 
