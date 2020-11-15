@@ -1,11 +1,26 @@
+"""
+Copyright (C) 2012-2020, Leif Theden <leif.theden@gmail.com>
+
+This file is part of pytmx.
+
+pytmx is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+pytmx is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+"""
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from itertools import chain
 from typing import Union, Iterator, List, Dict
-
-logger = logging.getLogger(__file__)
 
 TileImageType = Union[None, str]
 
@@ -21,6 +36,7 @@ class Tile:
     properties: dict = field(default_factory=dict)
     animation: Animation = None
     offsety: int = 0
+    collider_group: ObjectGroup = None
 
     def calc_blit_offset(self, tileheight):
         self.offsety = tileheight - self.image.get_height()
@@ -36,11 +52,20 @@ class TileLayer:
     offsety: int
     data: list
 
+    def __iter__(self):
+        yield from self.tiles()
+
     def tiles(self):
         for y, row in enumerate(self.data):
             for x, tile in enumerate(row):
                 if tile:
                     yield x, y, tile
+
+    def get_tile(self, x, y):
+        try:
+            return self.data[y][x]
+        except IndexError:
+            raise ValueError(f"Tile coordinates ({x},{y} are invalid")
 
 
 @dataclass
@@ -64,6 +89,10 @@ class Map:
     properties: Dict = field(default_factory=dict)
     tiles: Dict = field(default_factory=dict)
 
+    def __iter__(self):
+        for layer in self.layers:
+            yield from layer
+
     def get_layer_by_name(self, name):
         """Return a layer by name"""
         for layer in self.layers:
@@ -84,7 +113,7 @@ class Map:
             assert x >= 0 and y >= 0 and layer >= 0
         except (AssertionError, ValueError, TypeError):
             raise ValueError(
-                f"Tile coordinates and layers must be non-negative, were ({x}, {y}), layer={layer}"
+                f"Tile coordinates must be non-negative, were ({x}, {y}), layer={layer}"
             )
         try:
             layer = self.layers[layer]
@@ -104,28 +133,24 @@ class Map:
         except IndexError:
             raise ValueError(f"GID not found: {gid}")
 
-    def get_tile_locations_by_gid(self, gid: int) -> Iterator[MapCoordinates]:
-        """Search map for tile locations by the GID
+    def get_tile_locations_by_tile(self, tile: Tile) -> Iterator[MapCoordinates]:
+        """Search map for tile locations by the tile
 
         Note: Not a fast operation.  Cache results if used often.
         """
         for l in self.tile_layers():
-            for x, y, _gid in [i for i in self.layers[l].iter_data() if i[2] == gid]:
-                yield MapCoordinates(x, y, l)
+            for x, y, _tile in [t for t in l.tiles() if t == tile]:
+                yield MapCoordinates(x, y, _tile)
 
     @property
     def objectgroups(self):
         """Return iterator of all object groups
-
-        :rtype: Iterator
         """
         return (layer for layer in self.layers if isinstance(layer, ObjectGroup))
 
     @property
     def objects(self):
         """Return iterator of all the objects associated with this map
-
-        :rtype: Iterator
         """
         return chain(*self.objectgroups)
 
@@ -138,29 +163,27 @@ class Map:
         return (l for l in self.layers if l.visible)
 
     def tile_layers(self, include_invisible=False):
+        """Return iterator of layers"""
         layers = (layer for layer in self.layers if isinstance(layer, TileLayer))
         if include_invisible:
             return layers
         else:
             return (layer for layer in layers if layer.visible)
 
-    @property
-    def visible_object_groups(self):
-        """Return iterator of object group indexes that are set 'visible'
-
-        :rtype: Iterator
-        """
-        return (
-            i
-            for (i, l) in enumerate(self.layers)
-            if l.visible and isinstance(l, TiledObjectGroup)
-        )
+    def object_groups(self, include_invisible=False):
+        """Return iterator of object groups"""
+        layers = (layer for layer in self.layers if isinstance(layer, TileLayer))
+        if include_invisible:
+            return layers
+        else:
+            return (layer for layer in layers if layer.visible)
 
     def tile_properties(self):
-        for layer in self.tile_layers:
-            for tile in layer.tiles:
-                if tile.properties:
-                    yield tile, tile.properties
+        """Return iterator of tiles which have properties assigned to them"""
+        for tile in self.tiles:
+            if tile.properties:
+                yield tile
+
 
 @dataclass
 class MapCoordinates:
@@ -229,7 +252,7 @@ class ObjectGroup:
     objects: List = field(default_factory=list)
 
     def __iter__(self):
-        return iter(self.objects)
+        yield from self.objects
 
 
 @dataclass
@@ -242,6 +265,10 @@ class Group:
     offsety: int
     # mason
     layers: List = field(default_factory=list)
+
+    def __iter__(self):
+        for layer in self.layers:
+            yield from layer
 
 
 @dataclass
@@ -259,7 +286,6 @@ class Tileset:
     # mason
     orientation: str = None
     images: List = field(default_factory=list)
-    tiles: List = field(default_factory=list)
 
 
 @dataclass
@@ -332,3 +358,6 @@ class ImageLayer:
     name: str
     visible: bool
     image: Image
+
+    def __iter__(self):
+        yield self.image

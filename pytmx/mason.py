@@ -1,11 +1,28 @@
-import dataclasses
+"""
+Copyright (C) 2012-2020, Leif Theden <leif.theden@gmail.com>
+
+This file is part of pytmx.
+
+pytmx is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+pytmx is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import gzip
 import os
 import struct
 import zlib
 from base64 import b64decode
 from collections import namedtuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from itertools import product
 from typing import Any, Dict
 from xml.etree import ElementTree
@@ -18,16 +35,15 @@ from pytmx.dc import (
     Map,
     Object,
     ObjectGroup,
+    Point,
     Polygon,
     Polyline,
     Property,
+    Text,
     Tile,
     TileLayer,
     Tileset,
-    Text,
-    Point,
 )
-from pytmx.util_pygame import smart_convert, handle_transformation
 
 # Tiled gid flags
 GID_TRANS_FLIPX = 1 << 31
@@ -50,6 +66,7 @@ class Context:
     invert_y: bool = None
     tiles: Dict = field(default_factory=dict)
     firstgid: int = 0
+    loaders: Dict = field(default_factory=dict)
 
 
 @dataclass
@@ -119,7 +136,7 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
 
 
 def reshape_data(gids, width):
-    """Change the shape of the data"""
+    """Change 1d list to 2d list"""
     return [gids[i: i + width] for i in range(0, len(gids), width)]
 
 
@@ -129,6 +146,11 @@ def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
         range(margin, height + margin - tileheight + 1, tileheight + spacing),
         range(margin, width + margin - tilewidth + 1, tilewidth + spacing),
     )
+
+
+def parse_points(text):
+    """Return list of tuples representing points"""
+    return list(tuple(map(float, i.split(","))) for i in text.split())
 
 
 # object creation
@@ -149,34 +171,30 @@ def getdefault(d):
     return get
 
 
-def new_data(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_data(ctx, stack, get, text):
     return Data(get("encoding"), get("compression"), text=text)
 
 
-def new_ellipse(ctx, stack, attrib, text):
+def new_ellipse(ctx, stack, get, text):
     return Circle()
 
 
-def new_grid(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_grid(ctx, stack, get, text):
     return Grid(get("orientation"), get("width", int), get("height", int))
 
 
-def new_group(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_group(ctx, stack, get, text):
     return Group(
         name=get("name"),
         opacity=get("opacity", float, 1.0),
         visible=get("visible", bool, True),
         tintcolor=get("tintcolor"),
-        offsetx=get("offsetx"),
-        offsety=get("offsety"),
+        offsetx=get("offsetx", int),
+        offsety=get("offsety", int),
     )
 
 
-def new_image(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_image(ctx, stack, get, text):
     return Image(
         source=get("source"),
         width=get("width", int),
@@ -185,26 +203,23 @@ def new_image(ctx, stack, attrib, text):
     )
 
 
-def new_imagelayer(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_imagelayer(ctx, stack, get, text):
     return ImageLayer(get("name"), get("visible", bool, True), get("image"))
 
 
-def new_tile_layer(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_tile_layer(ctx, stack, get, text):
     return TileLayer(
         name=get("name"),
         opacity=get("opacity", float, 1.0),
         visible=get("visible", bool, True),
         tintcolor=get("tintcolor"),
-        offsetx=get("offsetx"),
-        offsety=get("offsety"),
+        offsetx=get("offsetx", float),
+        offsety=get("offsety", float),
         data=get("data"),
     )
 
 
-def new_map(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_map(ctx, stack, get, text):
     return Map(
         version=get("version"),
         orientation=get("orientation"),
@@ -223,25 +238,21 @@ def new_map(ctx, stack, attrib, text):
     )
 
 
-def new_object(ctx, stack, attrib, text):
-    get = getdefault(attrib)
-    y = get("y", float)
-    height = get("height", float)
+def new_object(ctx, stack, get, text):
     return Object(
         name=get("name"),
         type=get("type"),
         x=get("x", float),
-        y=y,
+        y=get("y", float),
         width=get("width", float),
-        height=height,
+        height=get("height", float),
         rotation=get("rotation", float),
         gid=get("gid", int, 0),
         visible=get("visible", bool, True),
     )
 
 
-def new_objectgroup(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_objectgroup(ctx, stack, get, text):
     return ObjectGroup(
         name=get("name"),
         color=get("color"),
@@ -254,34 +265,29 @@ def new_objectgroup(ctx, stack, attrib, text):
     )
 
 
-def new_point(ctx, stack, attrib, text):
-    get = getdefault(attrib)
-    return Point(get("x", int), get("y", int))
+def new_point(ctx, stack, get, text):
+    return Point(get("x", float), get("y", float))
 
 
-def new_polygon(ctx, stack, attrib, text):
-    get = getdefault(attrib)
-    text = get("points")
-    points = list(tuple(map(float, i.split(","))) for i in text.split())
+def new_polygon(ctx, stack, get, text):
+    points = parse_points(get("points"))
     return Polygon(points=points)
 
 
-def new_polyline(ctx, stack, attrib, text):
-    get = getdefault(attrib)
-    return Polyline(points=get("points"))
+def new_polyline(ctx, stack, get, text):
+    points = parse_points(get("points"))
+    return Polyline(points=points)
 
 
-def new_properties(ctx, stack, attrib, text):
+def new_properties(ctx, stack, get, text):
     return Properties(dict())
 
 
-def new_property(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_property(ctx, stack, get, text):
     return Property(get("name"), get("type"), get("value"))
 
 
-def new_text(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_text(ctx, stack, get, text):
     return Text(
         fontfamily=get("fontfamily"),
         pixelsize=get("pixelsize"),
@@ -297,8 +303,7 @@ def new_text(ctx, stack, attrib, text):
     )
 
 
-def new_tile(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_tile(ctx, stack, get, text):
     return Tile(
         id=get("id", int, None),
         gid=get("gid", int, None),
@@ -308,8 +313,7 @@ def new_tile(ctx, stack, attrib, text):
     )
 
 
-def new_tileset(ctx, stack, attrib, text):
-    get = getdefault(attrib)
+def new_tileset(ctx, stack, get, text):
     source = get("source")
     firstgid = get("firstgid", int)
     if firstgid:
@@ -345,6 +349,11 @@ def add_object(ctx, stack, parent: ObjectGroup, child: Object):
     parent.objects.append(child)
 
 
+def add_objectgroup_to_tile(ctx, stack, parent: Tile, child: ObjectGroup):
+    assert parent.collider_group is None
+    parent.collider_group = child
+
+
 def add_shape(ctx, stack, parent, child):
     pass
 
@@ -374,10 +383,15 @@ def exception(message):
 
 
 def finalize_map(ctx, stack, parent: None, child: Map):
+    child.tiles = ctx.tiles
     for tile in ctx.tiles.values():
         if tile:
             tile.calc_blit_offset(child.tileheight)
-    child.tiles = ctx.tiles
+
+    # for raw_gid, tile in ctx.tiles.items():
+    #     # TODO: get the colorkey/pixelapha from the tileset
+    #     gid, flags = decode_gid(raw_gid)
+    #     image = ctx.loader[gid](None, flags)
 
 
 def load_tileset(ctx, stack, parent: Tileset, child: Image):
@@ -394,6 +408,7 @@ def load_tileset(ctx, stack, parent: Tileset, child: Image):
     for gid, (y, x) in enumerate(p, parent.firstgid):
         rect = (x, y, parent.tilewidth, parent.tileheight)
         ctx.tiles[gid] = Tile(gid=gid, image=loader(rect, None))
+        ctx.image_loader[gid] = loader
 
 
 def noop(*args):
@@ -413,11 +428,7 @@ def set_layer_data(ctx, stack, parent: Map, child: Data):
             gid, flags = decode_gid(raw_gid)
             tile = ctx.tiles[gid]
             if gid != raw_gid:
-                # TODO: get the colorkey/pixelapha from the tileset
-                image = smart_convert(
-                    handle_transformation(tile.image, flags), None, True
-                )
-                tile = dataclasses.replace(tile, image=image)
+                tile = replace(tile, gid=gid, image=None)
                 ctx.tiles[raw_gid] = tile
             data.append(tile)
         else:
@@ -478,6 +489,7 @@ operations = {
     (ObjectGroup, Object): add_object,
     (Properties, Property): set_property,
     (Tile, Image): set_image,
+    (Tile, ObjectGroup): add_objectgroup_to_tile,
     (Tile, Properties): set_properties,
     (Tileset,): noop,
     (Tileset, Grid): copy_attribute("orientation"),
@@ -508,7 +520,8 @@ def parse_tmxdata(ctx, path):
         attrib = element.attrib
         text = element.text
         if event == "start":
-            obj = factory[name](ctx, stack, attrib, text)
+            get = getdefault(attrib)
+            obj = factory[name](ctx, stack, get, text)
             t = Token(name, attrib, text, obj)
             stack.append(t)
         elif event == "end":
@@ -523,7 +536,7 @@ def parse_tmxdata(ctx, path):
     return t.obj
 
 
-def load_tmxmap(path, image_loader):
+def load_tmxmap(path, image_loader=default_image_loader):
     invert_y = False
     ctx = Context()
     ctx.path = path
