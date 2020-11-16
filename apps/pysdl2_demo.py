@@ -28,10 +28,9 @@ logger.setLevel(logging.INFO)
 import os
 os.environ['PYSDL2_DLL_PATH'] = os.path.dirname(__file__)
 
-from pytmx import *
-from pytmx.util_pysdl2 import load_pysdl2
-from sdl2 import *
-import sdl2.ext
+from contrib.util_pysdl2 import load_pysdl2
+# from sdl2 import *
+# import sdl2.ext
 
 
 class TiledRenderer(object):

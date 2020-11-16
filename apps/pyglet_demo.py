@@ -17,9 +17,8 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
-from pytmx import *
-from pytmx.util_pyglet import load_pyglet
-import pyglet
+from contrib.pyglet_adapter import load_pyglet
+# import pyglet
 
 
 class TiledRenderer(object):

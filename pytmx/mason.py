@@ -27,7 +27,7 @@ from itertools import product
 from typing import Any, Dict
 from xml.etree import ElementTree
 
-from pytmx.dc import (
+from pytmx.objects import (
     Circle,
     Group,
     Image,
@@ -66,7 +66,6 @@ class Context:
     invert_y: bool = None
     tiles: Dict = field(default_factory=dict)
     firstgid: int = 0
-    loaders: Dict = field(default_factory=dict)
 
 
 @dataclass
@@ -107,7 +106,7 @@ def decode_gid(raw_gid):
     return gid, flags
 
 
-def default_image_loader(filename, ):
+def default_image_loader(filename,):
     """This default image loader just returns filename, rect, and any flags"""
 
     def load(rect=None, flags=None):
@@ -127,7 +126,7 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
         elif compression:
             raise MasonException(f"layer compression {compression} is not supported.")
         fmt = struct.Struct("<L")
-        iterator = (data[i: i + 4] for i in range(0, len(data), 4))
+        iterator = (data[i : i + 4] for i in range(0, len(data), 4))
         return [fmt.unpack(i)[0] for i in iterator]
     elif encoding == "csv":
         return [int(i) for i in text.split(",")]
@@ -137,7 +136,7 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
 
 def reshape_data(gids, width):
     """Change 1d list to 2d list"""
-    return [gids[i: i + width] for i in range(0, len(gids), width)]
+    return [gids[i : i + width] for i in range(0, len(gids), width)]
 
 
 def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
@@ -388,11 +387,6 @@ def finalize_map(ctx, stack, parent: None, child: Map):
         if tile:
             tile.calc_blit_offset(child.tileheight)
 
-    # for raw_gid, tile in ctx.tiles.items():
-    #     # TODO: get the colorkey/pixelapha from the tileset
-    #     gid, flags = decode_gid(raw_gid)
-    #     image = ctx.loader[gid](None, flags)
-
 
 def load_tileset(ctx, stack, parent: Tileset, child: Image):
     path = os.path.join(ctx.folder, child.source)
@@ -408,7 +402,6 @@ def load_tileset(ctx, stack, parent: Tileset, child: Image):
     for gid, (y, x) in enumerate(p, parent.firstgid):
         rect = (x, y, parent.tilewidth, parent.tileheight)
         ctx.tiles[gid] = Tile(gid=gid, image=loader(rect, None))
-        ctx.image_loader[gid] = loader
 
 
 def noop(*args):
@@ -424,15 +417,19 @@ def set_image(ctx, stack, parent, child: Image):
 def set_layer_data(ctx, stack, parent: Map, child: Data):
     data = list()
     for raw_gid in unpack_gids(child.text, child.encoding, child.compression):
+        tile = None
         if raw_gid:
             gid, flags = decode_gid(raw_gid)
             tile = ctx.tiles[gid]
             if gid != raw_gid:
-                tile = replace(tile, gid=gid, image=None)
+                tile = replace(
+                    tile,
+                    flipped_h=flags.horizontal,
+                    flipped_v=flags.diagonal,
+                    flipped_d=flags.diagonal,
+                )
                 ctx.tiles[raw_gid] = tile
-            data.append(tile)
-        else:
-            data.append(None)
+        data.append(tile)
     map = search(stack, "Map")
     parent.data = reshape_data(data, map.width)
 
@@ -520,8 +517,7 @@ def parse_tmxdata(ctx, path):
         attrib = element.attrib
         text = element.text
         if event == "start":
-            get = getdefault(attrib)
-            obj = factory[name](ctx, stack, get, text)
+            obj = factory[name](ctx, stack, getdefault(attrib), text)
             t = Token(name, attrib, text, obj)
             stack.append(t)
         elif event == "end":

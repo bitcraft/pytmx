@@ -21,11 +21,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyglet
-except ImportError:
-    logger.error("cannot import pyglet (is it installed?)")
-    raise
+# try:
+#     import pyglet
+# except ImportError:
+#     logger.error("cannot import pyglet (is it installed?)")
+#     raise
 
 import pytmx
 

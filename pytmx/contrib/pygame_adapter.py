@@ -63,3 +63,7 @@ def pygame_image_loader(filename: str, colorkey: str = None, pixelalpha=True):
     if colorkey:
         colorkey = pygame.Color("#{0}".format(colorkey))
     return load_image
+
+
+class PygameAdapter:
+    pass

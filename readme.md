@@ -155,21 +155,21 @@ tiled_map = pytmx.TiledMap('map.tmx')
 #### Load with pygame images:
 
 ```python
-from pytmx.util_pygame import load_pygame
+from contrib.pygame_adapter import load_pygame
 tiled_map = load_pygame('map.tmx')
 ```
 
 #### Load with pysdl2 images (experimental):
 
 ```python
-from pytmx.util_pysdl2 import load_pysdl2
+from contrib.util_pysdl2 import load_pysdl2
 tiled_map = load_pysdl2('map.tmx')
 ```
 
 #### Load with pyglet images (experimental):
 
 ```python
-from pytmx.util_pyglet import load_pyglet
+from contrib.pyglet_adapter import load_pyglet
 tiled_map = load_pyglet('map.tmx')
 ```
 
@@ -261,7 +261,7 @@ All loaders support the following flags:
 - allow_duplicate_names: Force load maps with ambiguous data (see 'reserved names')
 
 ```python
-from pytmx.util_pygame import load_pygame
+from contrib.pygame_adapter import load_pygame
 tiled_map = load_pygame(path_to_tmx_file, invert_y=True)
 ```
 
@@ -544,7 +544,7 @@ you can try at your own risk.  Pass 'allow_duplicate_names=True' to any
 loader or to the TiledMap constructor and the checks will be disabled.
 
 ```python
-from pytmx.util_pygame import load_pygame
+from contrib.pygame_adapter import load_pygame
 tiled_map = load_pygame('map.tmx', allow_duplicate_names=True)
 ```
 

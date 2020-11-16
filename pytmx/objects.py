@@ -20,9 +20,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from itertools import chain
+from math import sin, radians, cos
 from typing import Union, Iterator, List, Dict
 
 TileImageType = Union[None, str]
+
+
+def rotate(points, origin, angle):
+    sin_t = sin(radians(angle))
+    cos_t = cos(radians(angle))
+    new_points = list()
+    for point in points:
+        p = (origin.x + (cos_t * (point.x - origin.x) - sin_t * (point.y - origin.y)),
+             origin.y + (sin_t * (point.x - origin.x) + cos_t * (point.y - origin.y)))
+        new_points.append(p)
+    return new_points
 
 
 @dataclass
@@ -32,14 +44,25 @@ class Tile:
     type: str = None
     terrain: str = None
     # mason
+    collider_group: ObjectGroup = None
     image: TileImageType = None  # this will be the image/surface
     properties: dict = field(default_factory=dict)
     animation: Animation = None
     offsety: int = 0
-    collider_group: ObjectGroup = None
+    flipped_h: bool = False
+    flipped_v: bool = False
+    flipped_d: bool = False
 
     def calc_blit_offset(self, tileheight):
         self.offsety = tileheight - self.image.get_height()
+
+
+@dataclass
+class Chunk:
+    x: int
+    y: int
+    width: int
+    height: int
 
 
 @dataclass
@@ -312,6 +335,10 @@ class Object:
     # mason
     image: Image = None
     shapes: list = field(default_factory=list)
+
+    def render(self):
+        """Return all points for object, taking in account rotation"""
+        return rotate(self.as_points, self, self.rotation)
 
     @property
     def as_points(self):

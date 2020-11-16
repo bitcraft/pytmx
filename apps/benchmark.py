@@ -19,8 +19,7 @@ import logging
 import pygame
 from pygame.locals import *
 
-from pytmx import *
-from pytmx.util_pygame import load_pygame
+from contrib.pygame_adapter import load_pygame
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()

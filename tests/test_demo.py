@@ -5,15 +5,13 @@ Leif Theden "bitcraft", 2012-2020
 import glob
 import logging
 import os.path
-from math import radians
-from math import sin, cos
 
 import pygame
 from pygame.locals import *
 
-from pytmx.dc import TileLayer, ObjectGroup, ImageLayer
-from pytmx.mason import load_tmxmap, MasonException
-from pytmx.util_pygame import pygame_image_loader
+from pytmx.objects import TileLayer, ObjectGroup, ImageLayer
+from pytmx.mason import load_tmxmap
+from contrib.pygame_adapter import pygame_image_loader
 
 logger = logging.getLogger(__name__)
 
@@ -46,18 +44,9 @@ class BasicRenderer(object):
         for x, y, tile in layer.tiles():
             x = x * tw
             y = y * th + tile.offsety
+            image = tile.image
+            # image = handle_transformation(image, tile)
             surface_blit(tile.image, (x, y))
-
-    @staticmethod
-    def rotate(points, origin, angle):
-        sin_t = sin(radians(angle))
-        cos_t = cos(radians(angle))
-        new_points = list()
-        for point in points:
-            p = (origin.x + (cos_t * (point.x - origin.x) - sin_t * (point.y - origin.y)),
-                 origin.y + (sin_t * (point.x - origin.x) + cos_t * (point.y - origin.y)))
-            new_points.append(p)
-        return new_points
 
     def render_object_layer(self, surface, layer):
         draw_rect = pygame.draw.rect
@@ -72,12 +61,8 @@ class BasicRenderer(object):
             # tiled will invert the y axis if there is an image
             if obj.image:
                 if obj.rotation:
-                    r = obj.rotation
-                    print(obj, obj.as_points)
-                    print(self.rotate(obj.as_points, obj, r))
-                    points = self.rotate(obj.as_points, obj, r)
-                    # clockwise -> counterclockwise
-                    image = pygame.transform.rotate(obj.image, 360 - r)
+                    points = obj.render()
+                    image = pygame.transform.rotate(obj.image, 360 - obj.rotation)
                     position = sorted(points)[0]
                     surface_blit(image, (position[0], position[1]))
                 elif obj.width and obj.height:
@@ -107,7 +92,7 @@ class SimpleTest(object):
         self.dirty = False
         self.screen = None
 
-    def setup(self):
+    def init(self):
         width, height = 800, 800
         pygame.init()
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -171,14 +156,11 @@ class SimpleTest(object):
 
 if __name__ == "__main__":
     viewer = SimpleTest()
+    viewer.init()
     try:
         for filename in glob.glob(os.path.join("apps", 'data', '*.tmx')):
             logger.info("Testing %s", filename)
-            try:
-                if not SimpleTest.load_map(filename):
-                    break
-            except MasonException:
-                pass
+            viewer.load_map(filename)
     except:
         pygame.quit()
         raise
