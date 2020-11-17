@@ -31,8 +31,10 @@ def rotate(points, origin, angle):
     cos_t = cos(radians(angle))
     new_points = list()
     for point in points:
-        p = (origin.x + (cos_t * (point.x - origin.x) - sin_t * (point.y - origin.y)),
-             origin.y + (sin_t * (point.x - origin.x) + cos_t * (point.y - origin.y)))
+        p = (
+            origin.x + (cos_t * (point.x - origin.x) - sin_t * (point.y - origin.y)),
+            origin.y + (sin_t * (point.x - origin.x) + cos_t * (point.y - origin.y)),
+        )
         new_points.append(p)
     return new_points
 
@@ -219,6 +221,9 @@ class MapCoordinates:
 class Point:
     x: int
     y: int
+
+    def __getitem__(self, index):
+        return (self.x, self.y)[index]
 
 
 @dataclass

@@ -1,7 +1,3 @@
-"""
-Leif Theden "bitcraft", 2012-2020
-"""
-
 import glob
 import logging
 import os.path
@@ -97,7 +93,7 @@ class SimpleTest(object):
         pygame.init()
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         pygame.font.init()
-        pygame.display.set_caption('pytmx map viewer')
+        pygame.display.set_caption("pytmx map viewer")
         logging.basicConfig(level=logging.DEBUG)
 
     def load_map(self, filename):
@@ -122,8 +118,7 @@ class SimpleTest(object):
         self.renderer.render_map(temp)
         pygame.transform.scale(temp, self.screen.get_size(), self.screen)
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit',
-                     True, (180, 180, 0))
+        i = f.render("press any key for next map or ESC to quit", True, (180, 180, 0))
         self.screen.blit(i, (0, 0))
 
     def handle_input(self):
@@ -158,7 +153,7 @@ if __name__ == "__main__":
     viewer = SimpleTest()
     viewer.init()
     try:
-        for filename in glob.glob(os.path.join("apps", 'data', '*.tmx')):
+        for filename in glob.glob(os.path.join("apps", "data", "*.tmx")):
             logger.info("Testing %s", filename)
             viewer.load_map(filename)
     except:
