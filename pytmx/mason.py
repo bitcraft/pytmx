@@ -349,7 +349,6 @@ def add_object(ctx, stack, parent: objects.ObjectGroup, child: objects.Object):
 
 
 def add_objectgroup_to_tile(ctx, stack, parent: objects.Tile, child: objects.ObjectGroup):
-    assert parent.collider_group is None
     parent.collider_group = child
 
 
