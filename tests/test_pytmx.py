@@ -265,7 +265,7 @@ class NewObjectTest(unittest.TestCase):
         self.assertEqual(2, result.offsety)
 
     def test_new_image(self):
-        data = dict(source="SOURCE", width="1", height="2", trans="TRANS", )
+        data = dict(source="SOURCE", width="1", height="2", trans="TRANS",)
         get = mason.getdefault(data)
         result = mason.new_image(self.ctx, self.stack, get, self.text)
         self.assertIsInstance(result, objects.Image)
@@ -275,7 +275,7 @@ class NewObjectTest(unittest.TestCase):
         self.assertEqual("TRANS", result.trans)
 
     def test_new_imagelayer(self):
-        data = dict(name="NAME", visible="1", image="IMAGE", )
+        data = dict(name="NAME", visible="1", image="IMAGE",)
         get = mason.getdefault(data)
         result = mason.new_imagelayer(self.ctx, self.stack, get, self.text)
         self.assertIsInstance(result, objects.ImageLayer)
@@ -367,7 +367,7 @@ class NewObjectTest(unittest.TestCase):
         self.assertEqual("DRAWORDER", result.draworder)
 
     def test_new_point(self):
-        data = dict(x="1.5", y="2.5", )
+        data = dict(x="1.5", y="2.5",)
         get = mason.getdefault(data)
         result = mason.new_point(self.ctx, self.stack, get, self.text)
         self.assertIsInstance(result, objects.Point)
@@ -496,7 +496,7 @@ class NewObjectTest(unittest.TestCase):
         self.assertEqual(7, result.tilewidth)
 
     def test_new_external_tileset(self):
-        data = dict(source="SOURCE", )
+        data = dict(source="SOURCE",)
         self.ctx.firstgid = 1
         self.ctx.folder = "FOLDER"
         get = mason.getdefault(data)

@@ -5,9 +5,9 @@ import os.path
 import pygame
 from pygame.locals import *
 
-from pytmx.objects import TileLayer, ObjectGroup, ImageLayer
-from pytmx.mason import load_tmxmap
 from contrib.pygame_adapter import pygame_image_loader
+from pytmx.mason import load_tmxmap
+from pytmx.objects import TileLayer, ObjectGroup, ImageLayer
 
 logger = logging.getLogger(__name__)
 

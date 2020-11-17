@@ -24,7 +24,7 @@ from base64 import b64decode
 from collections import namedtuple
 from dataclasses import dataclass, field, replace
 from itertools import product
-from typing import Any, Dict
+from typing import Any, Dict, Tuple, List, Iterator
 from xml.etree import ElementTree
 
 from pytmx import objects
@@ -94,7 +94,7 @@ def convert_to_bool(value: Any) -> bool:
         return False
 
 
-def decode_gid(raw_gid):
+def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
     """Decode a GID from TMX data"""
     flags = TileFlags(
         raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
@@ -105,7 +105,7 @@ def decode_gid(raw_gid):
     return gid, flags
 
 
-def default_image_loader(filename,):
+def default_image_loader(filename: str):
     """This default image loader just returns filename, rect, and any flags"""
 
     def load(rect=None, flags=None):
@@ -114,7 +114,7 @@ def default_image_loader(filename,):
     return load
 
 
-def getdefault(d):
+def getdefault(d: Dict):
     """Return dictionary key as optional type, with a default"""
 
     def get(key, type=None, default=None):
@@ -129,7 +129,9 @@ def getdefault(d):
     return get
 
 
-def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
+def iter_image_tiles(
+    width: int, height: int, tilewidth: int, tileheight: int, margin: int, spacing: int
+) -> Iterator[Tuple[int, int, int, int]]:
     """Iterate tiles in the image"""
     for y, x in product(
         range(margin, height + margin - tileheight + 1, tileheight + spacing),
@@ -138,12 +140,12 @@ def iter_image_tiles(width, height, tilewidth, tileheight, margin, spacing):
         yield x, y, tilewidth, tileheight
 
 
-def parse_points(text):
+def parse_points(text: str) -> List[Tuple[float, float]]:
     """Return list of tuples representing points"""
     return list(tuple(map(float, i.split(","))) for i in text.split())
 
 
-def reshape_data(gids, width):
+def reshape_data(gids: List[int], width: int):
     """Change 1d list to 2d list"""
     return [gids[i : i + width] for i in range(0, len(gids), width)]
 
@@ -170,19 +172,19 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
 # object creation
 
 
-def new_data(ctx, stack, get, text):
+def new_data(ctx, stack, get, text) -> Data:
     return Data(get("encoding"), get("compression"), text=text)
 
 
-def new_ellipse(ctx, stack, get, text):
+def new_ellipse(ctx, stack, get, text) -> objects.Circle:
     return objects.Circle()
 
 
-def new_grid(ctx, stack, get, text):
+def new_grid(ctx, stack, get, text) -> Grid:
     return Grid(get("orientation"), get("width", int), get("height", int))
 
 
-def new_group(ctx, stack, get, text):
+def new_group(ctx, stack, get, text) -> objects.Group:
     return objects.Group(
         name=get("name"),
         opacity=get("opacity", float, 1.0),
@@ -193,7 +195,7 @@ def new_group(ctx, stack, get, text):
     )
 
 
-def new_image(ctx, stack, get, text):
+def new_image(ctx, stack, get, text) -> objects.Image:
     return objects.Image(
         source=get("source"),
         width=get("width", int),
@@ -202,11 +204,13 @@ def new_image(ctx, stack, get, text):
     )
 
 
-def new_imagelayer(ctx, stack, get, text):
-    return objects.ImageLayer(get("name"), get("visible", convert_to_bool, True), get("image"))
+def new_imagelayer(ctx, stack, get, text) -> objects.ImageLayer:
+    return objects.ImageLayer(
+        get("name"), get("visible", convert_to_bool, True), get("image")
+    )
 
 
-def new_map(ctx, stack, get, text):
+def new_map(ctx, stack, get, text) -> objects.Map:
     return objects.Map(
         version=get("version"),
         orientation=get("orientation"),
@@ -225,7 +229,7 @@ def new_map(ctx, stack, get, text):
     )
 
 
-def new_object(ctx, stack, get, text):
+def new_object(ctx, stack, get, text) -> objects.Object:
     return objects.Object(
         name=get("name"),
         type=get("type"),
@@ -239,7 +243,7 @@ def new_object(ctx, stack, get, text):
     )
 
 
-def new_objectgroup(ctx, stack, get, text):
+def new_objectgroup(ctx, stack, get, text) -> objects.ObjectGroup:
     return objects.ObjectGroup(
         name=get("name"),
         color=get("color"),
@@ -252,29 +256,29 @@ def new_objectgroup(ctx, stack, get, text):
     )
 
 
-def new_point(ctx, stack, get, text):
+def new_point(ctx, stack, get, text) -> objects.Point:
     return objects.Point(get("x", float), get("y", float))
 
 
-def new_polygon(ctx, stack, get, text):
+def new_polygon(ctx, stack, get, text) -> objects.Polygon:
     points = parse_points(get("points"))
     return objects.Polygon(points=points)
 
 
-def new_polyline(ctx, stack, get, text):
+def new_polyline(ctx, stack, get, text) -> objects.Polyline:
     points = parse_points(get("points"))
     return objects.Polyline(points=points)
 
 
-def new_properties(ctx, stack, get, text):
+def new_properties(ctx, stack, get, text) -> Properties:
     return Properties(dict())
 
 
-def new_property(ctx, stack, get, text):
+def new_property(ctx, stack, get, text) -> objects.Property:
     return objects.Property(get("name"), get("type"), get("value"))
 
 
-def new_text(ctx, stack, get, text):
+def new_text(ctx, stack, get, text) -> objects.Text:
     return objects.Text(
         bold=get("bold"),
         color=get("color"),
@@ -290,7 +294,7 @@ def new_text(ctx, stack, get, text):
     )
 
 
-def new_tile(ctx, stack, get, text):
+def new_tile(ctx, stack, get, text) -> objects.Tile:
     return objects.Tile(
         id=get("id", int, None),
         gid=get("gid", int, None),
@@ -300,7 +304,7 @@ def new_tile(ctx, stack, get, text):
     )
 
 
-def new_tilelayer(ctx, stack, get, text):
+def new_tilelayer(ctx, stack, get, text) -> objects.TileLayer:
     return objects.TileLayer(
         data=get("data"),
         name=get("name"),
@@ -312,7 +316,7 @@ def new_tilelayer(ctx, stack, get, text):
     )
 
 
-def new_tileset(ctx, stack, get, text):
+def new_tileset(ctx, stack, get, text) -> objects.Tileset:
     source = get("source")
     firstgid = get("firstgid", int)
     if firstgid:
@@ -348,7 +352,9 @@ def add_object(ctx, stack, parent: objects.ObjectGroup, child: objects.Object):
     parent.objects.append(child)
 
 
-def add_objectgroup_to_tile(ctx, stack, parent: objects.Tile, child: objects.ObjectGroup):
+def add_objectgroup_to_tile(
+    ctx, stack, parent: objects.Tile, child: objects.ObjectGroup
+):
     parent.collider_group = child
 
 
@@ -462,7 +468,9 @@ factory = {
 }
 
 operations = {
-    (Data, objects.Tile): exception("Map using XML objects.Tile elements not supported"),
+    (Data, objects.Tile): exception(
+        "Map using XML objects.Tile elements not supported"
+    ),
     (objects.Group, objects.ObjectGroup): add_layer,
     (objects.Group, objects.TileLayer): add_layer,
     (objects.ImageLayer, objects.Image): set_image,
@@ -532,7 +540,7 @@ def parse_tmxdata(ctx, path):
         return t.obj
 
 
-def load_tmxmap(path, image_loader=default_image_loader):
+def load_tmxmap(path, image_loader=default_image_loader) -> objects.Map:
     invert_y = False
     ctx = Context()
     ctx.path = path
