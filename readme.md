@@ -125,9 +125,6 @@ Why use PyTMX?
 * GitHub hosting allows for community participation
 * I have kept PyTMX current with new versions of Tiled since v.7
 
-### PyTMX is usable:
-* Liberal LGPL license means you can use PyTMX for your project
-
 
 Installation
 ===============================================================================
@@ -137,9 +134,12 @@ Install from pip
     pip install pytmx
 
 
-You can also manually install it
+Manually install it
 
     python setup.py install
+
+
+You can also copy/paste the pytmx folder into your project
 
 
 Basic use:
@@ -157,13 +157,6 @@ tiled_map = pytmx.TiledMap('map.tmx')
 ```python
 from pytmx.util_pygame import load_pygame
 tiled_map = load_pygame('map.tmx')
-```
-
-#### Load with pysdl2 images (experimental):
-
-```python
-from pytmx.util_pysdl2 import load_pysdl2
-tiled_map = load_pysdl2('map.tmx')
 ```
 
 #### Load with pyglet images (experimental):
@@ -233,7 +226,7 @@ Working with Maps
 TiledMap objects are returned from the loader.  They contain layers, objects,
 and a bunch of useful functions for getting information about the map.  In
 general, all of the pytmx types are not meant to be modified after being
-returned from the loader.  While there is a potentional for modifing them,
+returned from the loader.  While there is a potential for modifying them,
 its not a supported function, and may change any time.  Please consider them
 read-only.
 
@@ -566,34 +559,12 @@ objectgroup: name, color, x, y, width, height, opacity, object, properties
 object:      id, name, type, x, y, width, height, gid, properties, polygon,  
              polyline, image
 
-pygame_sdl2 and pyinstaller issues
-==================================
-
-Pygame_sdl2 is not compatible with pygame and could cause problems when they both exist in your python installation.
-If you are considering using pygame_sdl2, you should consider using a virtual environment until these issues are fixed
-with that other project.  To be clear, this is not a problem with pytmx.
-
-To exclude pygame with pyinstaller, for example, you will need an analysis block in your spec
-file that looks something like this:
-```python
-    a = Analysis(['my_program.py'],
-             pathex=['C:\\my_programs_path'],
-             binaries=[],
-             datas=[],
-             hiddenimports=[],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=['pygame'],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher)
-```
 
 #### Please consider the following:
 
 PyTMX is a map __loader__.  Pytmx takes the pain out of parsing XML, variable type conversion, shape loading, properties, and of course image loading.  When asking for help, please understand that I want people to make their own games or utilities, and that PyTMX is able to make Tiled Maps easy to use.
 
-pytmx is not going to make your JRPG for you.  You will need to do that yourself, and I, the author, cannot simply respond to every new developer who expects pytmx, pygame, or any other game library to simply make it work for them.  Programming is a learned skill, and for most it takes practice and diligent study to get proficient at.  I'm personally a nice guy, and do want to help, so before you flame me on your blog or reddit, understand what pytmx is used for, read the documentation and copy/paste the demo code if you have to.  Thank you.
+pytmx is not going to make your JRPG for you.  You will need to do that yourself, and I, the author, cannot simply respond to every new developer who expects pytmx, pygame, or any other game library to simply make it work for them.  Programming is a learned skill, and for most it takes practice and diligent study to get proficient at.  I'm generally open to help, so before you flame me on your blog or reddit, understand what pytmx is used for, read the documentation and copy/paste the demo code if you have to.  Thank you.
 
 I have a working solution to using Tiled Maps and Pygame ready for you.  If you simply want a library to render the maps for you, please check it out, as they are designed to work together.
 
