@@ -6,7 +6,7 @@ If you have any problems or suggestions, please open an issue.
 *Released under the LGPL v3*
 
 ### See the "apps" folder for example use and cut/paste code.
-
+/and
 
 News
 ===============================================================================
@@ -180,7 +180,7 @@ import pytmx
 tiled_map = pytmx.TiledMap.from_xml_string(some_string_here)
 ```
 
-#### Iterate through layers and groups:
+#### Iterate through layers and object groups:
 
 ```python
 for layer in tiled_map.layers:
@@ -315,7 +315,7 @@ Layers are accessed through the TiledMap class and there are a few ways to get r
 # get a layer by name
 layer_or_group = tiled_map.get_layer_by_name("base layer")
 
-# TiledMap.layers is a list of layers and groups
+# TiledMap.layers is a list of layers and object groups
 layer = tiled_map.layers[layer_index_number]
 
 # easily get references to just the visible tile layers
