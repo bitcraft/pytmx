@@ -21,9 +21,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from itertools import chain
 from math import sin, radians, cos
-from typing import Union, Iterator, List, Dict
+from typing import Union, Iterator, List, Dict, Any
 
-TileImageType = Union[None, str]
+TileImageType = Union[None, str, Any]
 
 
 def rotate(points, origin, angle):
@@ -56,7 +56,7 @@ class Tile:
     flipped_d: bool = False
 
     def calc_blit_offset(self, tileheight):
-        self.offsety = tileheight - self.image.get_height()
+        self.offsety = tileheight - self.image.height
 
 
 @dataclass
@@ -228,27 +228,28 @@ class Point:
 
 @dataclass
 class Text:
-    fontfamily: str
-    pixelsize: int
-    wrap: bool
-    color: str
     bold: bool
-    italic: bool
-    underline: bool
-    strikeout: bool
-    kerning: bool
+    color: str
+    fontfamily: str
     halign: str
+    italic: bool
+    kerning: bool
+    pixelsize: int
+    strikeout: bool
+    text: str
+    underline: bool
     valign: str
+    wrap: bool
 
 
 @dataclass
 class Animation:
-    frames: List[AnimationFrame]
+    frames: List[AnimationFrame] = field(default_factory=list)
 
 
 @dataclass
 class AnimationFrame:
-    tile: Tile
+    tile: int  # ref -> frame
     duration: int
 
 

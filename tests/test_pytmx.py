@@ -418,6 +418,7 @@ class NewObjectTest(unittest.TestCase):
             kerning="KERNING",
             pixelsize="PIXELSIZE",
             strikeout="STRIKEOUT",
+            test=self.text,
             underline="UNDERLINE",
             valign="VALIGN",
             wrap="WRAP",
@@ -433,6 +434,7 @@ class NewObjectTest(unittest.TestCase):
         self.assertEqual("KERNING", result.kerning)
         self.assertEqual("PIXELSIZE", result.pixelsize)
         self.assertEqual("STRIKEOUT", result.strikeout)
+        self.assertEqual(self.text, result.text)
         self.assertEqual("UNDERLINE", result.underline)
         self.assertEqual("VALIGN", result.valign)
         self.assertEqual("WRAP", result.wrap)

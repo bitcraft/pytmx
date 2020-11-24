@@ -16,17 +16,43 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
+import time
+
+"""
+
+wth is this mess?
+
+sax parser will emit start and end tokens for the xml
+these tokens are parsed and objects created with defaults on start tokens
+when children of the token are encountered, their relationship is queried on a table
+if there is an operation for say, <tileset> and <tile> objects, then the function
+for the (<tileset>, <tile>) relationship is called, which will do stuff.
+
+images are not loaded in this pass, but are made instead into references.  as the
+parser moves through the file, references are tracked.  a pool of threads will load
+images and do things.  it is up the the image loader to determine what to do.
+
+the pygame loader will fire up a few threads to read the images into memory and
+split the tilesheet into images.
+
+after all images are loaded, a final pass is made over the objects and any objects
+which were previously references are replaced with live objects, just as tile images.
+
+"""
 import gzip
 import os
 import struct
+import threading
 import zlib
 from base64 import b64decode
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from dataclasses import dataclass, field, replace
 from itertools import product
+from queue import Queue
 from typing import Any, Dict, Tuple, List, Iterator
 from xml.etree import ElementTree
 
+from contrib.pygame_adapter import pygame_image_loader
 from pytmx import objects
 
 # objects.Tiled gid flags
@@ -50,6 +76,15 @@ class Context:
     invert_y: bool = None
     tiles: Dict = field(default_factory=dict)
     firstgid: int = 0
+    gid_refs: defaultdict = None
+
+
+@dataclass
+class Reference:
+    target: Any
+    attribute_name: str
+    gid: int
+    replace: Any
 
 
 @dataclass
@@ -75,6 +110,15 @@ class Data:
 @dataclass
 class Grid:
     orientation: str
+    width: int
+    height: int
+
+
+@dataclass
+class ImagePlaceholder:
+    source: str
+    x: int
+    y: int
     width: int
     height: int
 
@@ -172,12 +216,20 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
 # object creation
 
 
+def new_animation(ctx, stack, get, text) -> objects.Animation:
+    return objects.Animation()
+
+
 def new_data(ctx, stack, get, text) -> Data:
     return Data(get("encoding"), get("compression"), text=text)
 
 
 def new_ellipse(ctx, stack, get, text) -> objects.Circle:
     return objects.Circle()
+
+
+def new_frame(ctx, stack, get, text) -> objects.AnimationFrame:
+    return objects.AnimationFrame(tile=get("tile", int), duration=get("duration", int))
 
 
 def new_grid(ctx, stack, get, text) -> Grid:
@@ -288,6 +340,7 @@ def new_text(ctx, stack, get, text) -> objects.Text:
         kerning=get("kerning"),
         pixelsize=get("pixelsize"),
         strikeout=get("strikeout"),
+        text=text,
         underline=get("underline"),
         valign=get("valign"),
         wrap=get("wrap"),
@@ -323,7 +376,7 @@ def new_tileset(ctx, stack, get, text) -> objects.Tileset:
         ctx.firstgid = firstgid
     if source:
         path = os.path.join(ctx.folder, source)
-        tileset = parse_tmxdata(ctx, path)
+        tileset = parse_for_parent_node_only(ctx, path)
         return tileset
     return objects.Tileset(
         columns=get("columns", int),
@@ -340,6 +393,10 @@ def new_tileset(ctx, stack, get, text) -> objects.Tileset:
 
 
 # operations
+
+
+def add_animation_frame(ctx, stack, parent, child: objects.AnimationFrame):
+    parent.frames.append(child)
 
 
 def add_layer(ctx, stack, map: objects.Map, layer):
@@ -388,14 +445,13 @@ def exception(message):
 
 def finalize_map(ctx, stack, parent: None, child: objects.Map):
     child.tiles = ctx.tiles
-    for tile in ctx.tiles.values():
-        if tile:
-            tile.calc_blit_offset(child.tileheight)
+    # for tile in ctx.tiles.values():
+    #     if tile:
+    #         tile.calc_blit_offset(child.tileheight)
 
 
 def load_tileset(ctx, stack, parent: objects.Tileset, child: objects.Image):
     path = os.path.join(ctx.folder, child.source)
-    loader = ctx.image_loader(path, child.trans)
     p = iter_image_tiles(
         child.width,
         child.height,
@@ -405,17 +461,37 @@ def load_tileset(ctx, stack, parent: objects.Tileset, child: objects.Image):
         parent.spacing,
     )
     for gid, rect in enumerate(p, parent.firstgid):
-        ctx.tiles[gid] = objects.Tile(gid=gid, image=loader(rect, None))
+        x, y, w, h = rect
+        placeholder = ImagePlaceholder(
+            source=path, x=x, y=y, width=parent.tilewidth, height=parent.tileheight,
+        )
+        tile = objects.Tile(gid=gid, image=placeholder)
+        ctx.tiles[gid] = tile
+        ref = Reference(parent, "image", gid, None)
+        ctx.gid_refs[gid] = ref
+
+        ctx.ref2.append(Reference(parent, "image", 0, None))
+        ctx.ref2.append(Reference(tile, "image", 0, "image"))
+
+        yield gid, (placeholder, rect, None)
 
 
 def noop(*args):
     pass
 
 
+def set_animation(ctx, stack, parent, child: objects.Animation):
+    parent.animation = child
+
+
 def set_image(ctx, stack, parent, child: objects.Image):
     path = os.path.join(ctx.folder, child.source)
-    image = ctx.image_loader(path)()
-    parent.image = image
+    # image = ctx.image_loader(path)()
+    parent.image = ImagePlaceholder(
+        source=path, x=0, y=0, width=child.width, height=child.height,
+    )
+    ref = Reference(parent, "image", None)
+    # ctx.gid_refs[gid] = ref
 
 
 def set_layer_data(ctx, stack, parent: objects.Map, child: Data):
@@ -447,8 +523,10 @@ def set_property(ctx, stack, parent: Properties, child: objects.Property):
 
 
 factory = {
+    "Animation": new_animation,
     "Data": new_data,
     "Ellipse": new_ellipse,
+    "Frame": new_frame,
     "Grid": new_grid,
     "Group": new_group,
     "Image": new_image,
@@ -468,6 +546,7 @@ factory = {
 }
 
 operations = {
+    (objects.Animation, objects.AnimationFrame): add_animation_frame,
     (Data, objects.Tile): exception(
         "Map using XML objects.Tile elements not supported"
     ),
@@ -488,6 +567,8 @@ operations = {
     (objects.Object, objects.Text): add_shape,
     (objects.Object, Properties): set_properties,
     (objects.ObjectGroup, objects.Object): add_object,
+    (objects.ObjectGroup, Properties): set_properties,
+    (objects.Tile, objects.Animation): set_animation,
     (objects.Tile, objects.Image): set_image,
     (objects.Tile, objects.ObjectGroup): add_objectgroup_to_tile,
     (objects.Tile, Properties): set_properties,
@@ -515,32 +596,79 @@ def peek(stack):
         return Token("", "", "", None)
 
 
-def parse_tmxdata(ctx, path):
+def parse_for_parent_node_only(ctx, path):
+    node = None
+    for node in parse_all_nodes(ctx, path):
+        pass
+    return node
+
+
+def parse_all_nodes(ctx: Context, path: str) -> Iterator[Token]:
     stack = list()
     root = ElementTree.iterparse(path, events=("start", "end"))
-    t = None
     for event, element in root:
         name = element.tag.title()
         attrib = element.attrib
         text = element.text
         if event == "start":
             obj = factory[name](ctx, stack, getdefault(attrib), text)
-            t = Token(name, attrib, text, obj)
-            stack.append(t)
+            token = Token(name, attrib, text, obj)
+            stack.append(token)
         elif event == "end":
-            t = stack.pop()
-            path = [type(t.obj)]
+            token = stack.pop()
+            path = [type(token.obj)]
             parent = peek(stack)
             if parent.obj:
                 path.insert(0, type(parent.obj))
             operation = operations[tuple(path)]
-            operation(ctx, stack, parent.obj, t.obj)
+            stuff = operation(ctx, stack, parent.obj, token.obj)
             element.clear()
-    if t:
-        return t.obj
+            if stuff is not None:
+                yield from stuff
+    yield token.obj
+
+
+def worker(queue: Queue, ctx, loaders):
+    while True:
+        item = queue.get()
+        if item is None:
+            queue.task_done()
+            break
+        else:
+            gid, params = item
+            image, rect, flags = params
+            loader = None
+            path = image.source
+            while loader is None:
+                if path in loaders:
+                    loader = loaders[path]
+                else:
+                    lock = ctx.locks[path]
+                    if lock.acquire(blocking=False):
+                        loader = pygame_image_loader(path)
+                        loaders[path] = loader
+                        lock.release()
+            image = loader(rect)
+            ctx.gidmap[gid] = image
+            queue.task_done()
 
 
 def load_tmxmap(path, image_loader=default_image_loader) -> objects.Map:
+    """
+
+    * build the context
+    * scan the xml, iterate intermediate mason objects
+    * no external resources are loaded during scanning
+    * after scanning in complete, search the object stream for placeholders
+    * batch the placeholders and load them
+    * replace placeholder objects with loaded resources
+    * set additional attributes on objects for the platform
+    
+    """
+    start = time.time_ns()
+    image_queue = Queue()
+    threads = 2
+
     invert_y = False
     ctx = Context()
     ctx.path = path
@@ -548,5 +676,34 @@ def load_tmxmap(path, image_loader=default_image_loader) -> objects.Map:
     ctx.image_loader = image_loader
     ctx.invert_y = invert_y
     ctx.tiles = {0: None}
-    mason_map = parse_tmxdata(ctx, path)
+    ctx.gid_refs = defaultdict(set)
+    ctx.gidmap = dict()
+    ctx.references = dict()
+    ctx.names = dict()
+    ctx.ref2 = list()
+    ctx.loader_lock = threading.Lock()
+    ctx.locks = defaultdict(threading.Lock)
+    tokens = list(parse_all_nodes(ctx, path))
+    loaders = dict()
+    for i in range(threads):
+        thread = threading.Thread(
+            target=worker, args=(image_queue, ctx, loaders), daemon=True
+        )
+        thread.start()
+    for token in tokens:
+        if isinstance(token, Tuple):
+            image_queue.put(token)
+    for i in range(threads):
+        image_queue.put(None)
+    image_queue.join()
+    mason_map = tokens[-1]
+    # threads = 1 : 1.2
+
+    # convert must be done must be done by the main thread; this is a pygame limitation
+    for surface in ctx.gidmap.values():
+        surface.convert()
+
+    duration = (time.time_ns() - start) / 1000 / 1000 / 1000
+    print(duration)
+
     return mason_map

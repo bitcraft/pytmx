@@ -56,7 +56,8 @@ def pygame_image_loader(filename: str, colorkey: str = None, pixelalpha=True):
             tile = image.copy()
         if flags:
             tile = handle_transformation(tile, flags)
-        return smart_convert(tile, colorkey, pixelalpha)
+        # return smart_convert(tile, colorkey, pixelalpha)
+        return tile
 
     # TODO: turn off pixel alpha if source image doesn't have alpha channel
     image = pygame.image.load(filename)

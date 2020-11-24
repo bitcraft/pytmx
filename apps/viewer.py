@@ -153,7 +153,8 @@ if __name__ == "__main__":
     viewer = SimpleTest()
     viewer.init()
     try:
-        for filename in glob.glob(os.path.join("apps", "data", "*.tmx")):
+        for filename in glob.glob(os.path.join("data", "*.tmx")):
+            filename = "../../Tuxemon/mods/tuxemon/maps/taba_town.tmx"
             logger.info("Testing %s", filename)
             viewer.load_map(filename)
     except:
