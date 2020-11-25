@@ -174,7 +174,8 @@ prop_type = {
     'float': float,
     'bool': convert_to_bool,
     'color': str,
-    'file': str
+    'file': str,
+    'object': str,
 }
 
 
