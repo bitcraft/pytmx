@@ -45,7 +45,6 @@ class Tile:
     id: int = None
     type: str = None
     terrain: str = None
-    # mason
     collider_group: ObjectGroup = None
     image: TileImageType = None  # this will be the image/surface
     properties: dict = field(default_factory=dict)
@@ -54,17 +53,6 @@ class Tile:
     flipped_h: bool = False
     flipped_v: bool = False
     flipped_d: bool = False
-
-    def calc_blit_offset(self, tileheight):
-        self.offsety = tileheight - self.image.height
-
-
-@dataclass
-class Chunk:
-    x: int
-    y: int
-    width: int
-    height: int
 
 
 @dataclass
@@ -94,11 +82,97 @@ class TileLayer:
 
 
 @dataclass
+class Image:
+    source: str
+    width: int
+    height: int
+    trans: str
+    colorkey: str = None
+    object: Any = None
+
+
+@dataclass
+class SubImage:
+    source: Image
+    x: int
+    y: int
+    width: int
+    height: int
+    object: Any = None
+
+
+@dataclass
+class ObjectGroup:
+    name: str
+    color: str
+    opacity: float
+    visible: bool
+    tintcolor: str
+    offsetx: int
+    offsety: int
+    draworder: int
+    objects: List = field(default_factory=list)
+
+    def __iter__(self):
+        yield from self.objects
+
+
+@dataclass
+class Object:
+    name: str
+    type: str
+    x: float
+    y: float
+    width: float
+    height: float
+    rotation: float
+    gid: int
+    visible: bool
+    image: Image = None
+    shapes: list = field(default_factory=list)
+
+    def render(self):
+        """Return all points for object, taking in account rotation"""
+        return rotate(self.as_points, self, self.rotation)
+
+    @property
+    def as_points(self):
+        return [
+            Point(*i)
+            for i in [
+                (self.x, self.y),
+                (self.x, self.y - self.height),
+                (self.x + self.width, self.y - self.height),
+                (self.x + self.width, self.y),
+            ]
+        ]
+
+    @property
+    def points(self):
+        if self.width and self.height:
+            if self.image:
+                return [
+                    (self.x, self.y - self.height),
+                    (self.x + self.width, self.y - self.height),
+                    (self.x + self.width, self.y),
+                    (self.x, self.y),
+                ]
+            else:
+                return [
+                    (self.x, self.y),
+                    (self.x + self.width, self.y),
+                    (self.x + self.width, self.y + self.height),
+                    (self.x, self.y + self.height),
+                ]
+        else:
+            return [(self.x, self.y)]
+
+
+@dataclass
 class Map:
     version: str
     orientation: str
     renderorder: str
-    compressionlevel: str
     width: int
     height: int
     tilewidth: int
@@ -106,7 +180,7 @@ class Map:
     hexsidelength: int
     staggeraxis: str
     staggerindex: str
-    background_color: str
+    background_color: Color
     infinite: bool
     filename: str = None
     layers: List = field(default_factory=list)
@@ -131,6 +205,10 @@ class Map:
             if obj.name == name:
                 return obj
         raise ValueError(f'Object "{name}" not found')
+
+    def get_object_by_id(self, id: int) -> Object:
+        """Return Object by ID"""
+        pass
 
     def get_tile(self, x, y, layer) -> int:
         """Return the tile for this location"""
@@ -211,6 +289,38 @@ class Map:
 
 
 @dataclass
+class ARGBColor:
+    alpha: int
+    red: int
+    green: int
+    blue: int
+
+    def __str__(self) -> str:
+        return f"#{self.alpha:02X}{self.red:02X}{self.green:02X}{self.blue:02X}"
+
+
+@dataclass
+class RGBColor:
+    red: int
+    green: int
+    blue: int
+
+    def __str__(self) -> str:
+        return f"#{self.red:02X}{self.green:02X}{self.blue:02X}"
+
+
+Color = Union[ARGBColor, RGBColor]
+
+
+@dataclass
+class Chunk:
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+@dataclass
 class MapCoordinates:
     x: int
     y: int
@@ -260,39 +370,15 @@ class Circle:
 
 
 @dataclass
-class Image:
-    source: str
-    width: int
-    height: int
-    trans: str
-
-
-@dataclass
-class ObjectGroup:
-    name: str
-    color: str
-    opacity: float
-    visible: bool
-    tintcolor: str
-    offsetx: int
-    offsety: int
-    draworder: int
-    # mason
-    objects: List = field(default_factory=list)
-
-    def __iter__(self):
-        yield from self.objects
-
-
-@dataclass
 class Group:
+    """Layer which contains other layers"""
+
     name: str
     opacity: float
     visible: bool
     tintcolor: str
     offsetx: int
     offsety: int
-    # mason
     layers: List = field(default_factory=list)
 
     def __iter__(self):
@@ -312,7 +398,6 @@ class Tileset:
     tilecount: int
     columns: int
     objectalignment: str
-    # mason
     orientation: str = None
     images: List = field(default_factory=list)
 
@@ -328,55 +413,11 @@ class Polyline:
 
 
 @dataclass
-class Object:
-    name: str
-    type: str
-    x: float
-    y: float
-    width: float
-    height: float
-    rotation: float
-    gid: int
-    visible: bool
-    # mason
-    image: Image = None
-    shapes: list = field(default_factory=list)
+class Properties:
+    value: dict
 
-    def render(self):
-        """Return all points for object, taking in account rotation"""
-        return rotate(self.as_points, self, self.rotation)
-
-    @property
-    def as_points(self):
-        return [
-            Point(*i)
-            for i in [
-                (self.x, self.y),
-                (self.x, self.y - self.height),
-                (self.x + self.width, self.y - self.height),
-                (self.x + self.width, self.y),
-            ]
-        ]
-
-    @property
-    def points(self):
-        if self.width and self.height:
-            if self.image:
-                return [
-                    (self.x, self.y - self.height),
-                    (self.x + self.width, self.y - self.height),
-                    (self.x + self.width, self.y),
-                    (self.x, self.y),
-                ]
-            else:
-                return [
-                    (self.x, self.y),
-                    (self.x + self.width, self.y),
-                    (self.x + self.width, self.y + self.height),
-                    (self.x, self.y + self.height),
-                ]
-        else:
-            return [(self.x, self.y)]
+    def as_dict(self):
+        pass
 
 
 @dataclass
@@ -388,6 +429,8 @@ class Property:
 
 @dataclass
 class ImageLayer:
+    """Layer contains image anchored at the top left corner"""
+
     name: str
     visible: bool
     image: Image

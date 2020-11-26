@@ -3,6 +3,7 @@ from itertools import chain
 from unittest import mock
 import unittest
 
+import objects
 from pytmx import mason, objects
 
 
@@ -395,7 +396,7 @@ class NewObjectTest(unittest.TestCase):
         data = dict()
         get = mason.getdefault(data)
         result = mason.new_properties(self.ctx, self.stack, get, self.text)
-        self.assertIsInstance(result, mason.Properties)
+        self.assertIsInstance(result, objects.Properties)
         self.assertIsInstance(result.value, dict)
         self.assertEqual(dict(), result.value)
 

@@ -16,36 +16,14 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
-import time
-
-"""
-
-wth is this mess?
-
-sax parser will emit start and end tokens for the xml
-these tokens are parsed and objects created with defaults on start tokens
-when children of the token are encountered, their relationship is queried on a table
-if there is an operation for say, <tileset> and <tile> objects, then the function
-for the (<tileset>, <tile>) relationship is called, which will do stuff.
-
-images are not loaded in this pass, but are made instead into references.  as the
-parser moves through the file, references are tracked.  a pool of threads will load
-images and do things.  it is up the the image loader to determine what to do.
-
-the pygame loader will fire up a few threads to read the images into memory and
-split the tilesheet into images.
-
-after all images are loaded, a final pass is made over the objects and any objects
-which were previously references are replaced with live objects, just as tile images.
-
-"""
 import gzip
 import os
 import struct
 import threading
+import time
 import zlib
 from base64 import b64decode
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, field, replace
 from itertools import product
 from queue import Queue
@@ -53,6 +31,7 @@ from typing import Any, Dict, Tuple, List, Iterator
 from xml.etree import ElementTree
 
 from contrib.pygame_adapter import pygame_image_loader
+from objects import SubImage, Properties
 from pytmx import objects
 
 # objects.Tiled gid flags
@@ -60,11 +39,16 @@ GID_TRANS_FLIPX = 1 << 31
 GID_TRANS_FLIPY = 1 << 30
 GID_TRANS_ROT = 1 << 29
 
-TileFlags = namedtuple("TileFlags", ["horizontal", "vertical", "diagonal"])
-
 
 class MasonException(Exception):
     pass
+
+
+@dataclass
+class TileFlags:
+    horizontal: bool
+    vertical: bool
+    diagonal: bool
 
 
 @dataclass
@@ -93,11 +77,6 @@ class Token:
     attrib: str
     text: str
     obj: Any
-
-
-@dataclass
-class Properties:
-    value: dict
 
 
 @dataclass
@@ -138,15 +117,14 @@ def convert_to_bool(value: Any) -> bool:
         return False
 
 
-def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
+def decode_gid(raw_gid: int) -> Tuple[int, bool, bool, bool]:
     """Decode a GID from TMX data"""
-    flags = TileFlags(
+    return (
+        raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT),
         raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
         raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
         raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
     )
-    gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
-    return gid, flags
 
 
 def default_image_loader(filename: str):
@@ -181,6 +159,7 @@ def iter_image_tiles(
         range(margin, height + margin - tileheight + 1, tileheight + spacing),
         range(margin, width + margin - tilewidth + 1, tilewidth + spacing),
     ):
+        # tiles.append((x, y, tilewidth, tileheight))
         yield x, y, tilewidth, tileheight
 
 
@@ -204,9 +183,8 @@ def unpack_gids(text: str, encoding: str = None, compression: str = None):
             data = zlib.decompress(data)
         elif compression:
             raise MasonException(f"layer compression {compression} is not supported.")
-        fmt = struct.Struct("<L")
-        iterator = (data[i : i + 4] for i in range(0, len(data), 4))
-        return [fmt.unpack(i)[0] for i in iterator]
+        fmt = "<%dL" % (len(data) // 4)
+        return list(struct.unpack(fmt, data))
     elif encoding == "csv":
         return [int(i) for i in text.split(",")]
     elif encoding:
@@ -267,7 +245,7 @@ def new_map(ctx, stack, get, text) -> objects.Map:
         version=get("version"),
         orientation=get("orientation"),
         renderorder=get("renderorder"),
-        compressionlevel=get("compressionlevel"),
+        # compressionlevel=get("compressionlevel"),
         width=get("width", int),
         height=get("height", int),
         tilewidth=get("tilewidth", int),
@@ -452,28 +430,18 @@ def finalize_map(ctx, stack, parent: None, child: objects.Map):
 
 def load_tileset(ctx, stack, parent: objects.Tileset, child: objects.Image):
     path = os.path.join(ctx.folder, child.source)
+    tilewidth = parent.tilewidth
+    tileheight = parent.tileheight
     p = iter_image_tiles(
-        child.width,
-        child.height,
-        parent.tilewidth,
-        parent.tileheight,
-        parent.margin,
-        parent.spacing,
+        child.width, child.height, tilewidth, tileheight, parent.margin, parent.spacing,
     )
+    tileset_image = Reference(child, "object", 0, None)
     for gid, rect in enumerate(p, parent.firstgid):
         x, y, w, h = rect
-        placeholder = ImagePlaceholder(
-            source=path, x=x, y=y, width=parent.tilewidth, height=parent.tileheight,
-        )
-        tile = objects.Tile(gid=gid, image=placeholder)
+        image = SubImage(source=child, x=x, y=y, width=tilewidth, height=tileheight)
+        ctx.ref2.append(Reference(image, "object", 0, image))
+        tile = objects.Tile(gid=gid, image=image)
         ctx.tiles[gid] = tile
-        ref = Reference(parent, "image", gid, None)
-        ctx.gid_refs[gid] = ref
-
-        ctx.ref2.append(Reference(parent, "image", 0, None))
-        ctx.ref2.append(Reference(tile, "image", 0, "image"))
-
-        yield gid, (placeholder, rect, None)
 
 
 def noop(*args):
@@ -497,19 +465,15 @@ def set_image(ctx, stack, parent, child: objects.Image):
 def set_layer_data(ctx, stack, parent: objects.Map, child: Data):
     data = list()
     for raw_gid in unpack_gids(child.text, child.encoding, child.compression):
-        tile = None
         if raw_gid:
-            gid, flags = decode_gid(raw_gid)
-            tile = ctx.tiles[gid]
-            if gid != raw_gid:
-                tile = replace(
-                    tile,
-                    flipped_h=flags.horizontal,
-                    flipped_v=flags.diagonal,
-                    flipped_d=flags.diagonal,
-                )
+            tile = ctx.tiles[raw_gid]
+            if raw_gid > GID_TRANS_ROT:
+                gid, h, v, d = decode_gid(raw_gid)
+                tile = replace(tile, flipped_h=h, flipped_v=v, flipped_d=d,)
                 ctx.tiles[raw_gid] = tile
-        data.append(tile)
+            data.append(tile)
+        else:
+            data.append(None)
     map = search(stack, "Map")
     parent.data = reshape_data(data, map.width)
 
@@ -546,10 +510,10 @@ factory = {
 }
 
 operations = {
-    (objects.Animation, objects.AnimationFrame): add_animation_frame,
     (Data, objects.Tile): exception(
         "Map using XML objects.Tile elements not supported"
     ),
+    (objects.Animation, objects.AnimationFrame): add_animation_frame,
     (objects.Group, objects.ObjectGroup): add_layer,
     (objects.Group, objects.TileLayer): add_layer,
     (objects.ImageLayer, objects.Image): set_image,
@@ -621,14 +585,23 @@ def parse_all_nodes(ctx: Context, path: str) -> Iterator[Token]:
             if parent.obj:
                 path.insert(0, type(parent.obj))
             operation = operations[tuple(path)]
-            stuff = operation(ctx, stack, parent.obj, token.obj)
+            operation(ctx, stack, parent.obj, token.obj)
             element.clear()
-            if stuff is not None:
-                yield from stuff
-    yield token.obj
+            yield token.obj
 
 
 def worker(queue: Queue, ctx, loaders):
+    """
+
+    each thread should not pull in a new tileset...this requires
+    loading and evac a huge surface in and out of memory each time...
+    a thread should work on tiles from a specific image
+
+    :param queue:
+    :param ctx:
+    :param loaders:
+    :return:
+    """
     while True:
         item = queue.get()
         if item is None:
@@ -667,7 +640,7 @@ def load_tmxmap(path, image_loader=default_image_loader) -> objects.Map:
     """
     start = time.time_ns()
     image_queue = Queue()
-    threads = 2
+    threads = 1
 
     invert_y = False
     ctx = Context()
@@ -681,29 +654,31 @@ def load_tmxmap(path, image_loader=default_image_loader) -> objects.Map:
     ctx.references = dict()
     ctx.names = dict()
     ctx.ref2 = list()
-    ctx.loader_lock = threading.Lock()
     ctx.locks = defaultdict(threading.Lock)
-    tokens = list(parse_all_nodes(ctx, path))
-    loaders = dict()
-    for i in range(threads):
-        thread = threading.Thread(
-            target=worker, args=(image_queue, ctx, loaders), daemon=True
-        )
-        thread.start()
-    for token in tokens:
-        if isinstance(token, Tuple):
-            image_queue.put(token)
-    for i in range(threads):
-        image_queue.put(None)
-    image_queue.join()
-    mason_map = tokens[-1]
-    # threads = 1 : 1.2
+
+    # loaders = dict()
+    # for i in range(threads):
+    #     thread = threading.Thread(
+    #         target=worker, args=(image_queue, ctx, loaders), daemon=True
+    #     )
+    #     thread.start()
+
+    mason_map = parse_for_parent_node_only(ctx, path)
+
+    for ref in ctx.ref2:
+        target = ref.target
+        if isinstance(target, SubImage):
+            print(target.source)
+
+    # for i in range(threads):
+    #     image_queue.put(None)
+    # image_queue.join()
 
     # convert must be done must be done by the main thread; this is a pygame limitation
     for surface in ctx.gidmap.values():
         surface.convert()
 
-    duration = (time.time_ns() - start) / 1000 / 1000 / 1000
+    duration = (time.time_ns() - start) / 1000 / 1000
     print(duration)
 
     return mason_map

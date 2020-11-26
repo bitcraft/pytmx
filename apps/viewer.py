@@ -42,7 +42,7 @@ class BasicRenderer(object):
             y = y * th + tile.offsety
             image = tile.image
             # image = handle_transformation(image, tile)
-            surface_blit(tile.image, (x, y))
+            surface_blit(tile.image.object, (x, y))
 
     def render_object_layer(self, surface, layer):
         draw_rect = pygame.draw.rect
