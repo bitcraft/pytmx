@@ -20,7 +20,6 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 from collections import defaultdict, namedtuple
-from io import BytesIO
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
@@ -175,7 +174,7 @@ prop_type = {
     'bool': convert_to_bool,
     'color': str,
     'file': str,
-    'object': str,
+    'object': int,
 }
 
 
@@ -314,6 +313,8 @@ class TiledMap(TiledElement):
         self.tilesets = list()  # TiledTileset objects
         self.tile_properties = dict()  # tiles that have properties
         self.layernames = dict()
+        self.objects_by_id = dict()
+        self.objects_by_name = dict()
 
         # only used tiles are actually loaded, so there will be a difference
         # between the GIDs in the Tiled map data (tmx) and the data in this
@@ -382,7 +383,11 @@ class TiledMap(TiledElement):
             self.add_layer(TiledImageLayer(self, subnode))
 
         for subnode in node.findall('objectgroup'):
-            self.add_layer(TiledObjectGroup(self, subnode))
+            objectgroup = TiledObjectGroup(self, subnode)
+            self.add_layer(objectgroup)
+            for obj in objectgroup:
+                self.objects_by_id[obj.id] = obj
+                self.objects_by_name[obj.name] = obj
 
         for subnode in node.findall('tileset'):
             self.add_tileset(TiledTileset(self, subnode))
@@ -667,16 +672,21 @@ class TiledMap(TiledElement):
             logger.debug(msg.format(name))
             raise ValueError(msg.format(name))
 
+    def get_object_by_id(self, obj_id):
+        """Find an object
+
+        :param name: Name of object.  Case-sensitive.
+        :rtype: Object if found, otherwise ValueError
+        """
+        return self.objects_by_id[obj_id]
+
     def get_object_by_name(self, name):
         """Find an object
 
         :param name: Name of object.  Case-sensitive.
         :rtype: Object if found, otherwise ValueError
         """
-        for obj in self.objects:
-            if obj.name == name:
-                return obj
-        raise ValueError("Object {0} not found".format(name))
+        return self.objects_by_name[name]
 
     def get_tileset_from_gid(self, gid):
         """ Return tileset that owns the gid
