@@ -20,6 +20,7 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 from collections import defaultdict, namedtuple
+from io import BytesIO
 from itertools import chain, product
 from operator import attrgetter
 from xml.etree import ElementTree
