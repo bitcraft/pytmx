@@ -11,7 +11,7 @@ If you have any problems or suggestions, please open an issue.
 News
 ===============================================================================
 
-__12/04/20__ - Support tile colliders
+__12/04/20__ - Support tile colliders  
 __08/28/20__ - Python 2.7 support removed.  Use the "py27-legacy" branch.  
 __11/13/15__ - Animations are now loaded  
 __07/08/15__ - Documentation overhaul  
