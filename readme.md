@@ -11,6 +11,7 @@ If you have any problems or suggestions, please open an issue.
 News
 ===============================================================================
 
+__12/04/20__ - Support tile colliders
 __08/28/20__ - Python 2.7 support removed.  Use the "py27-legacy" branch.  
 __11/13/15__ - Animations are now loaded  
 __07/08/15__ - Documentation overhaul  
@@ -102,6 +103,7 @@ Design Goals and Features
 * Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
+* Tile collider groups
 * Built-in image loading with pygame, pysdl2, and pyglet
 * Loads animation information
 
@@ -219,6 +221,27 @@ bbox = obj.x, obj.y, obj.width, obj.height
 points = obj.points
 # if obj.closed == True, then obj is a polygon
 ```
+
+#### Get the transformed points (after rotation) of object:
+
+This works for box shaped objects, as well as polygon/line
+```python
+points = obj.apply_transformations()
+```
+
+#### Get tile colliders:
+
+Tile colliders are a objectgroup, with each shape being a TiledObject
+```python
+# iterate over all of them
+for gid, colliders in tiled_map.get_tile_colliders():
+   pass
+
+# get colliders for a specific gid
+properties = TiledMap.get_tile_properties(x, y, layer) 
+colliders = properties["colliders"]
+```
+
 
 Working with Maps
 ===============================================================================
