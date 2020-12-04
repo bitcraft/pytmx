@@ -729,6 +729,13 @@ class TiledMap(TiledElement):
 
         raise ValueError("Tileset not found")
 
+    def get_tile_colliders(self):
+        """Return iterator of (gid, dict) pairs of tiles with colliders"""
+        for gid, props in self.tile_properties.items():
+            colliders = props.get("colliders")
+            if colliders:
+                yield gid, colliders
+
     @property
     def objectgroups(self):
         """Return iterator of all object groups

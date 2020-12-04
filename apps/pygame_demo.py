@@ -146,6 +146,10 @@ class SimpleTest(object):
         for k, v in self.renderer.tmx_data.tile_properties.items():
             logger.info("%s\t%s", k, v)
 
+        logger.info("Tile colliders:")
+        for k, v in self.renderer.tmx_data.get_tile_colliders():
+            logger.info("%s\t%s", k, list(v))
+
     def draw(self, surface):
         """ Draw our map to some surface (probably the display)
         """
