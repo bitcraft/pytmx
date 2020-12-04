@@ -278,6 +278,7 @@ class TiledElement(object):
         else:
             return '<{}: "{}">'.format(self.__class__.__name__, self.name)
 
+
 class TiledMap(TiledElement):
     """Contains the layers, objects, and images from a Tiled TMX map
 
