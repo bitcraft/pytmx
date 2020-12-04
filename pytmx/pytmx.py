@@ -22,6 +22,7 @@ import os
 from collections import defaultdict, namedtuple
 from io import BytesIO
 from itertools import chain, product
+from math import cos, radians, sin
 from operator import attrgetter
 from xml.etree import ElementTree
 
@@ -57,8 +58,9 @@ flag_names = (
     'flipped_vertically',
     'flipped_diagonally')
 
-TileFlags = namedtuple('TileFlags', flag_names)
 AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
+Point = namedtuple("Point", ["x", "y"])
+TileFlags = namedtuple('TileFlags', flag_names)
 
 
 def default_image_loader(filename, flags, **kwargs):
@@ -105,6 +107,19 @@ def convert_to_bool(value):
     else:
         return False
     raise ValueError('cannot parse "{}" as bool'.format(value))
+
+
+def rotate(points, origin, angle):
+    sin_t = sin(radians(angle))
+    cos_t = cos(radians(angle))
+    new_points = list()
+    for point in points:
+        p = (
+            origin.x + (cos_t * (point.x - origin.x) - sin_t * (point.y - origin.y)),
+            origin.y + (sin_t * (point.x - origin.x) + cos_t * (point.y - origin.y)),
+        )
+        new_points.append(p)
+    return new_points
 
 
 # used to change the unicode string returned from xml to
@@ -386,6 +401,7 @@ class TiledMap(TiledElement):
         for subnode in node.findall('imagelayer'):
             self.add_layer(TiledImageLayer(self, subnode))
 
+        # this will only find objectgroup layers, not including tile colliders
         for subnode in node.findall('objectgroup'):
             objectgroup = TiledObjectGroup(self, subnode)
             self.add_layer(objectgroup)
@@ -396,7 +412,7 @@ class TiledMap(TiledElement):
         for subnode in node.findall('tileset'):
             self.add_tileset(TiledTileset(self, subnode))
 
-        # "tile objects", objects with a GID, have need to have their attributes
+        # "tile objects", objects with a GID, require their attributes to be
         # set after the tileset is loaded, so this step must be performed last
         # also, this step is performed for objects to load their tiles.
 
@@ -917,6 +933,10 @@ class TiledTileset(TiledElement):
                     gid = register_gid(int(frame.get('tileid')) + self.firstgid)
                     frames.append(AnimationFrame(gid, duration))
 
+            for objgrp_node in child.findall("objectgroup"):
+                objectgroup = TiledObjectGroup(self.parent, objgrp_node)
+                p["colliders"] = objectgroup
+
             for gid, flags in self.parent.map_gid2(tiled_gid + self.firstgid):
                 self.parent.set_tile_properties(gid, p)
 
@@ -1099,7 +1119,7 @@ class TiledObjectGroup(TiledElement, list):
         self.visible = 1
         self.offsetx = 0
         self.offsety = 0
-        self.draworder = "topdown"
+        self.draworder = "index"
 
         self.parse_xml(node)
 
@@ -1137,6 +1157,7 @@ class TiledObject(TiledElement):
         self.rotation = 0
         self.gid = 0
         self.visible = 1
+        self.closed = True
         self.template = None
 
         self.parse_xml(node)
@@ -1186,9 +1207,28 @@ class TiledObject(TiledElement):
             self.width = abs(x1) + abs(x2)
             self.height = abs(y1) + abs(y2)
             self.points = tuple(
-                [(i[0] + self.x, i[1] + self.y) for i in points])
+                [Point(i[0] + self.x, i[1] + self.y) for i in points])
 
         return self
+
+    def apply_transformations(self):
+        """Return all points for object, taking in account rotation"""
+        if hasattr(self, "points"):
+            return rotate(self.points, self, self.rotation)
+        else:
+            return rotate(self.as_points, self, self.rotation)
+
+    @property
+    def as_points(self):
+        return [
+            Point(*i)
+            for i in [
+                (self.x, self.y),
+                (self.x, self.y + self.height),
+                (self.x + self.width, self.y + self.height),
+                (self.x + self.width, self.y),
+            ]
+        ]
 
 
 class TiledImageLayer(TiledElement):

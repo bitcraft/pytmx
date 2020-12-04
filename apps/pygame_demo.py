@@ -109,20 +109,13 @@ class TiledRenderer(object):
             logger.info(obj)
 
             # objects with points are polygons or lines
-            if hasattr(obj, 'points'):
-                draw_lines(surface, poly_color, obj.closed, obj.points, 3)
-
-            # some objects have an image
-            # Tiled calls them "GID Objects"
-            elif obj.image:
+            if obj.image:
+                # some objects have an image; Tiled calls them "GID Objects"
                 surface_blit(obj.image, (obj.x, obj.y))
 
-            # draw a rect for everything else
-            # Mostly, I am lazy, but you could check if it is circle/oval
-            # and use pygame to draw an oval here...I just do a rect.
             else:
-                draw_rect(surface, rect_color,
-                          (obj.x, obj.y, obj.width, obj.height), 3)
+                # use `apply_transformations` to get the points after rotation
+                draw_lines(surface, rect_color, obj.closed, obj.apply_transformations(), 3)
 
     def render_image_layer(self, surface, layer):
         if layer.image:
