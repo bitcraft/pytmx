@@ -94,14 +94,12 @@ class TiledRenderer(object):
         """ Render all TiledObjects contained in this layer
         """
         # deref these heavily used references for speed
-        draw_rect = pygame.draw.rect
         draw_lines = pygame.draw.lines
         surface_blit = surface.blit
 
         # these colors are used to draw vector shapes,
         # like polygon and box shapes
         rect_color = (255, 0, 0)
-        poly_color = (0, 255, 0)
 
         # iterate over all the objects in the layer
         # These may be Tiled shapes like circles or polygons, GID objects, or Tiled Objects
