@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#55aaff" nextlayerid="15" nextobjectid="38">
+ <tileset firstgid="1" name="acid0" tilewidth="16" tileheight="16" tilecount="4" columns="2">
+  <image source="acid0.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="5" name="acid1" tilewidth="16" tileheight="32" spacing="4" margin="4" tilecount="2" columns="2">
+  <image source="acid1.png" width="44" height="40"/>
+ </tileset>
+ <tileset firstgid="7" name="ACID2" tilewidth="16" tileheight="16" tilecount="3" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="16" height="16" source="acid4.png"/>
+  </tile>
+  <tile id="1">
+   <image width="16" height="16" source="acid/acid7.png"/>
+  </tile>
+  <tile id="2">
+   <image width="16" height="16" source="acid8.png"/>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="8" width="15.7895" height="8"/>
+    <object id="2" x="8" y="0" width="8" height="8"/>
+   </objectgroup>
+  </tile>
+ </tileset>
+ <tileset firstgid="10" source="acid.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="10" height="10">
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,7,7,7,7,7,7,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+8,8,8,8,8,8,8,8,0,0,
+10,8,8,8,8,8,8,8,0,0
+</data>
+ </layer>
+ <layer id="2" name="Tile Layer 2" width="10" height="10">
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,
+0,0,0,0,0,0,0,0,0,0,
+3,3,7,0,0,0,0,0,0,0,
+3,3,8,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+5,5,0,0,0,0,0,0,0,0,
+6,0,0,0,0,0,0,0,0,0,
+0,5,0,0,0,0,0,0,0,0,
+5,5,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="3" name="Tile Layer 3" width="10" height="10">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+2,2,2,2,2,2,2,2,2,2,
+2,2,2,2,2,2,2,2,2,2,
+4,3,0,0,0,0,0,0,0,0,
+4,3,0,0,0,0,0,0,0,0,
+0,0,0,3758096393,1610612745,0,0,0,0,0,
+0,0,0,2147483657,9,0,0,0,0,0,
+0,6,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="4" name="Tile Layer 4" width="10" height="10" opacity="0.5">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="6" name="Object Layer 1">
+  <object id="1" x="32" y="0" width="48" height="48"/>
+  <object id="2" name="name" x="0" y="0">
+   <properties>
+    <property name="Name" value="not name"/>
+   </properties>
+  </object>
+  <object id="3" type="topright" x="160" y="0">
+   <properties>
+    <property name="Type" value="Type"/>
+   </properties>
+  </object>
+  <object id="4" name="cant see me" x="160" y="160" visible="0"/>
+  <object id="5" x="0" y="160" rotation="45">
+   <properties>
+    <property name="Custom" value="Property"/>
+   </properties>
+  </object>
+  <object id="6" gid="7" x="48" y="80" width="32" height="32"/>
+  <object id="8" gid="8" x="48" y="80" width="32" height="16"/>
+  <object id="12" gid="9" x="64" y="144" width="16" height="16"/>
+  <object id="13" gid="9" x="48" y="128" width="16" height="16" rotation="90"/>
+  <object id="14" gid="9" x="64" y="112" width="16" height="16" rotation="180"/>
+  <object id="15" gid="9" x="80" y="128" width="16" height="16" rotation="270"/>
+  <object id="16" x="80" y="48" width="16" height="16">
+   <ellipse/>
+  </object>
+  <object id="17" x="80" y="64" width="16" height="32">
+   <ellipse/>
+  </object>
+  <object id="18" x="128" y="48" width="16" height="32" rotation="90">
+   <ellipse/>
+  </object>
+  <object id="19" x="96" y="64">
+   <polygon points="0,0 0,32 32,32 32,0"/>
+  </object>
+  <object id="20" x="80" y="144">
+   <polyline points="0,0 16,-32 32,-16 48,-48"/>
+  </object>
+  <object id="21" x="48" y="144" width="92.375" height="19">
+   <text wrap="1">Hello World</text>
+  </object>
+  <object id="29" gid="6" x="128" y="96" width="16" height="32"/>
+  <object id="30" gid="5" x="144" y="96" width="16" height="32"/>
+  <object id="33" x="144" y="144">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="Object Layer 2">
+  <object id="25" gid="5" x="128" y="112" width="16" height="32"/>
+  <object id="26" gid="6" x="144" y="112" width="16" height="32"/>
+ </objectgroup>
+ <group id="8" name="Group 1" visible="0">
+  <layer id="9" name="Tile Layer 5" width="10" height="10">
+   <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,1,1,
+0,0,0,0,0,0,0,0,0,0
+</data>
+  </layer>
+  <objectgroup id="10" name="Object Layer 3">
+   <object id="22" gid="2" x="144" y="128" width="16" height="16"/>
+   <object id="23" gid="2" x="128" y="128" width="16" height="16"/>
+  </objectgroup>
+ </group>
+ <group id="12" name="Copy of Group 1" opacity="0.5">
+  <layer id="13" name="Tile Layer 5" width="10" height="10">
+   <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,1,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+  </layer>
+  <objectgroup id="14" name="Object Layer 3">
+   <object id="31" gid="2" x="144" y="64" width="16" height="16"/>
+   <object id="32" gid="2" x="128" y="64" width="16" height="16"/>
+  </objectgroup>
+ </group>
+ <imagelayer id="11" name="Image Layer 1">
+  <image source="acid2.png" width="32" height="32"/>
+ </imagelayer>
+</map>
