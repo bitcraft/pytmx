@@ -1123,7 +1123,7 @@ class TiledObjectGroup(TiledElement, list):
         self.name = None
         self.color = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
         self.offsetx = 0
         self.offsety = 0
         self.draworder = "index"
@@ -1163,7 +1163,7 @@ class TiledObject(TiledElement):
         self.height = 0
         self.rotation = 0
         self.gid = 0
-        self.visible = 1
+        self.visible = True
         self.closed = True
         self.template = None
 
@@ -1254,7 +1254,7 @@ class TiledImageLayer(TiledElement):
         # defaults from the specification
         self.name = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
 
         self.parse_xml(node)
 
@@ -1271,9 +1271,6 @@ class TiledImageLayer(TiledElement):
         :return: self
         """
         self._set_properties(node)
-        self.name = node.get('name', None)
-        self.opacity = node.get('opacity', self.opacity)
-        self.visible = node.get('visible', self.visible)
         image_node = node.find('image')
         self.source = image_node.get('source', None)
         self.trans = image_node.get('trans', None)
