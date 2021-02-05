@@ -395,14 +395,36 @@ class TiledMap(TiledElement):
 
         # ***         do not change this load order!         *** #
         # ***    gid mapping errors will occur if changed    *** #
-        for subnode in node.findall('layer'):
+        def find_all_visible_nodes(node, node_type):
+            """ Recursively find all visible nodes of the specified type
+
+            Recurses though the ElementTree of a TMX file to find visible nodes
+            by node type.  The layers can be organized in a tree structure of
+            group layers.  This method recurses through any groups to find all
+            such layers in the TMX file.
+
+            :param node: ElementTree xml node
+            :param node_type: Tag name of elements to find
+            :return: Python list of ElementTree xml nodes
+            """
+            subnodes = []
+            for subnode in node:
+                if 'visible' in subnode.attrib and not convert_to_bool(subnode.attrib['visible']):
+                    continue
+                if subnode.tag == node_type:
+                    subnodes.append(subnode)
+                elif subnode.tag == 'group':
+                    subnodes += find_all_visible_nodes(subnode, node_type)
+            return subnodes
+
+        for subnode in find_all_visible_nodes(node, 'layer'):
             self.add_layer(TiledTileLayer(self, subnode))
 
-        for subnode in node.findall('imagelayer'):
+        for subnode in find_all_visible_nodes(node, 'imagelayer'):
             self.add_layer(TiledImageLayer(self, subnode))
 
         # this will only find objectgroup layers, not including tile colliders
-        for subnode in node.findall('objectgroup'):
+        for subnode in find_all_visible_nodes(node, 'objectgroup'):
             objectgroup = TiledObjectGroup(self, subnode)
             self.add_layer(objectgroup)
             for obj in objectgroup:
