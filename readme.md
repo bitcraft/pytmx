@@ -3,6 +3,9 @@
 
 If you have any problems or suggestions, please open an issue.
 
+If you find this useful, please consider making a donation to help support it
+https://liberapay.com/ltheden/donate
+
 *Released under the LGPL v3*
 
 ### See the "apps" folder for example use and cut/paste code.
