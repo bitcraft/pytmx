@@ -59,7 +59,7 @@ def smart_convert(original, colorkey, pixelalpha):
     # no colorkey, so use a mask to determine if there are transparent pixels
     else:
         tile_size = original.get_size()
-        threshold = 127  # the default
+        threshold = 254  # the default
 
         try:
             # count the number of pixels in the tile that are not transparent
