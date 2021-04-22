@@ -397,14 +397,36 @@ class TiledMap(TiledElement):
 
         # ***         do not change this load order!         *** #
         # ***    gid mapping errors will occur if changed    *** #
-        for subnode in node.findall('layer'):
+        def find_all_visible_nodes(node, node_type):
+            """ Recursively find all visible nodes of the specified type
+
+            Recurses though the ElementTree of a TMX file to find visible nodes
+            by node type.  The layers can be organized in a tree structure of
+            group layers.  This method recurses through any groups to find all
+            such layers in the TMX file.
+
+            :param node: ElementTree xml node
+            :param node_type: Tag name of elements to find
+            :return: Python list of ElementTree xml nodes
+            """
+            subnodes = []
+            for subnode in node:
+                if 'visible' in subnode.attrib and not convert_to_bool(subnode.attrib['visible']):
+                    continue
+                if subnode.tag == node_type:
+                    subnodes.append(subnode)
+                elif subnode.tag == 'group':
+                    subnodes += find_all_visible_nodes(subnode, node_type)
+            return subnodes
+
+        for subnode in find_all_visible_nodes(node, 'layer'):
             self.add_layer(TiledTileLayer(self, subnode))
 
-        for subnode in node.findall('imagelayer'):
+        for subnode in find_all_visible_nodes(node, 'imagelayer'):
             self.add_layer(TiledImageLayer(self, subnode))
 
         # this will only find objectgroup layers, not including tile colliders
-        for subnode in node.findall('objectgroup'):
+        for subnode in find_all_visible_nodes(node, 'objectgroup'):
             objectgroup = TiledObjectGroup(self, subnode)
             self.add_layer(objectgroup)
             for obj in objectgroup:
@@ -1125,7 +1147,7 @@ class TiledObjectGroup(TiledElement, list):
         self.name = None
         self.color = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
         self.offsetx = 0
         self.offsety = 0
         self.draworder = "index"
@@ -1165,7 +1187,7 @@ class TiledObject(TiledElement):
         self.height = 0
         self.rotation = 0
         self.gid = 0
-        self.visible = 1
+        self.visible = True
         self.closed = True
         self.template = None
 
@@ -1256,7 +1278,7 @@ class TiledImageLayer(TiledElement):
         # defaults from the specification
         self.name = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
 
         self.parse_xml(node)
 
@@ -1273,9 +1295,6 @@ class TiledImageLayer(TiledElement):
         :return: self
         """
         self._set_properties(node)
-        self.name = node.get('name', None)
-        self.opacity = node.get('opacity', self.opacity)
-        self.visible = node.get('visible', self.visible)
         image_node = node.find('image')
         self.source = image_node.get('source', None)
         self.trans = image_node.get('trans', None)
