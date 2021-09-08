@@ -17,10 +17,13 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
+import gzip
 import logging
 import os
+import struct
+import zlib
+from base64 import b64decode
 from collections import defaultdict, namedtuple
-from io import BytesIO
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
@@ -49,6 +52,8 @@ TRANS_ROT = 4
 GID_TRANS_FLIPX = 1 << 31
 GID_TRANS_FLIPY = 1 << 30
 GID_TRANS_ROT = 1 << 29
+GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT
+
 
 # error message format strings go here
 duplicate_name_fmt = 'Cannot set user {} property on {} "{}"; Tiled property already exists.'
@@ -61,6 +66,7 @@ flag_names = (
 AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
 Point = namedtuple("Point", ["x", "y"])
 TileFlags = namedtuple('TileFlags', flag_names)
+empty_flags = TileFlags(False, False, False)
 
 
 def default_image_loader(filename, flags, **kwargs):
@@ -73,21 +79,44 @@ def default_image_loader(filename, flags, **kwargs):
     return load
 
 
-def decode_gid(raw_gid):
-    """ Decode a GID from TMX data
-
-    as of 0.7.0 it determines if the tile should be flipped when rendered
-    as of 0.8.0 bit 30 determines if GID is rotated
-
-    :param raw_gid: 32-bit number from TMX layer data
-    :return: gid, flags
+def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
     """
-    flags = TileFlags(
-        raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
-        raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
-        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT)
-    gid = raw_gid & ~(GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT)
-    return gid, flags
+    Decode a GID from TMX data
+
+    """
+    if raw_gid < GID_TRANS_ROT:
+        return raw_gid, empty_flags
+    return (
+        raw_gid & ~GID_MASK,
+        TileFlags(
+            raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
+            raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
+            raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
+        )
+    )
+
+
+def reshape_data(gids: list[int], width: int):
+    """Change 1d list to 2d list"""
+    return [gids[i : i + width] for i in range(0, len(gids), width)]
+
+
+def unpack_gids(text: str, encoding: str = None, compression: str = None):
+    """Return all gids from encoded/compressed layer data"""
+    if encoding == "base64":
+        data = b64decode(text)
+        if compression == "gzip":
+            data = gzip.decompress(data)
+        elif compression == "zlib":
+            data = zlib.decompress(data)
+        elif compression:
+            raise ValueError(f"layer compression {compression} is not supported.")
+        fmt = "<%dL" % (len(data) // 4)
+        return list(struct.unpack(fmt, data))
+    elif encoding == "csv":
+        return [int(i) for i in text.split(",")]
+    elif encoding:
+        raise ValueError(f"layer encoding {encoding} is not supported.")
 
 
 def convert_to_bool(value):
@@ -484,6 +513,11 @@ class TiledMap(TiledElement):
                     # handle that here
                     for gid, flags in gids:
                         self.images[gid] = loader(rect, flags)
+                # else:
+                #     # not used in layer data give another chance to load the tile anyway
+                #     if self.load_all_tiles or real_gid in self.optional_gids:
+                #         # TODO: handle flags? - might never be an issue, though
+                #         self.register_gid(real_gid, flags=0)
 
         # load image layer images
         for layer in (i for i in self.layers if isinstance(i, TiledImageLayer)):
@@ -1035,12 +1069,7 @@ class TiledTileLayer(TiledElement):
         :param node: ElementTree xml node
         :return: self
         """
-        import struct
-        import array
-
         self._set_properties(node)
-        data = None
-        next_gid = None
         data_node = node.find('data')
         chunk_nodes = data_node.findall('chunk')
         if chunk_nodes:
@@ -1048,66 +1077,29 @@ class TiledTileLayer(TiledElement):
             logger.error(msg)
             raise Exception
 
-        encoding = data_node.get('encoding', None)
-        if encoding == 'base64':
-            from base64 import b64decode
+        child = data_node.find("tile")
+        if child is not None:
+            raise ValueError("XML tile elements are no longer supported. Must use base64 or csv map formats.")
 
-            data = b64decode(data_node.text.strip())
-
-        elif encoding == 'csv':
-            next_gid = map(int, "".join(
-                line.strip() for line in data_node.text.strip()).split(","))
-
-        elif encoding:
-            msg = 'TMX encoding type: {0} is not supported.'
-            logger.error(msg.format(encoding))
-            raise Exception(msg.format(encoding))
-
-        compression = data_node.get('compression', None)
-        if compression == 'gzip':
-            import gzip
-
-            with gzip.GzipFile(fileobj=BytesIO(data)) as fh:
-                data = fh.read()
-
-        elif compression == 'zlib':
-            import zlib
-
-            data = zlib.decompress(data)
-
-        elif compression:
-            msg = 'TMX compression type: {0} is not supported.'
-            logger.error(msg.format(compression))
-            raise Exception(msg.format(compression))
-
-        # if data is None, then it was not decoded or decompressed, so
-        # we assume here that it is going to be a bunch of tile elements
-        # TODO: this will/should raise an exception if there are no tiles
-        if encoding == next_gid is None:
-            def get_children(parent):
-                for child in parent.findall('tile'):
-                    yield int(child.get('gid'))
-
-            next_gid = get_children(data_node)
-
-        elif data:
-            if type(data) == bytes:
-                fmt = struct.Struct('<L')
-                iterator = (data[i:i + 4] for i in range(0, len(data), 4))
-                next_gid = (fmt.unpack(i)[0] for i in iterator)
-            else:
-                msg = 'layer data not in expected format ({})'
-                logger.error(msg.format(type(data)))
-                raise Exception(msg.format(type(data)))
-
-        init = lambda: [0] * self.width
         reg = self.parent.register_gid
+        temp = list()
+        temp_append = temp.append
+        for gid in unpack_gids(
+            text=data_node.text.strip(),
+            encoding=data_node.get('encoding', None),
+            compression=data_node.get('compression', None),
+        ):
+            if gid == 0:
+                temp_append(0)
+            elif gid < GID_TRANS_ROT:
+                gid = reg(gid)
+                temp_append(gid)
+            else:
+                gid, flags = decode_gid(gid)
+                gid = reg(gid, flags)
+                temp_append(gid)
 
-        # H (16-bit) may be a limitation for very detailed maps
-        self.data = tuple(array.array('H', init()) for i in range(self.height))
-        for (y, x) in product(range(self.height), range(self.width)):
-            self.data[y][x] = reg(*decode_gid(next(next_gid)))
-
+        self.data = reshape_data(temp, self.width)
         return self
 
 

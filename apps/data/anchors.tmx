@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.7.1" orientation="orthogonal" renderorder="right-down" width="5" height="3" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="4">
+ <tileset firstgid="1" name="figur" tilewidth="32" tileheight="64" tilecount="1" columns="1">
+  <image source="Tiled Images/figur.png" width="32" height="64"/>
+ </tileset>
+ <tileset firstgid="2" name="figur2" tilewidth="32" tileheight="96" tilecount="1" columns="1">
+  <image source="Tiled Images/figur2.png" width="32" height="96"/>
+ </tileset>
+ <tileset firstgid="3" name="background" tilewidth="160" tileheight="96" tilecount="1" columns="1">
+  <image source="Tiled Images/background.png" width="160" height="96"/>
+ </tileset>
+ <tileset firstgid="4" name="midTile" tilewidth="32" tileheight="32" tilecount="12" columns="3">
+  <image source="Tiled Images/midTile.png" width="96" height="128"/>
+ </tileset>
+ <tileset firstgid="16" name="bush" tilewidth="32" tileheight="32" tilecount="1" columns="1">
+  <image source="Tiled Images/bush.png" width="32" height="32"/>
+ </tileset>
+ <layer id="1" name="Background" width="5" height="3">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAOMGMRAwAAeAAE
+  </data>
+ </layer>
+ <layer id="2" name="Main" width="5" height="3">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAOsAAxKxCzIYkBAAEkABA=
+  </data>
+ </layer>
+ <objectgroup id="3" name="Objects">
+  <object id="1" gid="16" x="0" y="32" width="32" height="32"/>
+  <object id="2" gid="1" x="32" y="64" width="32" height="64"/>
+  <object id="3" gid="2" x="96" y="96" width="32" height="96"/>
+ </objectgroup>
+</map>

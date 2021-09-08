@@ -230,7 +230,7 @@ if __name__ == '__main__':
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('data', '*.tmx')):
+        for filename in glob.glob(os.path.join('apps', 'data', '*.tmx')):
             logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break
