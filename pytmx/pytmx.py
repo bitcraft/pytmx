@@ -17,6 +17,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
+from __future__ import annotations
 import gzip
 import logging
 import os
@@ -27,6 +28,7 @@ from collections import defaultdict, namedtuple
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
+from typing import List, Tuple
 from xml.etree import ElementTree
 
 __all__ = (
@@ -61,7 +63,8 @@ duplicate_name_fmt = 'Cannot set user {} property on {} "{}"; Tiled property alr
 flag_names = (
     'flipped_horizontally',
     'flipped_vertically',
-    'flipped_diagonally')
+    'flipped_diagonally'
+)
 
 AnimationFrame = namedtuple('AnimationFrame', ['gid', 'duration'])
 Point = namedtuple("Point", ["x", "y"])
@@ -79,7 +82,7 @@ def default_image_loader(filename, flags, **kwargs):
     return load
 
 
-def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
+def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
     """
     Decode a GID from TMX data
 
@@ -88,6 +91,7 @@ def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
         return raw_gid, empty_flags
     return (
         raw_gid & ~GID_MASK,
+        # TODO: cache all combinations of flags
         TileFlags(
             raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
             raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
@@ -96,12 +100,12 @@ def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
     )
 
 
-def reshape_data(gids: list[int], width: int):
+def reshape_data(gids: List[int], width: int) -> List[List[int]]:
     """Change 1d list to 2d list"""
     return [gids[i : i + width] for i in range(0, len(gids), width)]
 
 
-def unpack_gids(text: str, encoding: str = None, compression: str = None):
+def unpack_gids(text: str, encoding: str=None, compression: str=None) -> List[int]:
     """Return all gids from encoded/compressed layer data"""
     if encoding == "base64":
         data = b64decode(text)
@@ -244,7 +248,7 @@ def parse_properties(node):
     return d
 
 
-class TiledElement(object):
+class TiledElement:
     """ Base class for all pytmx types
     """
     allow_duplicate_names = False
