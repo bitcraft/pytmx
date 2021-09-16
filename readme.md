@@ -93,7 +93,7 @@ Getting Help
 ===============================================================================
 
 For bugs or feature requests, please use the issues feature of github.  For
-all other general questions, join me on IRC at freennode.net #pygame.
+all other general questions, join me on IRC at freenode.net #pygame.
 
 
 Design Goals and Features
@@ -361,7 +361,7 @@ Pytmx loads tile layers and their data:
 #### Tile Images
 
 Single tile images are accessible from TiledMap, TiledTileLayer, and TiledObject objects.
-If you requre all images in a layer, there are more effecient ways described below.
+If you requre all images in a layer, there are more efficient ways described below.
 
 ```python
 # get image from the TiledMap using x, y, and layer numbers
@@ -445,7 +445,7 @@ Working with Objects
 ===============================================================================
 
 Tiled "objects" are things that are created in object layers, and include
-polygons, polylings, boxes, ellispes, and tile objects.  Pytmx loads all objects
+polygons, polylings, boxes, ellipses, and tile objects.  Pytmx loads all objects
 and their data:
 
 - name

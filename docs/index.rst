@@ -28,7 +28,7 @@ Getting Help
 ============
 
 For bugs or feature requests, please use the issues feature of github.  For
-all other general questions, join me on IRC at freennode.net #pygame.
+all other general questions, join me on IRC at freenode.net #pygame.
 
 
 Installation
