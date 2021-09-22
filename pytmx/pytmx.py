@@ -967,8 +967,8 @@ class TiledTileset(TiledElement):
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p['source'] = tile_source
                 p['trans'] = image.get('trans', None)
-                p['width'] = image.get('width')
-                p['height'] = image.get('height')
+                p['width'] = image.get('width', None)
+                p['height'] = image.get('height', None)
 
             # handle tiles with animations
             anim = child.find('animation')
