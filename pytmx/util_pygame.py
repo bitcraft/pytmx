@@ -54,7 +54,7 @@ def smart_convert(original, colorkey, pixelalpha):
     if colorkey:
         tile = original.convert()
         tile.set_colorkey(colorkey, pygame.RLEACCEL)
-        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL sould be used
+        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL should be used
 
     # no colorkey, so use a mask to determine if there are transparent pixels
     else:

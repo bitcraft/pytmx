@@ -343,7 +343,7 @@ class TiledMap(TiledElement):
         :param optional_gids: load specific tile image GID, even if never used
         :param invert_y: invert the y axis
         :param load_all_tiles: load all tile images, even if never used
-        :param allow_duplicate_names: allow duplicates in objects' metatdata
+        :param allow_duplicate_names: allow duplicates in objects' metadata
 
         image_loader:
           this must be a reference to a function that will accept a tuple:
