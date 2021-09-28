@@ -810,7 +810,7 @@ class TiledMap(TiledElement):
         :rtype: Iterator
         """
         return (i for (i, l) in enumerate(self.layers)
-                if isinstance(l, TiledTileLayer) and l.visible)
+                if l.visible and isinstance(l, TiledTileLayer))
 
     @property
     def visible_object_groups(self):
@@ -1016,6 +1016,7 @@ class TiledGroupLayer(TiledElement):
         TiledElement.__init__(self)
         self.parent = parent
         self.name = None
+        self.visible = 1
         self.parse_xml(node)
 
     def parse_xml(self, node):
