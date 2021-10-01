@@ -1,3 +1,0 @@
-pygame==2.0.1
-dataclasses==0.6
-pyglet==1.5.21

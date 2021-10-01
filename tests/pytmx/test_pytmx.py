@@ -73,11 +73,14 @@ class TiledMapTest(unittest.TestCase):
         self.m = pytmx.TiledMap(self.filename)
 
     def test_build_rects(self):
-        from pytmx import util_pygame
-        rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", None)
-        self.assertEqual(rects[0], [0, 0, 240, 240])
-        rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", 18)
-        self.assertNotEqual(0, len(rects))
+        try:
+            from pytmx import util_pygame
+            rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", None)
+            self.assertEqual(rects[0], [0, 0, 240, 240])
+            rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", 18)
+            self.assertNotEqual(0, len(rects))
+        except ImportError:
+            pass
 
     def test_get_tile_image(self):
         image = self.m.get_tile_image(0, 0, 0)

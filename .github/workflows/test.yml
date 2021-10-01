@@ -17,12 +17,18 @@ jobs:
           - 3.7.12
           - 3.8.12
           - 3.9.7
+        dependencies:
+          - pygame pyglet
+          - pygame
+          - pyglet
+          - "null"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements
-        run: pip install -r requirements.txt
+        if: ${{ matrix.dependencies != "null" }}
+        run: pip install ${{ matrix.dependencies }}
       - name: Run Tests
         run: python -m unittest tests/pytmx/test_pytmx.py
