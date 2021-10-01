@@ -430,21 +430,24 @@ class TiledMap(TiledElement):
 
         # ***         do not change this load order!         *** #
         # ***    gid mapping errors will occur if changed    *** #
-        for subnode in node.findall('layer'):
+        for subnode in node.findall('.//group'):
+            self.add_layer(TiledGroupLayer(self, subnode))
+
+        for subnode in node.findall('.//layer'):
             self.add_layer(TiledTileLayer(self, subnode))
 
-        for subnode in node.findall('imagelayer'):
+        for subnode in node.findall('.//imagelayer'):
             self.add_layer(TiledImageLayer(self, subnode))
 
         # this will only find objectgroup layers, not including tile colliders
-        for subnode in node.findall('objectgroup'):
+        for subnode in node.findall('.//objectgroup'):
             objectgroup = TiledObjectGroup(self, subnode)
             self.add_layer(objectgroup)
             for obj in objectgroup:
                 self.objects_by_id[obj.id] = obj
                 self.objects_by_name[obj.name] = obj
 
-        for subnode in node.findall('tileset'):
+        for subnode in node.findall('.//tileset'):
             self.add_tileset(TiledTileset(self, subnode))
 
         # "tile objects", objects with a GID, require their attributes to be
@@ -704,9 +707,8 @@ class TiledMap(TiledElement):
 
         :param layer: TileTileLayer, TiledImageLayer, TiledObjectGroup object
         """
-        assert (
-            isinstance(layer,
-                       (TiledTileLayer, TiledImageLayer, TiledObjectGroup)))
+        assert (isinstance(layer, (TiledGroupLayer, TiledTileLayer,
+                                   TiledImageLayer, TiledObjectGroup)))
 
         self.layers.append(layer)
         self.layernames[layer.name] = layer
@@ -1006,6 +1008,20 @@ class TiledTileset(TiledElement):
             self.width = int(image_node.get('width'))
             self.height = int(image_node.get('height'))
 
+        return self
+
+
+class TiledGroupLayer(TiledElement):
+    def __init__(self, parent, node):
+        TiledElement.__init__(self)
+        self.parent = parent
+        self.name = None
+        self.visible = 1
+        self.parse_xml(node)
+
+    def parse_xml(self, node):
+        self._set_properties(node)
+        self.name = node.get('name', None)
         return self
 
 
