@@ -1,5 +1,5 @@
 ## PyTMX
-##### For Python 3.3+
+##### For Python 3.7+
 
 If you have any problems or suggestions, please open an issue.
 
