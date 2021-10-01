@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements
-        if: ${{ matrix.dependencies != "null" }}
+        if: ${{ matrix.dependencies != 'null' }}
         run: pip install ${{ matrix.dependencies }}
       - name: Run Tests
         run: python -m unittest tests/pytmx/test_pytmx.py
