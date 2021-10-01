@@ -67,7 +67,7 @@ class TestConvertToBool(unittest.TestCase):
 
 
 class TiledMapTest(unittest.TestCase):
-    filename = '../resources/test01.tmx'
+    filename = 'tests/resources/test01.tmx'
 
     def setUp(self):
         self.m = pytmx.TiledMap(self.filename)
