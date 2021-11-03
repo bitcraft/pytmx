@@ -31,7 +31,7 @@ try:
     from pygame._sdl2 import Texture, Image, Renderer, Window
     import pygame
 except ImportError:
-    logger.error('cannot import pygame (is it installed?)')
+    logger.error("cannot import pygame (is it installed?)")
     raise
 
 
@@ -99,5 +99,5 @@ def load_pygame_sdl2(renderer: Renderer, filename: str, *args, **kwargs):
     Load a TMX file, images, and return a TiledMap class
 
     """
-    kwargs['image_loader'] = partial(pygame_sd2_image_loader, renderer)
+    kwargs["image_loader"] = partial(pygame_sd2_image_loader, renderer)
     return pytmx.TiledMap(filename, *args, **kwargs)
