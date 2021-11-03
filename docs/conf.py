@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pytmx'
-copyright = '2014, Leif Theden'
+copyright = '2012-2021, Leif Theden'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -245,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'pytmx', 'pytmx Documentation',
-   'Author', 'pytmx', 'One line description of project.',
+   'Author', 'pytmx', 'Load maps created with Tiled Map Editor',
    'Miscellaneous'),
 ]
 
@@ -268,7 +268,7 @@ texinfo_documents = [
 epub_title = 'pytmx'
 epub_author = 'Leif Theden'
 epub_publisher = 'Leif Theden'
-epub_copyright = '2014, Leif Theden'
+epub_copyright = '2012-2021, Leif Theden'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = 'pytmx'
