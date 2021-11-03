@@ -110,7 +110,7 @@ Scrolling Demo
 
 I have another repo with a working demo of a proper scrolling map using Tiled
 maps and pygame.  Please feel free to test drive it.  It isn't limited to Tiled
-maps, you can use any data structure you want, as long as PyGame is used.
+maps, you can use any data structure you want, as long as pygame is used.
 
 https://github.com/bitcraft/pyscroll
 
