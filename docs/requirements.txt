@@ -1,3 +1,4 @@
 pygame
 pyglet
 pysdl2
+docutils<0.18
