@@ -87,8 +87,17 @@ class TiledRenderer(object):
         surface_blit = surface.blit
 
         # iterate over the tiles in the layer, and blit them
-        for x, y, image in layer.tiles():
-            surface_blit(image, (x * tw, y * th))
+        if self.tmx_data.orientation == "orthogonal":
+            for x, y, image in layer.tiles():
+                surface_blit(image, (x * tw, y * th))
+        elif self.tmx_data.orientation == "isometric":
+            ox = self.pixel_size[0] // 2
+            tw2 = tw // 2
+            th2 = th // 2
+            for x, y, image in layer.tiles():
+                sx = x * tw2 - y * tw2
+                sy = x * th2 + y * th2
+                surface_blit(image, (sx + ox, sy))
 
     def render_object_layer(self, surface, layer):
         """ Render all TiledObjects contained in this layer
