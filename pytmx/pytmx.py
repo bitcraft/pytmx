@@ -32,7 +32,11 @@ from operator import attrgetter
 from typing import List, Tuple, Optional, Sequence, Union, Dict, Iterable
 from xml.etree import ElementTree
 
-import pygame
+# for type hinting
+try:
+    import pygame
+except ImportError:
+    pygame = None
 
 __all__ = (
     "TiledElement",
@@ -72,9 +76,14 @@ AnimationFrame = namedtuple("AnimationFrame", ["gid", "duration"])
 Point = namedtuple("Point", ["x", "y"])
 TileFlags = namedtuple("TileFlags", flag_names)
 empty_flags = TileFlags(False, False, False)
-ColorLike = Union[Tuple[int, int, int], int, str]
-PointLike = Union[Tuple[int, int], pygame.Vector2, Point]
+ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
 MapPoint = Tuple[int, int, int]
+
+# need a more graceful way to handle annotations for optional dependancies
+if pygame:
+    PointLike = Union[Tuple[int, int], pygame.Vector2, Point]
+else:
+    PointLike = Union[Tuple[int, int], Point]
 
 
 def default_image_loader(filename: str, flags, **kwargs):
