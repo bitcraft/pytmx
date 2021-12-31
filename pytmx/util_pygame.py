@@ -19,8 +19,10 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
 import itertools
 import logging
+from typing import Optional, Union, List
 
 import pytmx
+from pytmx.pytmx import ColorLike, PointLike
 
 logger = logging.getLogger(__name__)
 
@@ -28,33 +30,59 @@ try:
     from pygame.transform import flip, rotate
     import pygame
 except ImportError:
-    logger.error('cannot import pygame (is it installed?)')
+    logger.error("cannot import pygame (is it installed?)")
     raise
 
-__all__ = ['load_pygame', 'pygame_image_loader', 'simplify', 'build_rects']
+__all__ = ["load_pygame", "pygame_image_loader", "simplify", "build_rects"]
 
 
-def handle_transformation(tile, flags):
+def handle_transformation(
+    tile: pygame.Surface,
+    flags: pytmx.TileFlags,
+) -> pygame.Surface:
+    """
+    Transform tile according to the flags and return a new one
+
+    Parameters:
+        tile: tile surface to transform
+        flags: TileFlags object
+
+    Returns:
+        new tile surface
+
+    """
     if flags.flipped_diagonally:
-        tile = flip(rotate(tile, 270), 1, 0)
+        tile = flip(rotate(tile, 270), True, False)
     if flags.flipped_horizontally or flags.flipped_vertically:
         tile = flip(tile, flags.flipped_horizontally, flags.flipped_vertically)
     return tile
 
 
-def smart_convert(original, colorkey, pixelalpha):
+def smart_convert(
+    original: pygame.Surface,
+    colorkey: Optional[ColorLike],
+    pixelalpha: bool,
+) -> pygame.Surface:
     """
-    this method does several interactive_tests on a surface to determine the optimal
+    Return new pygame Surface with optimal pixel/data format
+
+    This method does several interactive_tests on a surface to determine the optimal
     flags and pixel format for each tile surface.
 
-    this is done for the best rendering speeds and removes the need to
-    convert() the images on your own
+    Parameters:
+        original: tile surface to inspect
+        colorkey: optional colorkey for the tileset image
+        pixelalpha: if true, prefer per-pixel alpha surfaces
+
+    Returns:
+        new tile surface
+
     """
     # tiled set a colorkey
     if colorkey:
         tile = original.convert()
         tile.set_colorkey(colorkey, pygame.RLEACCEL)
-        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL sould be used
+        # TODO: if there is a colorkey, count the colorkey pixels to determine if RLEACCEL should be used
 
     # no colorkey, so use a mask to determine if there are transparent pixels
     else:
@@ -84,18 +112,22 @@ def smart_convert(original, colorkey, pixelalpha):
     return tile
 
 
-def pygame_image_loader(filename, colorkey, **kwargs):
-    """ pytmx image loader for pygame
+def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
+    """
+    pytmx image loader for pygame
 
-    :param filename:
-    :param colorkey:
-    :param kwargs:
-    :return:
+    Parameters:
+        filename: filename, including path, to load
+        colorkey: colorkey for the image
+
+    Returns:
+        function to load tile images
+
     """
     if colorkey:
-        colorkey = pygame.Color('#{0}'.format(colorkey))
+        colorkey = pygame.Color("#{0}".format(colorkey))
 
-    pixelalpha = kwargs.get('pixelalpha', True)
+    pixelalpha = kwargs.get("pixelalpha", True)
     image = pygame.image.load(filename)
 
     def load_image(rect=None, flags=None):
@@ -103,7 +135,7 @@ def pygame_image_loader(filename, colorkey, **kwargs):
             try:
                 tile = image.subsurface(rect)
             except ValueError:
-                logger.error('Tile bounds outside bounds of tileset image')
+                logger.error("Tile bounds outside bounds of tileset image")
                 raise
         else:
             tile = image.copy()
@@ -117,8 +149,12 @@ def pygame_image_loader(filename, colorkey, **kwargs):
     return load_image
 
 
-def load_pygame(filename, *args, **kwargs):
-    """ Load a TMX file, images, and return a TiledMap class
+def load_pygame(
+    filename: str,
+    *args,
+    **kwargs,
+) -> pytmx.TiledMap:
+    """Load a TMX file, images, and return a TiledMap class
 
     PYGAME USERS: Use me.
 
@@ -135,26 +171,40 @@ def load_pygame(filename, *args, **kwargs):
     TL;DR:
     Don't attempt to convert() or convert_alpha() the individual tiles.  It is
     already done for you.
+
+    Parameters:
+        filename: filename to load
+
+    Returns:
+        new pytmx.TiledMap object
+
     """
-    kwargs['image_loader'] = pygame_image_loader
+    kwargs["image_loader"] = pygame_image_loader
     return pytmx.TiledMap(filename, *args, **kwargs)
 
 
-def build_rects(tmxmap, layer, tileset=None, real_gid=None):
-    """generate a set of non-overlapping rects that represents the distribution
-       of the specified gid.
+def build_rects(
+    tmxmap: pytmx.TiledMap,
+    layer: Union[int, str],
+    tileset: Optional[Union[int, str]],
+    real_gid: Optional[int],
+) -> List[pygame.Rect]:
+    """
+    Generate a set of non-overlapping rects that represents the distribution of the specified gid.
 
-    useful for generating rects for use in collision detection
-
-    Use at your own risk: this is experimental...will change in future
+    Useful for generating rects for use in collision detection
 
     GID Note: You will need to add 1 to the GID reported by Tiled.
 
-    :param tmxmap: TiledMap object
-    :param layer: int or string name of layer
-    :param tileset: int or string name of tileset
-    :param real_gid: Tiled GID of the tile + 1 (see note)
-    :return: List of pygame Rect objects
+    Parameters:
+        tmxmap: TiledMap object
+        layer: int or string name of layer
+        tileset: int or string name of tileset
+        real_gid: Tiled GID of the tile + 1 (see note)
+
+    Returns:
+        list of pygame Rect objects
+
     """
     if isinstance(tileset, int):
         try:
@@ -168,7 +218,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
         try:
             tileset = [t for t in tmxmap.tilesets if t.name == tileset].pop()
         except IndexError:
-            msg = "Tileset \"{0}\" not found in map {1}."
+            msg = 'Tileset "{0}" not found in map {1}.'
             logger.debug(msg.format(tileset, tmxmap))
             raise ValueError
 
@@ -193,7 +243,7 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
             layer = [l for l in tmxmap.layers if l.name == layer].pop()
             layer_data = layer.data
         except IndexError:
-            msg = "Layer \"{0}\" not found in map {1}."
+            msg = 'Layer "{0}" not found in map {1}.'
             logger.debug(msg.format(layer, tmxmap))
             raise ValueError
 
@@ -207,7 +257,11 @@ def build_rects(tmxmap, layer, tileset=None, real_gid=None):
     return rects
 
 
-def simplify(all_points, tilewidth, tileheight):
+def simplify(
+    all_points: List[PointLike],
+    tilewidth: int,
+    tileheight: int,
+) -> List[pygame.Rect]:
     """Given a list of points, return list of rects that represent them
     kludge:
 
@@ -271,12 +325,16 @@ def simplify(all_points, tilewidth, tileheight):
                         y -= 1
                         break
                 else:
-                    if x <= ex: y -= 1
+                    if x <= ex:
+                        y -= 1
                     break
 
-        c_rect = pygame.Rect(ox * tilewidth, oy * tileheight,
-                             (ex - ox + 1) * tilewidth,
-                             (y - oy + 1) * tileheight)
+        c_rect = pygame.Rect(
+            ox * tilewidth,
+            oy * tileheight,
+            (ex - ox + 1) * tilewidth,
+            (y - oy + 1) * tileheight,
+        )
 
         rects.append(c_rect)
 

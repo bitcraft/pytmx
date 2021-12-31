@@ -28,7 +28,7 @@ Getting Help
 ============
 
 For bugs or feature requests, please use the issues feature of github.  For
-all other general questions, join me on IRC at freennode.net #pygame.
+all other general questions, join me on IRC at freenode.net #pygame.
 
 
 Installation
@@ -110,7 +110,7 @@ Scrolling Demo
 
 I have another repo with a working demo of a proper scrolling map using Tiled
 maps and pygame.  Please feel free to test drive it.  It isn't limited to Tiled
-maps, you can use any data structure you want, as long as PyGame is used.
+maps, you can use any data structure you want, as long as pygame is used.
 
 https://github.com/bitcraft/pyscroll
 
@@ -125,10 +125,7 @@ shouldn't attempt to circumvent the loading mechanisms.
 API Documentation
 =================
 
-.. toctree::
-   :maxdepth: 4
-
-   pytmx
+* :ref:`modindex`
 
 
 Indices and tables

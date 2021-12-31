@@ -25,16 +25,20 @@ logger = logging.getLogger(__name__)
 try:
     import sdl2.ext
 except ImportError:
-    logger.error('cannot import pysdl2 (is it installed?)')
+    logger.error("cannot import pysdl2 (is it installed?)")
     raise
 
 import pytmx
 
-__all__ = ['load_pysdl2', 'pysdl2_image_loader', ]
+__all__ = [
+    "load_pysdl2",
+    "pysdl2_image_loader",
+]
 flag_names = (
-    'flipped_horizontally',
-    'flipped_vertically',
-    'flipped_diagonally',)
+    "flipped_horizontally",
+    "flipped_vertically",
+    "flipped_diagonally",
+)
 
 
 def pysdl2_image_loader(renderer, filename, colorkey, **kwargs):
@@ -59,7 +63,7 @@ def pysdl2_image_loader(renderer, filename, colorkey, **kwargs):
                 return texture, rect, flip
 
             except ValueError:
-                logger.error('Tile bounds outside bounds of tileset image')
+                logger.error("Tile bounds outside bounds of tileset image")
                 raise
         else:
             return texture, None, 0
@@ -67,7 +71,7 @@ def pysdl2_image_loader(renderer, filename, colorkey, **kwargs):
     image = sdl2.ext.load_image(filename)
 
     if colorkey:
-        colorkey = sdl2.ext.string_to_color('#' + colorkey)
+        colorkey = sdl2.ext.string_to_color("#" + colorkey)
         key = sdl2.SDL_MapRGB(image.format, *colorkey[:3])
         sdl2.SDL_SetColorKey(image, sdl2.SDL_TRUE, key)
 
@@ -77,5 +81,5 @@ def pysdl2_image_loader(renderer, filename, colorkey, **kwargs):
 
 
 def load_pysdl2(renderer, filename, *args, **kwargs):
-    kwargs['image_loader'] = partial(pysdl2_image_loader, renderer)
+    kwargs["image_loader"] = partial(pysdl2_image_loader, renderer)
     return pytmx.TiledMap(filename, *args, **kwargs)
