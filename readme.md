@@ -96,7 +96,7 @@ Getting Help
 ===============================================================================
 
 For bugs or feature requests, please use the issues feature of github.  For
-all other general questions, join me on IRC at freenode.net #pygame.
+all other general questions, join me on Discord https://discord.gg/2taTP4aYR6
 
 
 Design Goals and Features
