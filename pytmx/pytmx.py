@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2021, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2022, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -14,7 +14,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
+License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 from __future__ import annotations
 
@@ -39,14 +40,14 @@ except ImportError:
     pygame = None
 
 __all__ = (
+    "TileFlags",
     "TiledElement",
+    "TiledImageLayer",
     "TiledMap",
-    "TiledTileset",
-    "TiledTileLayer",
     "TiledObject",
     "TiledObjectGroup",
-    "TiledImageLayer",
-    "TileFlags",
+    "TiledTileLayer",
+    "TiledTileset",
     "convert_to_bool",
     "parse_properties",
 )
@@ -79,7 +80,7 @@ empty_flags = TileFlags(False, False, False)
 ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
 MapPoint = Tuple[int, int, int]
 
-# need a more graceful way to handle annotations for optional dependancies
+# need a more graceful way to handle annotations for optional dependencies
 if pygame:
     PointLike = Union[Tuple[int, int], pygame.Vector2, Point]
 else:
@@ -93,7 +94,6 @@ def default_image_loader(filename: str, flags, **kwargs):
     Suitable for loading a map without the images
 
     """
-
     def load(rect=None, flags=None):
         return filename, rect, flags
 
@@ -232,83 +232,83 @@ types = defaultdict(lambda: str)
 
 types.update(
     {
-        "version": str,
-        "tiledversion": str,
-        "orientation": str,
-        "renderorder": str,
-        "width": float,
-        "height": float,
-        "tilewidth": int,
-        "tileheight": int,
-        "hexsidelength": float,
-        "staggeraxis": str,
-        "staggerindex": str,
         "backgroundcolor": str,
-        "nextobjectid": int,
-        "firstgid": int,
-        "source": str,
-        "name": str,
-        "spacing": int,
-        "margin": int,
-        "tilecount": int,
-        "columns": int,
-        "format": str,
-        "trans": str,
-        "tile": int,
-        "terrain": str,
-        "probability": float,
-        "tileid": int,
-        "duration": int,
+        "bold": convert_to_bool,
         "color": str,
-        "id": int,
-        "opacity": float,
-        "visible": convert_to_bool,
-        "offsetx": int,
-        "offsety": int,
-        "encoding": str,
+        "columns": int,
         "compression": str,
         "draworder": str,
-        "points": str,
+        "duration": int,
+        "encoding": str,
+        "firstgid": int,
         "fontfamily": str,
-        "pixelsize": float,
-        "wrap": convert_to_bool,
-        "bold": convert_to_bool,
-        "italic": convert_to_bool,
-        "underline": convert_to_bool,
-        "strikeout": convert_to_bool,
-        "kerning": convert_to_bool,
-        "halign": str,
-        "valign": str,
+        "format": str,
         "gid": int,
+        "halign": str,
+        "height": float,
+        "hexsidelength": float,
+        "id": int,
+        "italic": convert_to_bool,
+        "kerning": convert_to_bool,
+        "margin": int,
+        "name": str,
+        "nextobjectid": int,
+        "offsetx": int,
+        "offsety": int,
+        "opacity": float,
+        "orientation": str,
+        "pixelsize": float,
+        "points": str,
+        "probability": float,
+        "renderorder": str,
+        "rotation": float,
+        "source": str,
+        "spacing": int,
+        "staggeraxis": str,
+        "staggerindex": str,
+        "strikeout": convert_to_bool,
+        "terrain": str,
+        "tile": int,
+        "tilecount": int,
+        "tiledversion": str,
+        "tileheight": int,
+        "tileid": int,
+        "tilewidth": int,
+        "trans": str,
         "type": str,
+        "underline": convert_to_bool,
+        "valign": str,
+        "value": str,
+        "version": str,
+        "visible": convert_to_bool,
+        "width": float,
+        "wrap": convert_to_bool,
         "x": float,
         "y": float,
-        "value": str,
-        "rotation": float,
     }
 )
 
 # casting for properties type
 prop_type = {
-    "string": str,
-    "int": int,
-    "float": float,
     "bool": convert_to_bool,
     "color": str,
     "file": str,
+    "float": float,
+    "int": int,
     "object": int,
+    "string": str,
 }
 
 
 def parse_properties(node: ElementTree.Element) -> Dict:
     """
-    Parse a Tiled xml node and return a dict that represents a Tiled "property"
+    Parse a Tiled xml node and return a dict
 
     Args:
         node: etree element to inspect
 
     Returns:
-        dict of the properties, as set in the Tiled editor for the object
+        dict of the properties, as set in the Tiled editor
 
     """
     d = dict()
@@ -335,7 +335,6 @@ class TiledElement:
     Base class for all pytmx types
 
     """
-
     allow_duplicate_names = False
 
     def __init__(self):
@@ -427,9 +426,7 @@ class TiledMap(TiledElement):
     """
     Contains the layers, objects, and images from a Tiled TMX map
 
-    This class is meant to handle most of the work you need to do to use a map.
     """
-
     def __init__(
         self,
         filename: Optional[str] = None,
@@ -446,7 +443,6 @@ class TiledMap(TiledElement):
             invert_y: invert the y axis
             load_all_tiles: load all tile images, even if never used
             allow_duplicate_names: allow duplicates in objects' metadata
-            image_loader: function to load the images
 
         """
         TiledElement.__init__(self)
@@ -755,7 +751,8 @@ class TiledMap(TiledElement):
             raise ValueError(msg.format(x, y, layer))
 
     def get_tile_properties(self, x: int, y: int, layer: int) -> Optional[Dict]:
-        """Return the tile image GID for this location
+        """
+        Return the tile image GID for this location
 
         Args:
             x: x coordinate
@@ -998,7 +995,10 @@ class TiledMap(TiledElement):
 
     @property
     def visible_object_groups(self) -> Iterable[TiledObjectGroup]:
-        """Return iterator of object group indexes that are set 'visible'"""
+        """
+        Return iterator of object group indexes that are set 'visible'
+
+        """
         return (
             i
             for (i, l) in enumerate(self.layers)
@@ -1071,12 +1071,13 @@ class TiledMap(TiledElement):
 
 
 class TiledTileset(TiledElement):
-    """Represents a Tiled Tileset
-
-    External tilesets are supported.  GID/ID's from Tiled are not guaranteed to
-    be the same after loaded.
     """
+    Represents a Tiled Tileset
 
+    External tilesets are supported.  GID/ID's from Tiled are not
+    guaranteed to be the same after loaded.
+
+    """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1104,8 +1105,8 @@ class TiledTileset(TiledElement):
         """
         Parse a Tileset from ElementTree xml element
 
-        A bit of mangling is done here so that tilesets that have external
-        TSX files appear the same as those that don't
+        A bit of mangling is done here so that tilesets that have
+        external TSX files appear the same as those that don't.
 
         Args:
             node: node to parse
@@ -1232,11 +1233,12 @@ class TiledGroupLayer(TiledElement):
 
 
 class TiledTileLayer(TiledElement):
-    """Represents a TileLayer
+    """
+    Represents a TileLayer
 
     To just get the tile images, use TiledTileLayer.tiles()
-    """
 
+    """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1337,8 +1339,8 @@ class TiledObjectGroup(TiledElement, list):
     """Represents a Tiled ObjectGroup
 
     Supports any operation of a normal list.
-    """
 
+    """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1369,11 +1371,11 @@ class TiledObjectGroup(TiledElement, list):
 
 
 class TiledObject(TiledElement):
-    """Represents a any Tiled Object
+    """Represents any Tiled Object
 
     Supported types: Box, Ellipse, Tile Object, Polyline, Polygon
-    """
 
+    """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1415,9 +1417,11 @@ class TiledObject(TiledElement):
             node: the node to be parsed
 
         """
-
         def read_points(text):
-            """parse a text string of float tuples and return [(x,...),...]"""
+            """
+            Parse a text string of float tuples and return [(x,...),...]
+
+            """
             return tuple(tuple(map(float, i.split(","))) for i in text.split())
 
         self._set_properties(node)
@@ -1455,7 +1459,10 @@ class TiledObject(TiledElement):
         return self
 
     def apply_transformations(self):
-        """Return all points for object, taking in account rotation"""
+        """
+        Return all points for object, taking in account rotation
+
+        """
         if hasattr(self, "points"):
             return rotate(self.points, self, self.rotation)
         else:
@@ -1475,11 +1482,12 @@ class TiledObject(TiledElement):
 
 
 class TiledImageLayer(TiledElement):
-    """Represents Tiled Image Layer
+    """
+    Represents Tiled Image Layer
 
     The image associated with this layer will be loaded and assigned a GID.
-    """
 
+    """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1527,7 +1535,6 @@ class TiledProperty(TiledElement):
     Represents Tiled Property
 
     """
-
     def __init__(self, parent, node):
         TiledElement.__init__(self)
 

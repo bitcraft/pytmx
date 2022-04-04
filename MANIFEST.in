@@ -1,5 +1,4 @@
 include LICENSE
-include changelog
 include readme.md
 recursive-include apps
 recursive-include docs

@@ -1,6 +1,6 @@
 """
 This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2017
+Leif Theden "bitcraft", 2012-2022
 
 Rendering demo for the TMXLoader.
 

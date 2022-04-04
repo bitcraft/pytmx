@@ -1,6 +1,6 @@
 """
 This is tested on pysdl2 1.2 and python 2.7.
-Leif Theden "bitcraft", 2012-2014
+Leif Theden "bitcraft", 2012-2022
 
 Rendering demo for the TMXLoader.
 
