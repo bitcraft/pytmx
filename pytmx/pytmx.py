@@ -32,6 +32,8 @@ from math import cos, radians, sin
 from operator import attrgetter
 from typing import List, Tuple, Optional, Sequence, Union, Dict, Iterable
 from xml.etree import ElementTree
+import json
+from copy import deepcopy
 
 # for type hinting
 try:
@@ -47,8 +49,10 @@ __all__ = (
     "TiledObject",
     "TiledObjectGroup",
     "TiledTileLayer",
+    "TiledClassType",
     "TiledTileset",
     "convert_to_bool",
+    "resolve_to_class",
     "parse_properties",
 )
 
@@ -196,6 +200,17 @@ def convert_to_bool(value: str) -> bool:
         return False
     raise ValueError('cannot parse "{}" as bool'.format(value))
 
+def resolve_to_class(value: str, custom_types: dict) -> TiledClassType:
+    """
+    Converts tiled custom types to a python class
+
+    Args:
+        value: name of the class
+
+    Raises:
+        ValueError: if `value` cannot be converted to a class
+    """
+    return deepcopy(custom_types[value])
 
 def rotate(
     points: Sequence[Point],
@@ -297,10 +312,12 @@ prop_type = {
     "int": int,
     "object": int,
     "string": str,
+    "class": resolve_to_class,
+    "enum": str,
 }
 
 
-def parse_properties(node: ElementTree.Element) -> Dict:
+def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
     """
     Parse a Tiled xml node and return a dict
 
@@ -324,9 +341,17 @@ def parse_properties(node: ElementTree.Element) -> Dict:
                         subnode.get("type")
                     )
                 )
-            d[subnode.get("name")] = subnode.get("value") or subnode.text
-            if cls is not None:
-                d[subnode.get("name")] = cls(subnode.get("value"))
+            if 'class' == subnode.get("type"):
+                new = resolve_to_class(subnode.get("propertytype"), customs)
+                properties = parse_properties(subnode, customs)
+                for key in properties.keys():
+                    setattr(new, key, properties[key])
+
+                d[subnode.get("name")] = new
+            else:
+                d[subnode.get("name")] = subnode.get("value") or subnode.text
+                if cls is not None:
+                    d[subnode.get("name")] = cls(subnode.get("value"))
     return d
 
 
@@ -380,7 +405,7 @@ class TiledElement:
         msg = "Some name are reserved for {0} objects and cannot be used."
         logger.error(msg)
 
-    def _set_properties(self, node: ElementTree.Element) -> None:
+    def _set_properties(self, node: ElementTree.Element, customs = None) -> None:
         """
         Set properties from xml data
 
@@ -393,13 +418,13 @@ class TiledElement:
 
         """
         self._cast_and_set_attributes_from_node_items(node.items())
-        properties = parse_properties(node)
+        properties = parse_properties(node, customs)
         if not self.allow_duplicate_names and self._contains_invalid_property_name(
             properties.items()
         ):
             self._log_property_error_message()
             raise ValueError(
-                "Reserved names and duplicate names are not allowed. Please rename your property inside the .tmx-file"
+                "Reserved names and duplicate names are not allowed. Please rename your property inside the .tmx file"
             )
 
         self.properties = properties
@@ -422,6 +447,17 @@ class TiledElement:
             return '<{}: "{}">'.format(self.__class__.__name__, self.name)
 
 
+class TiledClassType:
+    """
+    Contains custom tiled types
+
+    """
+    def __init__(self, name: str, members: List[dict]):
+        self.name = name
+        for member in members:
+            setattr(self, member["name"], member["value"])
+
+
 class TiledMap(TiledElement):
     """
     Contains the layers, objects, and images from a Tiled TMX map
@@ -430,6 +466,7 @@ class TiledMap(TiledElement):
     def __init__(
         self,
         filename: Optional[str] = None,
+        custom_property_filename: Optional[List[str]] = None,
         image_loader=default_image_loader,
         **kwargs,
     ) -> None:
@@ -447,6 +484,7 @@ class TiledMap(TiledElement):
         """
         TiledElement.__init__(self)
         self.filename = filename
+        self.custom_property_filename = custom_property_filename
         self.image_loader = image_loader
 
         # optional keyword arguments checked here
@@ -490,11 +528,18 @@ class TiledMap(TiledElement):
         self.background_color = None
         self.nextobjectid = 0
 
+        self.custom_types = dict()
+
         # initialize the gid mapping
         self.imagemap[(0, 0)] = 0
 
+        if custom_property_filename:
+            self.parse_json(json.load(open(custom_property_filename)))
+
         if filename:
             self.parse_xml(ElementTree.parse(self.filename).getroot())
+
+
 
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
@@ -511,6 +556,20 @@ class TiledMap(TiledElement):
         # make a float by default, so recast as int here
         self.height = int(self.height)
         self.width = int(self.width)
+
+    def parse_json(self, data: dict):
+        """
+        Parse custom data types from a JSON object
+
+        Args:
+            Dictionary from JSON object to parse
+
+        """
+        for custom_type in data:
+            if custom_type["type"] == 'class':
+                new = TiledClassType(custom_type["name"], custom_type['members'])
+
+                self.custom_types[custom_type["name"]] = new
 
     def parse_xml(self, node: ElementTree.Element):
         """
@@ -536,7 +595,7 @@ class TiledMap(TiledElement):
 
         # this will only find objectgroup layers, not including tile colliders
         for subnode in node.findall(".//objectgroup"):
-            objectgroup = TiledObjectGroup(self, subnode)
+            objectgroup = TiledObjectGroup(self, subnode, self.custom_types)
             self.add_layer(objectgroup)
             for obj in objectgroup:
                 self.objects_by_id[obj.id] = obj
@@ -1183,7 +1242,7 @@ class TiledTileset(TiledElement):
                     frames.append(AnimationFrame(gid, duration))
 
             for objgrp_node in child.findall("objectgroup"):
-                objectgroup = TiledObjectGroup(self.parent, objgrp_node)
+                objectgroup = TiledObjectGroup(self.parent, objgrp_node, None)
                 p["colliders"] = objectgroup
 
             for gid, flags in self.parent.map_gid2(tiled_gid + self.firstgid):
@@ -1341,7 +1400,7 @@ class TiledObjectGroup(TiledElement, list):
     Supports any operation of a normal list.
 
     """
-    def __init__(self, parent, node):
+    def __init__(self, parent, node, customs):
         TiledElement.__init__(self)
         self.parent = parent
 
@@ -1352,6 +1411,7 @@ class TiledObjectGroup(TiledElement, list):
         self.visible = 1
         self.offsetx = 0
         self.offsety = 0
+        self.custom_types = customs
         self.draworder = "index"
 
         self.parse_xml(node)
@@ -1364,8 +1424,8 @@ class TiledObjectGroup(TiledElement, list):
             node: node to parse
 
         """
-        self._set_properties(node)
-        self.extend(TiledObject(self.parent, child) for child in node.findall("object"))
+        self._set_properties(node, self.custom_types)
+        self.extend(TiledObject(self.parent, child, self.custom_types) for child in node.findall("object"))
 
         return self
 
@@ -1376,7 +1436,7 @@ class TiledObject(TiledElement):
     Supported types: Box, Ellipse, Tile Object, Polyline, Polygon
 
     """
-    def __init__(self, parent, node):
+    def __init__(self, parent, node, custom_types):
         TiledElement.__init__(self)
         self.parent = parent
 
@@ -1393,6 +1453,7 @@ class TiledObject(TiledElement):
         self.visible = 1
         self.closed = True
         self.template = None
+        self.custom_types = custom_types
 
         self.parse_xml(node)
 
@@ -1424,7 +1485,7 @@ class TiledObject(TiledElement):
             """
             return tuple(tuple(map(float, i.split(","))) for i in text.split())
 
-        self._set_properties(node)
+        self._set_properties(node, self.custom_types)
 
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
