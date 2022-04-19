@@ -67,7 +67,7 @@ class TestConvertToBool(unittest.TestCase):
 
 
 class TiledMapTest(unittest.TestCase):
-    filename = 'tests/resources/test01.tmx'
+    filename = "tests/resources/test01.tmx"
 
     def setUp(self):
         self.m = pytmx.TiledMap(self.filename)
@@ -75,6 +75,7 @@ class TiledMapTest(unittest.TestCase):
     def test_build_rects(self):
         try:
             from pytmx import util_pygame
+
             rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", None)
             self.assertEqual(rects[0], [0, 0, 240, 240])
             rects = util_pygame.build_rects(self.m, "Grass and Water", "tileset", 18)
@@ -106,16 +107,16 @@ class TiledMapTest(unittest.TestCase):
         self.assertIsInstance(self.m.layers[0].height, int)
 
     def test_properties_are_converted_to_builtin_types(self):
-        self.assertIsInstance(self.m.properties['test_bool'], bool)
-        self.assertIsInstance(self.m.properties['test_color'], str)
-        self.assertIsInstance(self.m.properties['test_file'], str)
-        self.assertIsInstance(self.m.properties['test_float'], float)
-        self.assertIsInstance(self.m.properties['test_int'], int)
-        self.assertIsInstance(self.m.properties['test_string'], str)
+        self.assertIsInstance(self.m.properties["test_bool"], bool)
+        self.assertIsInstance(self.m.properties["test_color"], str)
+        self.assertIsInstance(self.m.properties["test_file"], str)
+        self.assertIsInstance(self.m.properties["test_float"], float)
+        self.assertIsInstance(self.m.properties["test_int"], int)
+        self.assertIsInstance(self.m.properties["test_string"], str)
 
     def test_properties_are_converted_to_correct_values(self):
-        self.assertFalse(self.m.properties['test_bool'])
-        self.assertTrue(self.m.properties['test_bool_true'])
+        self.assertFalse(self.m.properties["test_bool"])
+        self.assertTrue(self.m.properties["test_bool_true"])
 
 
 class TiledElementTestCase(unittest.TestCase):
@@ -127,40 +128,40 @@ class TiledElementTestCase(unittest.TestCase):
             TiledElement.from_xml_string("<element></element>")
 
     def test_contains_reserved_property_name(self):
-        """ Reserved names are checked from any attributes in the instance
-            after it is created.  Instance attributes are defaults from the
-            specification.  We check that new properties are not named same
-            as existing attributes.
+        """Reserved names are checked from any attributes in the instance
+        after it is created.  Instance attributes are defaults from the
+        specification.  We check that new properties are not named same
+        as existing attributes.
         """
-        self.element.name = 'foo'
-        items = {'name': None}
+        self.element.name = "foo"
+        items = {"name": None}
         result = self.element._contains_invalid_property_name(items.items())
         self.assertTrue(result)
 
     def test_not_contains_reserved_property_name(self):
-        """ Reserved names are checked from any attributes in the instance
-            after it is created.  Instance attributes are defaults from the
-            specification.  We check that new properties are not named same
-            as existing attributes.
+        """Reserved names are checked from any attributes in the instance
+        after it is created.  Instance attributes are defaults from the
+        specification.  We check that new properties are not named same
+        as existing attributes.
         """
-        items = {'name': None}
+        items = {"name": None}
         result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
     def test_reserved_names_check_disabled_with_option(self):
-        """ Reserved names are checked from any attributes in the instance
-            after it is created.  Instance attributes are defaults from the
-            specification.  We check that new properties are not named same
-            as existing attributes.
+        """Reserved names are checked from any attributes in the instance
+        after it is created.  Instance attributes are defaults from the
+        specification.  We check that new properties are not named same
+        as existing attributes.
 
-            Check that passing an option will disable the check
+        Check that passing an option will disable the check
         """
         pytmx.TiledElement.allow_duplicate_names = True
-        self.element.name = 'foo'
-        items = {'name': None}
+        self.element.name = "foo"
+        items = {"name": None}
         result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
     def test_repr(self):
-        self.element.name = 'foo'
-        self.assertEqual("<TiledElement: \"foo\">", self.element.__repr__())
+        self.element.name = "foo"
+        self.assertEqual('<TiledElement: "foo">', self.element.__repr__())

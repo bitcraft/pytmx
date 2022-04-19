@@ -31,6 +31,7 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
 
     """
+
     def __init__(self, ctx: GameContext, filename):
         self.ctx = ctx
         self.tmx_data = tm = load_pygame_sdl2(ctx.renderer, filename)
@@ -39,7 +40,7 @@ class TiledRenderer(object):
     def render_map(self):
         """
         Render our map to a pygame surface
-        
+
         Feel free to use this as a starting point for your pygame app.
 
         Scrolling is a often requested feature, but pytmx is a map
@@ -70,7 +71,7 @@ class TiledRenderer(object):
                 image.angle,
                 None,
                 image.flipx,
-                image.flipy
+                image.flipy,
             )
 
 
@@ -79,6 +80,7 @@ class SimpleTest:
     Basic app to display a rendered Tiled map
 
     """
+
     def __init__(self, ctx: GameContext, filename):
         self.ctx = ctx
         self.map_renderer = None
@@ -135,8 +137,7 @@ class SimpleTest:
             self.running = False
 
     def run(self):
-        """ This is our app main loop
-        """
+        """This is our app main loop"""
         self.running = True
         self.exit_status = 1
 
@@ -147,7 +148,7 @@ class SimpleTest:
         return self.exit_status
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import os.path
     import glob
 
@@ -163,7 +164,7 @@ if __name__ == '__main__':
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('apps', 'data', '*.tmx')):
+        for filename in glob.glob(os.path.join("apps", "data", "*.tmx")):
             logger.info("Testing %s", filename)
             renderer.clear()
             if not SimpleTest(ctx, filename).run():

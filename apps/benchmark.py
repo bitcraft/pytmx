@@ -30,7 +30,7 @@ logger.setLevel(logging.INFO)
 
 
 def init_screen(width, height):
-    """ Set the screen mode
+    """Set the screen mode
     This function is used to handle window resize events
     """
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -56,7 +56,7 @@ class TiledRenderer(object):
                 continue
 
     def render_map(self, surface):
-        """ Render our map to a pygame surface
+        """Render our map to a pygame surface
 
         Feel free to use this as a starting point for your pygame app.
         This method expects that the surface passed is the same pixel
@@ -85,8 +85,7 @@ class TiledRenderer(object):
                 self.render_image_layer(surface, layer)
 
     def render_tile_layer(self, surface, layer):
-        """ Render all TiledTiles in this layer
-        """
+        """Render all TiledTiles in this layer"""
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
@@ -97,8 +96,7 @@ class TiledRenderer(object):
             surface_blit(image, (x * tw, y * th))
 
     def render_object_layer(self, surface, layer):
-        """ Render all TiledObjects contained in this layer
-        """
+        """Render all TiledObjects contained in this layer"""
         # deref these heavily used references for speed
         draw_rect = pygame.draw.rect
         draw_lines = pygame.draw.lines
@@ -113,7 +111,7 @@ class TiledRenderer(object):
         # These may be Tiled shapes like circles or polygons, GID objects, or Tiled Objects
         for obj in layer:
             # objects with points are polygons or lines
-            if hasattr(obj, 'points'):
+            if hasattr(obj, "points"):
                 draw_lines(surface, poly_color, obj.closed, obj.points, 3)
 
             # some objects have an image
@@ -125,8 +123,7 @@ class TiledRenderer(object):
             # Mostly, I am lazy, but you could check if it is circle/oval
             # and use pygame to draw an oval here...I just do a rect.
             else:
-                draw_rect(surface, rect_color,
-                          (obj.x, obj.y, obj.width, obj.height), 3)
+                draw_rect(surface, rect_color, (obj.x, obj.y, obj.width, obj.height), 3)
 
     def render_image_layer(self, surface, layer):
         if layer.image:
@@ -134,8 +131,7 @@ class TiledRenderer(object):
 
 
 class SimpleTest(object):
-    """ Basic app to display a rendered Tiled map
-    """
+    """Basic app to display a rendered Tiled map"""
 
     def __init__(self, filename):
         self.renderer = None
@@ -145,13 +141,11 @@ class SimpleTest(object):
         self.load_map(filename)
 
     def load_map(self, filename):
-        """ Create a renderer, load data, and print some debug info
-        """
+        """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
 
     def draw(self, surface):
-        """ Draw our map to some surface (probably the display)
-        """
+        """Draw our map to some surface (probably the display)"""
         # first we make a temporary surface that will accommodate the entire
         # size of the map.
         # because this demo does not implement scrolling, we render the
@@ -167,8 +161,7 @@ class SimpleTest(object):
 
         # display a bit of use info on the display
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit',
-                     1, (180, 180, 0))
+        i = f.render("press any key for next map or ESC to quit", 1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self):
@@ -195,8 +188,7 @@ class SimpleTest(object):
             self.running = False
 
     def run(self):
-        """ This is our app main loop
-        """
+        """This is our app main loop"""
         self.dirty = True
         self.running = True
         self.exit_status = 1
@@ -215,7 +207,7 @@ class SimpleTest(object):
         return self.exit_status
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import os.path
     import glob
     import pytmx
@@ -223,17 +215,18 @@ if __name__ == '__main__':
     pygame.init()
     pygame.font.init()
     screen = init_screen(600, 600)
-    pygame.display.set_caption('PyTMX Map Viewer')
+    pygame.display.set_caption("PyTMX Map Viewer")
 
     logger.info(pytmx.__version__)
 
     # loop through a bunch of maps in the maps folder
     import time
+
     try:
         # 6.6
         start = time.time()
         for i in range(500):
-            for filename in glob.glob(os.path.join('*.tmx')):
+            for filename in glob.glob(os.path.join("*.tmx")):
                 pygame.event.clear()
                 SimpleTest(filename)
 
@@ -243,4 +236,3 @@ if __name__ == '__main__':
     except:
         pygame.quit()
         raise
-
