@@ -92,10 +92,16 @@ else:
 
 
 def default_image_loader(filename: str, flags, **kwargs):
-    """
-    This default image loader just returns filename, rect, and any flags
-
-    Suitable for loading a map without the images
+    """This default image loader just returns filename, rect, and any flags.
+    Suitable for loading a map without the images.
+    
+    Args:
+        filename (str): The file's name.
+        flags (???): ???
+        **kwargs: Additional kwargs.
+    
+    Returns:
+        Tuple[str, ???, ???]: A tuple of the file name, rect, and flags.
 
     """
     def load(rect=None, flags=None):
@@ -105,14 +111,13 @@ def default_image_loader(filename: str, flags, **kwargs):
 
 
 def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
-    """
-    Decode a GID from TMX data
+    """Decode a GID from TMX data.
 
     Args:
-        raw_gid: GID, as reported by Tiled
+        raw_gid (int): GID, as reported by Tiled.
 
     Returns:
-        Tuple of the GID after rotation flags, and TileFlags object
+        Tuple[int, TileFlags]: Tuple of the GID after rotation flags, and TileFlags object
 
     """
     if raw_gid < GID_TRANS_ROT:
@@ -132,15 +137,14 @@ def reshape_data(
     gids: List[int],
     width: int,
 ) -> List[List[int]]:
-    """
-    Change 1d list to 2d list
+    """Change 1D list to 2d list
 
     Args:
-        gids: list of gid ints
-        width: width of each row
+        gids (List[int]): List of gid ints.
+        width (int): Width of each row.
 
     Returns:
-        2d nested list object
+        List[List[int]]: 2D nested list object.
 
     """
     return [gids[i : i + width] for i in range(0, len(gids), width)]
@@ -151,16 +155,15 @@ def unpack_gids(
     encoding: Optional[str] = None,
     compression: Optional[str] = None,
 ) -> List[int]:
-    """
-    Return all gids from encoded/compressed layer data
+    """Return all gids from encoded/compressed layer data
 
     Args:
-        text: layer data in text format
-        encoding: encoding used
-        compression: compression used
+        text (str): Layer data in text format.
+        encoding (Optional[str]): Encoding used.
+        compression (Optional[str]): Compression used.
 
     Returns:
-        list of all the GIDs in the layer
+        List[int]: List of all the GIDs in the layer.
 
     """
     if encoding == "base64":
@@ -180,14 +183,17 @@ def unpack_gids(
 
 
 def convert_to_bool(value: str) -> bool:
-    """
-    Convert a few common variations of "true" and "false" to boolean
+    """Convert a few common variations of "true" and "false" to boolean
 
     Args:
-        value: string to test
+        value (str): String to test.
 
     Raises:
-        ValueError: if `value` cannot be converted to a bool
+        ValueError: If `value` cannot be converted to a boolean.
+
+    Returns:
+        bool: The converted boolean.
+
     """
     value = str(value).strip()
     if value:
@@ -201,14 +207,18 @@ def convert_to_bool(value: str) -> bool:
     raise ValueError('cannot parse "{}" as bool'.format(value))
 
 def resolve_to_class(value: str, custom_types: dict) -> TiledClassType:
-    """
-    Converts tiled custom types to a python class
+    """Converts tiled custom types to a python class.
 
     Args:
-        value: name of the class
+        value (str): name of the class.
+        custom_types (dict): ???.
 
     Raises:
-        ValueError: if `value` cannot be converted to a class
+        ValueError: if `value` cannot be converted to a class.
+    
+    Returns:
+        TiledClassType: The converted python class type.
+    
     """
     return deepcopy(custom_types[value])
 
@@ -217,16 +227,15 @@ def rotate(
     origin: Point,
     angle: Union[int, float],
 ) -> List[Point]:
-    """
-    Rotate a sequence of points around an axis
+    """Rotate a sequence of points around an axis.
 
     Args:
-        points: sequence of points
-        origin: point where points are rotated around
-        angle: angle in degrees
+        points (Sequence[Point]): sequence of points.
+        origin (Point): point where points are rotated around.
+        angle (Union[int, float]): angle in degrees.
 
     Returns:
-        list of rotated points
+        List[Point]: List of rotated points.
 
     """
     sin_t = sin(radians(angle))
@@ -318,14 +327,13 @@ prop_type = {
 
 
 def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
-    """
-    Parse a Tiled xml node and return a dict
+    """Parse a Tiled xml node and return a dict.
 
     Args:
-        node: etree element to inspect
+        node (ElementTree.Element): Etree element to inspect.
 
     Returns:
-        dict of the properties, as set in the Tiled editor
+        Dict: Dictionary of the properties, as set in the Tiled editor.
 
     """
     d = dict()
@@ -356,9 +364,7 @@ def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
 
 
 class TiledElement:
-    """
-    Base class for all pytmx types
-
+    """Base class for all pytmx types.
     """
     allow_duplicate_names = False
 
@@ -367,11 +373,13 @@ class TiledElement:
 
     @classmethod
     def from_xml_string(cls, xml_string: str) -> TiledElement:
-        """
-        Return a TiledElement object from a xml string
+        """Return a TiledElement object from a xml string.
 
         Args:
-            xml_string: string containing xml data
+            xml_string (str): String containing xml data.
+
+        Returns:
+            TiledElement: The TiledElement from the xml string.
 
         """
         return cls().parse_xml(ElementTree.fromstring(xml_string))
@@ -406,15 +414,15 @@ class TiledElement:
         logger.error(msg)
 
     def _set_properties(self, node: ElementTree.Element, customs = None) -> None:
-        """
-        Set properties from xml data
+        """Set properties from xml data
 
-        Read the xml attributes and tiled "properties" from a xml node and fill
-        in the values into the object's dictionary.  Names will be checked to
+        Reads the xml attributes and Tiled "properties" from an XML node and fills
+        in the values into the object's dictionary. Names will be checked to
         make sure that they do not conflict with reserved names.
 
         Args:
-            node: etree element
+            node (ElementTree.Element): Etree element.
+            custom (???): ???.
 
         """
         self._cast_and_set_attributes_from_node_items(node.items())
@@ -448,20 +456,23 @@ class TiledElement:
 
 
 class TiledClassType:
-    """
-    Contains custom tiled types
-
+    """Contains custom Tiled types.
     """
     def __init__(self, name: str, members: List[dict]):
+        """Creates the TiledClassType.
+        
+        Args:
+            name (str): The name of the class type.
+            members (List[dict]): ???.
+        
+        """
         self.name = name
         for member in members:
             setattr(self, member["name"], member["value"])
 
 
 class TiledMap(TiledElement):
-    """
-    Contains the layers, objects, and images from a Tiled TMX map
-
+    """Contains the layers, objects, and images from a Tiled .tmx map.
     """
     def __init__(
         self,
@@ -470,16 +481,15 @@ class TiledMap(TiledElement):
         image_loader=default_image_loader,
         **kwargs,
     ) -> None:
-        """
-        Load new Tiled map from a .tmx file
+        """Load new Tiled map from a .tmx file.
 
         Args:
-            filename: filename of tiled map to load
-            image_loader: function that will load images (see below)
-            optional_gids: load specific tile image GID, even if never used
-            invert_y: invert the y axis
-            load_all_tiles: load all tile images, even if never used
-            allow_duplicate_names: allow duplicates in objects' metadata
+            filename (Optional[str]): Filename of tiled map to load.
+            image_loader (Optional[List[str]]): Function that will load images (see below).
+            optional_gids (???): Load specific tile image GID, even if never used.
+            invert_y (???): Invert the y axis.
+            load_all_tiles (???): Load all tile images, even if never used.
+            allow_duplicate_names (???): Allow duplicates in objects' metadata.
 
         """
         TiledElement.__init__(self)
@@ -558,11 +568,10 @@ class TiledMap(TiledElement):
         self.width = int(self.width)
 
     def parse_json(self, data: dict):
-        """
-        Parse custom data types from a JSON object
+        """Parse custom data types from a JSON object
 
         Args:
-            Dictionary from JSON object to parse
+            data (dict): Dictionary from JSON object to parse
 
         """
         for custom_type in data:
@@ -572,11 +581,10 @@ class TiledMap(TiledElement):
                 self.custom_types[custom_type["name"]] = new
 
     def parse_xml(self, node: ElementTree.Element):
-        """
-        Parse a map from ElementTree xml node
+        """Parse a map from ElementTree xml node.
 
         Args:
-            node: ElementTree xml node to parse
+            node (ElementTree.Element): ElementTree xml node to parse.
 
         """
         self._set_properties(node)
@@ -629,8 +637,7 @@ class TiledMap(TiledElement):
         return self
 
     def reload_images(self) -> None:
-        """
-        Load or reload the map images from disk
+        """Load or reload the map images from disk.
 
         This method will use the image loader passed in the constructor
         to do the loading or will use a generic default, in which case no
@@ -712,20 +719,19 @@ class TiledMap(TiledElement):
                 self.images[real_gid] = image
 
     def get_tile_image(self, x: int, y: int, layer: int):
-        """
-        Return the tile image for this location
+        """Return the tile image for this location.
 
         Args:
-            x: x coordinate
-            y: y coordinate
-            layer: layer number
+            x (int): The x coordinate.
+            y (int): The y coordinate.
+            layer (int): The layer's number.
 
         Returns:
-            the image object type will depend on the loader (ie. pygame surface)
+            ???: the image object type will depend on the loader (ie. pygame surface).
 
         Raises:
-            TypeError: if coordinates are not integers
-            ValueError: if the coordinates are out of bounds, or GID not found
+            TypeError: if coordinates are not integers.
+            ValueError: if the coordinates are out of bounds, or GID not found.
 
         """
         if not (x >= 0 and y >= 0):
@@ -753,18 +759,17 @@ class TiledMap(TiledElement):
             return self.get_tile_image_by_gid(gid)
 
     def get_tile_image_by_gid(self, gid: int):
-        """
-        Return the tile image for this location
+        """Return the tile image for this location.
 
         Args:
-            gid: GID of image
+            gid (int): GID of image.
 
         Returns:
-            the image object type will depend on the loader (ie. pygame surface)
+            ???: The image object type will depend on the loader (ie. pygame.Surface).
 
         Raises:
-            TypeError: if `gid` is not an integer
-            ValueError: if there is no image for this GID
+            TypeError: if `gid` is not an integer.
+            ValueError: if there is no image for this GID.
 
         """
         try:
@@ -780,19 +785,18 @@ class TiledMap(TiledElement):
             raise ValueError(msg.format(gid))
 
     def get_tile_gid(self, x: int, y: int, layer: int) -> int:
-        """
-        Return the tile image GID for this location
+        """Return the tile image GID for this location.
 
         Args:
-            x: x coordinate
-            y: y coordinate
-            layer: layer number
+            x (int): The x coordinate.
+            y (int): The y coordinate.
+            layer (int): The layer's number.
 
         Returns:
-            the image object type will depend on the loader (ie. pygame surface)
+            ???: The image object type will depend on the loader (ie. pygame.Surface).
 
         Raises:
-            ValueError: if coordinates are out of bounds
+            ValueError: If coordinates are out of bounds.
 
         """
         if not (x >= 0 and y >= 0 and layer >= 0):
@@ -810,19 +814,18 @@ class TiledMap(TiledElement):
             raise ValueError(msg.format(x, y, layer))
 
     def get_tile_properties(self, x: int, y: int, layer: int) -> Optional[Dict]:
-        """
-        Return the tile image GID for this location
+        """Return the tile image GID for this location.
 
         Args:
-            x: x coordinate
-            y: y coordinate
-            layer: layer number
+            x (int): The x coordinate.
+            y (int): The y coordinate.
+            layer (int): The layer number.
 
         Returns:
-            dict of the properties for tile in this location, or None
+            Optional[dict]: Dictionary of the properties for tile in this location or None.
 
         Raises:
-            ValueError: if coordinates are out of bounds
+            ValueError: If coordinates are out of bounds
 
         """
         if not (x >= 0 and y >= 0 and layer >= 0):
@@ -850,16 +853,15 @@ class TiledMap(TiledElement):
                 return None
 
     def get_tile_locations_by_gid(self, gid: int) -> Iterable[MapPoint]:
-        """
-        Search map for tile locations by the GID
-
-        Return (int, int, int) tuples, where the layer is index of
-        the visible tile layers.
+        """Search map for tile locations by the GID.
 
         Note: Not a fast operation.  Cache results if used often.
 
         Args:
-            gid: GID to be searched for
+            gid (int): GID to be searched for.
+        
+        Returns:
+            Iterable[MapPoint]: (int, int, int) tuples, where the layer is index of the visible tile layers.
 
         """
         for l in self.visible_tile_layers:
@@ -867,14 +869,13 @@ class TiledMap(TiledElement):
                 yield x, y, l
 
     def get_tile_properties_by_gid(self, gid: int) -> Optional[Dict]:
-        """
-        Get the tile properties of a tile GID
+        """Get the tile properties of a tile GID.
 
         Args:
-            gid: GID
+            gid (int): GID.
 
         Returns:
-            dict of properties for GID, or None
+            Optional[dict]: Dictionary of properties for GID, or None.
 
         """
         try:
@@ -883,22 +884,23 @@ class TiledMap(TiledElement):
             return None
 
     def set_tile_properties(self, gid: int, properties: dict) -> None:
-        """
-        Set the tile properties of a tile GID
+        """Set the tile properties of a tile GID.
 
         Args:
-            gid: GID
-            properties: python dict of properties for GID
+            gid (int): GID.
+            properties (dict): Python dictionary of properties for GID.
 
         """
         self.tile_properties[gid] = properties
 
     def get_tile_properties_by_layer(self, layer: int):
-        """
-        Get the tile properties of each GID in layer
+        """Get the tile properties of each GID in layer.
 
         Args:
-            layer: layer number
+            layer (int): The layer number.
+
+        Returns
+            ???: ???
 
         """
         try:
@@ -924,8 +926,10 @@ class TiledMap(TiledElement):
             TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup
         ],
     ) -> None:
-        """
-        Add a layer to the map
+        """Add a layer to the map.
+
+        Args:
+            layer (Union[TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup]): The layer.
 
         """
         assert isinstance(
@@ -936,19 +940,19 @@ class TiledMap(TiledElement):
         self.layernames[layer.name] = layer
 
     def add_tileset(self, tileset: TiledTileset) -> None:
-        """
-        Add a tileset to the map
-
+        """Add a tileset to the map.
         """
         assert isinstance(tileset, TiledTileset)
         self.tilesets.append(tileset)
 
     def get_layer_by_name(self, name: str):
-        """
-        Return a layer by name
+        """Return a layer by name.
 
         Args:
-            name: Name of layer.  Case-sensitive.
+            name (str): The layer's name. Case-sensitive!
+
+        Returns:
+            int: The layer number.
 
         Raises:
             ValueError: if layer by name does not exist
@@ -962,34 +966,40 @@ class TiledMap(TiledElement):
             raise ValueError(msg.format(name))
 
     def get_object_by_id(self, obj_id: int) -> TiledObject:
-        """
-        Find an object by the object id
+        """Find an object by the object id.
 
         Args:
-            obj_id: ID of the object, from Tiled
+            obj_id (int): ID of the object, from Tiled.
+
+        Returns:
+            ???: ???.
 
         """
         return self.objects_by_id[obj_id]
 
-    def get_object_by_name(self, name) -> TiledObject:
-        """
-        Find an object by name, case-sensitive
+    def get_object_by_name(self, name: str) -> TiledObject:
+        """Find an object by name, case-sensitive.
 
         Args:
-            name: name of object
+            name (str): The object's name.
+
+        Returns:
+            ???: ???
 
         """
         return self.objects_by_name[name]
 
     def get_tileset_from_gid(self, gid: int) -> TiledTileset:
-        """
-        Return tileset that owns the gid
+        """Return tileset that owns the gid.
 
         Note: this is a slow operation, so if you are expecting to do this
               often, it would be worthwhile to cache the results of this.
 
         Args:
-            gid: gid of tile image
+            gid (int): GID of tile image.
+
+        Returns:
+            TiledTileset: The tileset that owns the GID.
 
         Raises:
             ValueError: if the tileset for gid is not found
@@ -1007,9 +1017,11 @@ class TiledMap(TiledElement):
         raise ValueError("Tileset not found")
 
     def get_tile_colliders(self) -> Iterable[Tuple[int, List[Dict]]]:
-        """
-        Return iterator of (gid, dict) pairs of tiles with colliders
+        """Return iterator of (gid, dict) pairs of tiles with colliders.
 
+        Returns:
+            Iterable[Tuple[int, List[Dict]]]: The tile colliders.
+        
         """
         for gid, props in self.tile_properties.items():
             colliders = props.get("colliders")
@@ -1018,32 +1030,41 @@ class TiledMap(TiledElement):
 
     @property
     def objectgroups(self) -> Iterable[TiledObjectGroup]:
-        """
-        Return iterator of all object groups
+        """Returns iterator of all object groups.
 
+        Returns:
+            Iterable[TiledObjectGroup]: ???.
+        
         """
         return (layer for layer in self.layers if isinstance(layer, TiledObjectGroup))
 
     @property
     def objects(self) -> Iterable[TiledObject]:
-        """
-        Return iterator of all the objects associated with this map
-
+        """Returns iterator of all the objects associated with the map.
+        
+        Returns:
+            Iterable[TiledObject]: All objects associated with the map.
+        
         """
         return chain(*self.objectgroups)
 
     @property
     def visible_layers(self):
+        """Returns iterator of Layer objects that are set "visible".
+        
+        Returns:
+            ???: Iterator of Layer objects that are set "visible".
+        
         """
-        Return iterator of Layer objects that are set 'visible'
-
-        """
+        
         return (l for l in self.layers if l.visible)
 
     @property
     def visible_tile_layers(self) -> Iterable[TiledTileLayer]:
-        """
-        Return iterator of layer indexes that are set 'visible'
+        """Return iterator of layer indexes that are set "visible".
+
+        Returns:
+            Iterable[TiledTileLayer]: A list of layer indexes.
 
         """
         return (
@@ -1054,8 +1075,10 @@ class TiledMap(TiledElement):
 
     @property
     def visible_object_groups(self) -> Iterable[TiledObjectGroup]:
-        """
-        Return iterator of object group indexes that are set 'visible'
+        """Return iterator of object group indexes that are set "visible".
+
+        Returns:
+            Iterable[TiledObjectGroup]: A list of object group indexes that are set to "visible".
 
         """
         return (
@@ -1069,15 +1092,14 @@ class TiledMap(TiledElement):
         tiled_gid: int,
         flags: Optional[TileFlags] = None,
     ) -> int:
-        """
-        Used to manage the mapping of GIDs between the tmx and pytmx
+        """Used to manage the mapping of GIDs between .tmx and pytmx.
 
         Args:
-            tiled_gid: GID that is found in TMX data
-            flags: TileFlags
+            tiled_gid (int): GID that is found in TMX data.
+            flags (???): TileFlags.
 
         Returns:
-            New or existing GID for pytmx use
+            int: New or existing GID for pytmx use.
 
         """
         if flags is None:
@@ -1098,11 +1120,13 @@ class TiledMap(TiledElement):
             return 0
 
     def map_gid(self, tiled_gid: int) -> Optional[List[int]]:
-        """
-        Used to lookup a GID read from a TMX file's data
+        """Used to lookup a GID read from a TMX file's data.
 
         Args:
-            tiled_gid: GID that is found in TMX data
+            tiled_gid (int): GID. that is found in the .tmx file data.
+        
+        Returns:
+            Optional[List[int]]: ???
 
         """
         try:
@@ -1115,9 +1139,7 @@ class TiledMap(TiledElement):
             raise TypeError(msg)
 
     def map_gid2(self, tiled_gid: int) -> List[Tuple[int, Optional[int]]]:
-        """
-        WIP.  need to refactor the gid code
-
+        """WIP.  need to refactor the gid code
         """
         tiled_gid = int(tiled_gid)
 
@@ -1130,14 +1152,20 @@ class TiledMap(TiledElement):
 
 
 class TiledTileset(TiledElement):
-    """
-    Represents a Tiled Tileset
+    """Represents a Tiled Tileset
 
     External tilesets are supported.  GID/ID's from Tiled are not
     guaranteed to be the same after loaded.
 
     """
     def __init__(self, parent, node):
+        """???.
+        
+        Args:
+            parent (???): ???.
+            node (???): ???.
+        
+        """
         TiledElement.__init__(self)
         self.parent = parent
         self.offset = (0, 0)
@@ -1161,14 +1189,13 @@ class TiledTileset(TiledElement):
         self.parse_xml(node)
 
     def parse_xml(self, node):
-        """
-        Parse a Tileset from ElementTree xml element
+        """Parse a Tileset from ElementTree xml element.
 
         A bit of mangling is done here so that tilesets that have
         external TSX files appear the same as those that don't.
 
         Args:
-            node: node to parse
+            node (???): node to parse.
 
         """
         # if true, then node references an external tileset
@@ -1272,6 +1299,13 @@ class TiledTileset(TiledElement):
 
 class TiledGroupLayer(TiledElement):
     def __init__(self, parent, node):
+        """???.
+        
+        Args:
+            parent (???): ???.
+            node (???): ???.
+        
+        """
         TiledElement.__init__(self)
         self.parent = parent
         self.name = None
@@ -1280,10 +1314,10 @@ class TiledGroupLayer(TiledElement):
 
     def parse_xml(self, node):
         """
-        Parse a TiledGroup Layer from ElementTree xml node
+        Parse a TiledGroup Layer from ElementTree xml node.
 
         Args:
-            node: node to parse
+            node (???): Node to parse.
 
         """
         self._set_properties(node)
@@ -1292,10 +1326,9 @@ class TiledGroupLayer(TiledElement):
 
 
 class TiledTileLayer(TiledElement):
-    """
-    Represents a TileLayer
+    """Represents a TileLayer.
 
-    To just get the tile images, use TiledTileLayer.tiles()
+    To just get the tile images, use TiledTileLayer.tiles().
 
     """
     def __init__(self, parent, node):
@@ -1318,11 +1351,10 @@ class TiledTileLayer(TiledElement):
         return self.iter_data()
 
     def iter_data(self) -> Iterable[Tuple[int, int, int]]:
-        """
-        Yields X, Y, GID tuples for each tile in the layer
+        """Yields X, Y, GID tuples for each tile in the layer.
 
         Returns:
-            Iterator of X, Y, GID tuples for each tile in the layer
+            Iterable[Tuple[int, int, int]]: Iterator of X, Y, GID tuples for each tile in the layer.
 
         """
         for y, row in enumerate(self.data):
@@ -1330,11 +1362,10 @@ class TiledTileLayer(TiledElement):
                 yield x, y, gid
 
     def tiles(self):
-        """
-        Yields X, Y, Image tuples for each tile in the layer
+        """Yields X, Y, Image tuples for each tile in the layer.
 
         Returns:
-            Iterator of X, Y, Image tuples for each tile in the layer
+            ???: Iterator of X, Y, Image tuples for each tile in the layer
 
         """
         images = self.parent.images
@@ -1351,11 +1382,13 @@ class TiledTileLayer(TiledElement):
         self.width = int(self.width)
 
     def parse_xml(self, node: ElementTree.Element):
-        """
-        Parse a Tile Layer from ElementTree xml node
+        """Parse a Tile Layer from ElementTree xml node.
 
         Args:
-            node: node to parse
+            node (???): Node to parse.
+
+        Returns:
+            ???: ???.
 
         """
         self._set_properties(node)
@@ -1417,11 +1450,10 @@ class TiledObjectGroup(TiledElement, list):
         self.parse_xml(node)
 
     def parse_xml(self, node: ElementTree.Element):
-        """
-        Parse an Object Group from ElementTree xml node
+        """Parse an Object Group from ElementTree xml node
 
         Args:
-            node: node to parse
+            node (ElementTree.Element): Node to parse.
 
         """
         self._set_properties(node, self.custom_types)
@@ -1431,9 +1463,9 @@ class TiledObjectGroup(TiledElement, list):
 
 
 class TiledObject(TiledElement):
-    """Represents any Tiled Object
+    """Represents any Tiled Object.
 
-    Supported types: Box, Ellipse, Tile Object, Polyline, Polygon
+    Supported types: Box, Ellipse, Tile Object, Polyline, Polygon.
 
     """
     def __init__(self, parent, node, custom_types):
@@ -1459,11 +1491,10 @@ class TiledObject(TiledElement):
 
     @property
     def image(self):
-        """
-        Image for the object, if assigned
+        """Image for the object, if assigned.
 
         Returns:
-            the image object type will depend on the loader (ie. pygame surface)
+            ???: The image object type will depend on the loader (ie. pygame.Surface).
 
         """
         if self.gid:
@@ -1471,11 +1502,13 @@ class TiledObject(TiledElement):
         return None
 
     def parse_xml(self, node: ElementTree.Element):
-        """
-        Parse an Object from ElementTree xml node
+        """Parse an Object from ElementTree xml node.
 
         Args:
-            node: the node to be parsed
+            node (???): The node to be parsed.
+
+        Returns:
+            ???: ???.
 
         """
         def read_points(text):
@@ -1520,9 +1553,7 @@ class TiledObject(TiledElement):
         return self
 
     def apply_transformations(self):
-        """
-        Return all points for object, taking in account rotation
-
+        """Return all points for object, taking in account rotation.
         """
         if hasattr(self, "points"):
             return rotate(self.points, self, self.rotation)
@@ -1543,8 +1574,7 @@ class TiledObject(TiledElement):
 
 
 class TiledImageLayer(TiledElement):
-    """
-    Represents Tiled Image Layer
+    """Represents Tiled Image Layer.
 
     The image associated with this layer will be loaded and assigned a GID.
 
@@ -1565,11 +1595,10 @@ class TiledImageLayer(TiledElement):
 
     @property
     def image(self):
-        """
-        Image for the object, if assigned
+        """Image for the object, if assigned.
 
         Returns:
-            the image object type will depend on the loader (ie. pygame surface)
+            ???: the image object type will depend on the loader (ie. pygame.Surface).
 
         """
         if self.gid:
@@ -1577,9 +1606,7 @@ class TiledImageLayer(TiledElement):
         return None
 
     def parse_xml(self, node: ElementTree.Element):
-        """
-        Parse an Image Layer from ElementTree xml node
-
+        """Parse an Image Layer from ElementTree xml node.
         """
         self._set_properties(node)
         self.name = node.get("name", None)
@@ -1592,9 +1619,7 @@ class TiledImageLayer(TiledElement):
 
 
 class TiledProperty(TiledElement):
-    """
-    Represents Tiled Property
-
+    """Represents Tiled Property.
     """
     def __init__(self, parent, node):
         TiledElement.__init__(self)
