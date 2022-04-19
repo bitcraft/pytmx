@@ -26,7 +26,8 @@ logger.setLevel(logging.INFO)
 # 2. uncomment the two lines of code below
 # 3. profit!
 import os
-os.environ['PYSDL2_DLL_PATH'] = os.path.dirname(__file__)
+
+os.environ["PYSDL2_DLL_PATH"] = os.path.dirname(__file__)
 
 from pytmx import *
 from pytmx.util_pysdl2 import load_pysdl2
@@ -40,6 +41,7 @@ class TiledRenderer(object):
 
     no shape drawing yet
     """
+
     def __init__(self, filename, renderer):
         tm = load_pysdl2(renderer, filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
@@ -47,7 +49,7 @@ class TiledRenderer(object):
         self.renderer = renderer
 
     def render_tile_layer(self, layer):
-        """ Render the tile layer
+        """Render the tile layer
 
         DOES NOT CHECK FOR DRAWING TILES OFF THE SCREEN
         """
@@ -67,7 +69,7 @@ class TiledRenderer(object):
             rce(renderer, texture, src, dest, angle, None, flip)
 
     def render_map(self):
-        """ Render the entire map
+        """Render the entire map
 
         Only tile layer drawing is implemented
         """
@@ -104,6 +106,7 @@ class SimpleTest(object):
     def run(self, window):
         """Starts an event loop without actually processing any event."""
         import ctypes
+
         event = events.SDL_Event()
         self.running = True
         self.exit_status = 1
@@ -125,10 +128,11 @@ class SimpleTest(object):
 def all_filenames():
     import os.path
     import glob
-    return glob.glob(os.path.join('data', '*.tmx'))
+
+    return glob.glob(os.path.join("data", "*.tmx"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     window = sdl2.ext.Window("pytmx + psdl2 = awesome???", size=(600, 600))
     window.renderer = sdl2.ext.Renderer(window)
     window.renderer.blendmode = SDL_BLENDMODE_BLEND

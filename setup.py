@@ -7,14 +7,14 @@ from setuptools import setup
 
 setup(
     name="PyTMX",
-    version='3.31',
-    description='Loads tiled tmx maps',
-    author='bitcraft',
-    author_email='leif.theden@gmail.com',
-    packages=['pytmx'],
+    version="3.31",
+    description="Loads tiled tmx maps",
+    author="bitcraft",
+    author_email="leif.theden@gmail.com",
+    packages=["pytmx"],
     license="LGPLv3",
-    long_description='https://github.com/bitcraft/PyTMX',
-    python_requires='>=3.7',
+    long_description="https://github.com/bitcraft/PyTMX",
+    python_requires=">=3.7",
     classifiers=[
         "Intended Audience :: Developers",
         "Development Status :: 5 - Production/Stable",
@@ -26,5 +26,5 @@ setup(
         "Topic :: Games/Entertainment",
         "Topic :: Multimedia :: Graphics",
         "Topic :: Software Development :: Libraries :: pygame",
-    ]
+    ],
 )

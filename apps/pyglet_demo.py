@@ -28,12 +28,13 @@ class TiledRenderer(object):
 
     no shape drawing yet
     """
+
     def __init__(self, filename):
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
-        self.batches = []   # list of batches, e.g. layers
-        self.sprites = []   # container for tiles
+        self.batches = []  # list of batches, e.g. layers
+        self.sprites = []  # container for tiles
         self.generate_sprites()
         self.clock_display = pyglet.clock.ClockDisplay()
 
@@ -56,8 +57,8 @@ class TiledRenderer(object):
         poly_color = (0, 255, 0)
 
         for layer in self.tmx_data.visible_layers:
-            batch = pyglet.graphics.Batch() # create a new batch
-            self.batches.append(batch)      # add the batch to the list
+            batch = pyglet.graphics.Batch()  # create a new batch
+            self.batches.append(batch)  # add the batch to the list
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
 
@@ -66,9 +67,7 @@ class TiledRenderer(object):
                     y = mh - y
                     x = x * tw
                     y = y * th
-                    sprite = pyglet.sprite.Sprite(
-                        image, batch=batch, x=x, y=y
-                    )
+                    sprite = pyglet.sprite.Sprite(image, batch=batch, x=x, y=y)
                     self.sprites.append(sprite)
 
             # draw object layers
@@ -79,7 +78,7 @@ class TiledRenderer(object):
                     logger.info(obj)
 
                     # objects with points are polygons or lines
-                    if hasattr(obj, 'points'):
+                    if hasattr(obj, "points"):
                         draw_lines(poly_color, obj.closed, obj.points, 3)
 
                     # some object have an image
@@ -88,17 +87,14 @@ class TiledRenderer(object):
 
                     # draw a rect for everything else
                     else:
-                        draw_rect(rect_color,
-                                  (obj.x, obj.y, obj.width, obj.height), 3)
+                        draw_rect(rect_color, (obj.x, obj.y, obj.width, obj.height), 3)
 
             # draw image layers
             elif isinstance(layer, TiledImageLayer):
                 if layer.image:
                     x = mw // 2  # centers image
                     y = mh // 2
-                    sprite = pyglet.sprite.Sprite(
-                        layer.image, batch=batch, x=x, y=y
-                    )
+                    sprite = pyglet.sprite.Sprite(layer.image, batch=batch, x=x, y=y)
                     self.sprites.append(sprite)
 
     def draw(self):
@@ -135,7 +131,8 @@ class SimpleTest(object):
 def all_filenames():
     import os.path
     import glob
-    _list = glob.glob(os.path.join('data', '*.tmx'))
+
+    _list = glob.glob(os.path.join("data", "*.tmx"))
     try:
         while _list:
             yield _list.pop(0)
@@ -145,7 +142,7 @@ def all_filenames():
 
 class TestWindow(pyglet.window.Window):
     def on_draw(self):
-        if not hasattr(self, 'filenames'):
+        if not hasattr(self, "filenames"):
             self.filenames = all_filenames()
             self.next_map()
 
@@ -165,8 +162,8 @@ class TestWindow(pyglet.window.Window):
             self.next_map()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     window = TestWindow(600, 600, vsync=False)
     # Add schedule_interval with a dummy callable to force speeding up fps
-    pyglet.clock.schedule_interval(int, 1./240)
+    pyglet.clock.schedule_interval(int, 1.0 / 240)
     pyglet.app.run()

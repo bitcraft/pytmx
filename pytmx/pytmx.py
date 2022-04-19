@@ -94,16 +94,17 @@ else:
 def default_image_loader(filename: str, flags, **kwargs):
     """This default image loader just returns filename, rect, and any flags.
     Suitable for loading a map without the images.
-    
+
     Args:
         filename (str): The file's name.
         flags (???): ???
         **kwargs: Additional kwargs.
-    
+
     Returns:
         Tuple[str, ???, ???]: A tuple of the file name, rect, and flags.
 
     """
+
     def load(rect=None, flags=None):
         return filename, rect, flags
 
@@ -206,6 +207,7 @@ def convert_to_bool(value: str) -> bool:
         return False
     raise ValueError('cannot parse "{}" as bool'.format(value))
 
+
 def resolve_to_class(value: str, custom_types: dict) -> TiledClassType:
     """Converts tiled custom types to a python class.
 
@@ -215,12 +217,13 @@ def resolve_to_class(value: str, custom_types: dict) -> TiledClassType:
 
     Raises:
         ValueError: if `value` cannot be converted to a class.
-    
+
     Returns:
         TiledClassType: The converted python class type.
-    
+
     """
     return deepcopy(custom_types[value])
+
 
 def rotate(
     points: Sequence[Point],
@@ -349,7 +352,7 @@ def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
                         subnode.get("type")
                     )
                 )
-            if 'class' == subnode.get("type"):
+            if "class" == subnode.get("type"):
                 new = resolve_to_class(subnode.get("propertytype"), customs)
                 properties = parse_properties(subnode, customs)
                 for key in properties.keys():
@@ -364,8 +367,8 @@ def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
 
 
 class TiledElement:
-    """Base class for all pytmx types.
-    """
+    """Base class for all pytmx types."""
+
     allow_duplicate_names = False
 
     def __init__(self):
@@ -413,7 +416,7 @@ class TiledElement:
         msg = "Some name are reserved for {0} objects and cannot be used."
         logger.error(msg)
 
-    def _set_properties(self, node: ElementTree.Element, customs = None) -> None:
+    def _set_properties(self, node: ElementTree.Element, customs=None) -> None:
         """Set properties from xml data
 
         Reads the xml attributes and Tiled "properties" from an XML node and fills
@@ -456,15 +459,15 @@ class TiledElement:
 
 
 class TiledClassType:
-    """Contains custom Tiled types.
-    """
+    """Contains custom Tiled types."""
+
     def __init__(self, name: str, members: List[dict]):
         """Creates the TiledClassType.
-        
+
         Args:
             name (str): The name of the class type.
             members (List[dict]): ???.
-        
+
         """
         self.name = name
         for member in members:
@@ -472,8 +475,8 @@ class TiledClassType:
 
 
 class TiledMap(TiledElement):
-    """Contains the layers, objects, and images from a Tiled .tmx map.
-    """
+    """Contains the layers, objects, and images from a Tiled .tmx map."""
+
     def __init__(
         self,
         filename: Optional[str] = None,
@@ -549,8 +552,6 @@ class TiledMap(TiledElement):
         if filename:
             self.parse_xml(ElementTree.parse(self.filename).getroot())
 
-
-
     def __repr__(self):
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
 
@@ -575,8 +576,8 @@ class TiledMap(TiledElement):
 
         """
         for custom_type in data:
-            if custom_type["type"] == 'class':
-                new = TiledClassType(custom_type["name"], custom_type['members'])
+            if custom_type["type"] == "class":
+                new = TiledClassType(custom_type["name"], custom_type["members"])
 
                 self.custom_types[custom_type["name"]] = new
 
@@ -859,7 +860,7 @@ class TiledMap(TiledElement):
 
         Args:
             gid (int): GID to be searched for.
-        
+
         Returns:
             Iterable[MapPoint]: (int, int, int) tuples, where the layer is index of the visible tile layers.
 
@@ -940,8 +941,7 @@ class TiledMap(TiledElement):
         self.layernames[layer.name] = layer
 
     def add_tileset(self, tileset: TiledTileset) -> None:
-        """Add a tileset to the map.
-        """
+        """Add a tileset to the map."""
         assert isinstance(tileset, TiledTileset)
         self.tilesets.append(tileset)
 
@@ -1021,7 +1021,7 @@ class TiledMap(TiledElement):
 
         Returns:
             Iterable[Tuple[int, List[Dict]]]: The tile colliders.
-        
+
         """
         for gid, props in self.tile_properties.items():
             colliders = props.get("colliders")
@@ -1034,29 +1034,29 @@ class TiledMap(TiledElement):
 
         Returns:
             Iterable[TiledObjectGroup]: ???.
-        
+
         """
         return (layer for layer in self.layers if isinstance(layer, TiledObjectGroup))
 
     @property
     def objects(self) -> Iterable[TiledObject]:
         """Returns iterator of all the objects associated with the map.
-        
+
         Returns:
             Iterable[TiledObject]: All objects associated with the map.
-        
+
         """
         return chain(*self.objectgroups)
 
     @property
     def visible_layers(self):
         """Returns iterator of Layer objects that are set "visible".
-        
+
         Returns:
             ???: Iterator of Layer objects that are set "visible".
-        
+
         """
-        
+
         return (l for l in self.layers if l.visible)
 
     @property
@@ -1124,7 +1124,7 @@ class TiledMap(TiledElement):
 
         Args:
             tiled_gid (int): GID. that is found in the .tmx file data.
-        
+
         Returns:
             Optional[List[int]]: ???
 
@@ -1139,8 +1139,7 @@ class TiledMap(TiledElement):
             raise TypeError(msg)
 
     def map_gid2(self, tiled_gid: int) -> List[Tuple[int, Optional[int]]]:
-        """WIP.  need to refactor the gid code
-        """
+        """WIP.  need to refactor the gid code"""
         tiled_gid = int(tiled_gid)
 
         # gidmap is a default dict, so cannot trust to raise KeyError
@@ -1158,13 +1157,14 @@ class TiledTileset(TiledElement):
     guaranteed to be the same after loaded.
 
     """
+
     def __init__(self, parent, node):
         """???.
-        
+
         Args:
             parent (???): ???.
             node (???): ???.
-        
+
         """
         TiledElement.__init__(self)
         self.parent = parent
@@ -1300,11 +1300,11 @@ class TiledTileset(TiledElement):
 class TiledGroupLayer(TiledElement):
     def __init__(self, parent, node):
         """???.
-        
+
         Args:
             parent (???): ???.
             node (???): ???.
-        
+
         """
         TiledElement.__init__(self)
         self.parent = parent
@@ -1331,6 +1331,7 @@ class TiledTileLayer(TiledElement):
     To just get the tile images, use TiledTileLayer.tiles().
 
     """
+
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1433,6 +1434,7 @@ class TiledObjectGroup(TiledElement, list):
     Supports any operation of a normal list.
 
     """
+
     def __init__(self, parent, node, customs):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1457,7 +1459,10 @@ class TiledObjectGroup(TiledElement, list):
 
         """
         self._set_properties(node, self.custom_types)
-        self.extend(TiledObject(self.parent, child, self.custom_types) for child in node.findall("object"))
+        self.extend(
+            TiledObject(self.parent, child, self.custom_types)
+            for child in node.findall("object")
+        )
 
         return self
 
@@ -1468,6 +1473,7 @@ class TiledObject(TiledElement):
     Supported types: Box, Ellipse, Tile Object, Polyline, Polygon.
 
     """
+
     def __init__(self, parent, node, custom_types):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1511,6 +1517,7 @@ class TiledObject(TiledElement):
             ???: ???.
 
         """
+
         def read_points(text):
             """
             Parse a text string of float tuples and return [(x,...),...]
@@ -1553,8 +1560,7 @@ class TiledObject(TiledElement):
         return self
 
     def apply_transformations(self):
-        """Return all points for object, taking in account rotation.
-        """
+        """Return all points for object, taking in account rotation."""
         if hasattr(self, "points"):
             return rotate(self.points, self, self.rotation)
         else:
@@ -1579,6 +1585,7 @@ class TiledImageLayer(TiledElement):
     The image associated with this layer will be loaded and assigned a GID.
 
     """
+
     def __init__(self, parent, node):
         TiledElement.__init__(self)
         self.parent = parent
@@ -1606,8 +1613,7 @@ class TiledImageLayer(TiledElement):
         return None
 
     def parse_xml(self, node: ElementTree.Element):
-        """Parse an Image Layer from ElementTree xml node.
-        """
+        """Parse an Image Layer from ElementTree xml node."""
         self._set_properties(node)
         self.name = node.get("name", None)
         self.opacity = node.get("opacity", self.opacity)
@@ -1619,8 +1625,8 @@ class TiledImageLayer(TiledElement):
 
 
 class TiledProperty(TiledElement):
-    """Represents Tiled Property.
-    """
+    """Represents Tiled Property."""
+
     def __init__(self, parent, node):
         TiledElement.__init__(self)
 

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def init_screen(width, height):
-    """ Set the screen mode
+    """Set the screen mode
     This function is used to handle window resize events
     """
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -50,12 +50,12 @@ class TiledRenderer(object):
         self.tmx_data = tm
 
     def render_map(self, surface):
-        """ Render our map to a pygame surface
-        
+        """Render our map to a pygame surface
+
         Feel free to use this as a starting point for your pygame app.
         This method expects that the surface passed is the same pixel
         size as the map.
-        
+
         Scrolling is a often requested feature, but pytmx is a map
         loader, not a renderer!  If you'd like to have a scrolling map
         renderer, please see my pyscroll project.
@@ -79,8 +79,7 @@ class TiledRenderer(object):
                 self.render_image_layer(surface, layer)
 
     def render_tile_layer(self, surface, layer):
-        """ Render all TiledTiles in this layer
-        """
+        """Render all TiledTiles in this layer"""
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
@@ -100,8 +99,7 @@ class TiledRenderer(object):
                 surface_blit(image, (sx + ox, sy))
 
     def render_object_layer(self, surface, layer):
-        """ Render all TiledObjects contained in this layer
-        """
+        """Render all TiledObjects contained in this layer"""
         # deref these heavily used references for speed
         draw_lines = pygame.draw.lines
         surface_blit = surface.blit
@@ -122,7 +120,9 @@ class TiledRenderer(object):
 
             else:
                 # use `apply_transformations` to get the points after rotation
-                draw_lines(surface, rect_color, obj.closed, obj.apply_transformations(), 3)
+                draw_lines(
+                    surface, rect_color, obj.closed, obj.apply_transformations(), 3
+                )
 
     def render_image_layer(self, surface, layer):
         if layer.image:
@@ -130,8 +130,7 @@ class TiledRenderer(object):
 
 
 class SimpleTest(object):
-    """ Basic app to display a rendered Tiled map
-    """
+    """Basic app to display a rendered Tiled map"""
 
     def __init__(self, filename):
         self.renderer = None
@@ -141,8 +140,7 @@ class SimpleTest(object):
         self.load_map(filename)
 
     def load_map(self, filename):
-        """ Create a renderer, load data, and print some debug info
-        """
+        """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
 
         logger.info("Objects in map:")
@@ -160,8 +158,7 @@ class SimpleTest(object):
             logger.info("%s\t%s", k, list(v))
 
     def draw(self, surface):
-        """ Draw our map to some surface (probably the display)
-        """
+        """Draw our map to some surface (probably the display)"""
         # first we make a temporary surface that will accommodate the entire
         # size of the map.
         # because this demo does not implement scrolling, we render the
@@ -177,8 +174,7 @@ class SimpleTest(object):
 
         # display a bit of use info on the display
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit',
-                     1, (180, 180, 0))
+        i = f.render("press any key for next map or ESC to quit", 1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self):
@@ -205,8 +201,7 @@ class SimpleTest(object):
             self.running = False
 
     def run(self):
-        """ This is our app main loop
-        """
+        """This is our app main loop"""
         self.dirty = True
         self.running = True
         self.exit_status = 1
@@ -225,21 +220,21 @@ class SimpleTest(object):
         return self.exit_status
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import os.path
     import glob
 
     pygame.init()
     pygame.font.init()
     screen = init_screen(600, 600)
-    pygame.display.set_caption('PyTMX Map Viewer')
+    pygame.display.set_caption("PyTMX Map Viewer")
     logging.basicConfig(level=logging.DEBUG)
 
     logger.info(pytmx.__version__)
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('apps', 'data', '*.tmx')):
+        for filename in glob.glob(os.path.join("apps", "data", "*.tmx")):
             logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break
