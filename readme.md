@@ -1,10 +1,14 @@
 <div align="center">
-    <h1>pytmx</h1>
-    <p>A map loader for Python/pygame, designed for video games</p>
-    <img src="https://img.shields.io/pypi/v/pytmx" alt="pypi version">
-    <img src="https://img.shields.io/github/license/bitcraft/pytmx" alt="license">
-    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="code style">
-    <img src="https://img.shields.io/pypi/dm/pytmx" alt="pypi downloads">
+
+# pytmx
+
+A map loader for Python/pygame, designed for video games
+
+![pypi version](https://img.shields.io/pypi/v/pytmx)
+![license](https://img.shields.io/github/license/bitcraft/pytmx)
+![code style](https://img.shields.io/badge/code%20style-black-000000.svg)
+![pypi downloads](https://img.shields.io/pypi/dm/pytmx)
+
 </div>
 
 About
