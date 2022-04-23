@@ -896,7 +896,7 @@ class TiledMap(TiledElement):
         Args:
             layer (int): The layer number.
 
-        Yields:
+        Returns:
             ???: ???
 
         """
@@ -1385,7 +1385,7 @@ class TiledTileLayer(TiledElement):
         self.width = int(self.width)
 
     def parse_xml(self, node: ElementTree.Element) -> "TiledTileLayer":
-        """Parse a tile Layer from ElementTree xml node.
+        """Parse a Tile Layer from ElementTree xml node.
 
         Args:
             node (ElementTree.Element): Node to parse.
@@ -1571,9 +1571,7 @@ class TiledObject(TiledElement):
     @property
     def as_points(
         self,
-    ) -> List[
-        Point, List[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]
-    ]:
+    ) -> List[Point]:
         return [
             Point(*i)
             for i in [
