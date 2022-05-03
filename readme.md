@@ -1,71 +1,70 @@
-## PyTMX
-##### For Python 3.7+
+<div align="center">
 
-If you have any problems or suggestions, please open an issue.
+# pytmx
 
-If you find this useful, please consider making a donation to help support it
+A map loader for Python/pygame, designed for video games
+
+![pypi version](https://img.shields.io/pypi/v/pytmx)
+![license](https://img.shields.io/github/license/bitcraft/pytmx)
+![code style](https://img.shields.io/badge/code%20style-black-000000.svg)
+![pypi downloads](https://img.shields.io/pypi/dm/pytmx)
+
+</div>
+
+About
+===============================================================================
+**For Python 3.7+**
+A map loader for python/pygame designed for games. It provides smart
+tile loading with a fast and efficient storage base. Not only does it
+correctly handle most Tiled object types, it also will load metadata for
+them so you can modify your maps and objects in Tiled instead of modifying
+your source code. See the "apps" folder for example use and cut/paste code.
+
+Since pytmx was built with games in mind, it differs slightly from Tiled in
+a few minor aspects:
+ - Layers not aligned to the grid are not supported.
+ - Some object metadata attribute names are not supported (see "Reserved Names").
+ - pytmx is not a rendering engine or Tiled Map Editor.
+
+pytmx strives to balance performance and flexibility. Feel free to use the
+classes provided in pytmx.py as superclasses for your own maps, or simply
+load the data with pytmx and copy the data into your own classes with the API.
+
+**There is no save feature.** Once the map is loaded, it will be up to
+you to provide a way to save changes to the map. I've used the pickle module
+with good results.
+
+**As Python 2.7 is now EOL**, any changes moving forward past version 3.21.7 will
+not take python 2.7 support into consideration and any breaking changes will not be 
+fixed.
+
+If you have any problems or suggestions, please open an issue or join the Discord server.
+https://discord.gg/2taTP4aYR6
+
+If you find this useful, please consider making a donation to help support it.
 https://liberapay.com/ltheden/donate
 
-Discord!  https://discord.gg/2taTP4aYR6
-
-*Released under the LGPL v3*
-
-### See the "apps" folder for example use and cut/paste code.
+*Released under the LGPL V3*
 
 News
 ===============================================================================
 
-__09/21/21__ - Support pygame._sdl2  
-__09/08/21__ - Much faster loading, especially for large maps  
-__12/04/20__ - Support tile colliders  
-__08/28/20__ - Python 2.7 support removed.  Use the "py27-legacy" branch.  
-__11/13/15__ - Animations are now loaded  
-__07/08/15__ - Documentation overhaul  
-__04/18/15__ - Document support for pysdl2 and pyglet  
-__09/14/14__ - Merge python3 branch.  Now 100% compatible with 2.7 and 3.3+  
-__07/26/14__ - New python3/2 release.  Check it out in the python3 branch.  
-__05/29/14__ - Added support for rotated objects and floating point  
-__04/04/14__ - New Six Branch created  
-__02/28/14__ - Image layer support, object points changed, new test.py!  
-__02/24/14__ - New Python 3 Support: see python3 branch  
-__02/06/14__ - Python 3 support coming soon  
-
-
-Introduction
-===============================================================================
-
-PyTMX is a map loader for python/pygame designed for games.  It provides smart
-tile loading with a fast and efficient storage base.  Not only does it
-correctly handle most Tiled object types, it also will load metadata for
-them so you can modify your maps and objects in Tiled instead of modifying
-your source code.
-
-New support for pysdl2 and pyglet!  Check it out!
-
-Because PyTMX was built with games in mind, it differs slightly from Tiled in
-a few minor aspects:
-
-- Layers not aligned to the grid are not supported.
-- Some object metadata attribute names are not supported (see "Reserved Names")
-
-PyTMX strives to balance performance and flexibility.  Feel free to use the
-classes provided in pytmx.py as superclasses for your own maps, or simply
-load the data with PyTMX and copy the data into your own classes with the api.
-
-There is no save feature.  Once the map is loaded, it will be up to
-you to provide a way to save changes to the map.  I've used the pickle module
-with good results.
-
-I need to clarify a few things:
-- pytmx is not a rendering engine
-- pytmx is not the Tiled Map Editor
-
-
-Python 2.7 Support
-===============================================================================
-As Python 2.7 is now EOL, any changes moving forward past version 3.21.7 will
-not take python 2.7 support into consideration and any breaking changes will
-not be fixed.
+| Date     | Changes
+| -------- | --------
+| 09/21/21 | Supports pygame._sdl2.
+| 09/08/21 | Much faster loading, especially for large maps.
+| 12/04/20 | Support tile colliders.
+| 08/28/20 | Python 2.7 support removed. Use the "py27-legacy" branch.
+| 11/13/15 | Animations are now loaded.
+| 07/08/15 | Documentation overhaul.
+| 04/18/15 | Document support for pysdl2 and pyglet.
+| 09/14/14 | Merge python3 branch. Now 100% compatible with 2.7 and 3.3+.
+| 07/26/14 | New python3/2 release. Check it out in the python3 branch.
+| 05/29/14 | Added support for rotated objects and floating point.
+| 04/04/14 | New Six Branch created.
+| 02/28/14 | Image layer support, object points changed, new test.py!
+| 02/24/14 | New Python 3 Support: see python3 branch.
+| 02/06/14 | Python 3 support coming soon.
 
 
 Documentation
@@ -92,13 +91,6 @@ http://pytmx.readthedocs.org/
 10. [Understanding Properties](#understanding-properties)
 
 
-Getting Help
-===============================================================================
-
-For bugs or feature requests, please use the issues feature of github.  For
-all other general questions, join me on Discord https://discord.gg/2taTP4aYR6
-
-
 Design Goals and Features
 ===============================================================================
 
@@ -114,24 +106,24 @@ Design Goals and Features
 * Loads animation information
 
 
-Why use PyTMX?
+Why use pytmx?
 ===============================================================================
 
-### PyTMX is efficient:
+### pytmx is efficient:
 * Map information is stored as integers, not python objects (32+kb)
 * Extensive use of generators and iterators make it easy on memory
 * Code is designed for compact size and readability
 
-### PyTMX is flexible:
+### pytmx is flexible:
 * Supports all major Tiled features and object types
-* PyTMX data classes can be extended
+* pytmx data classes can be extended
 * Does not force you to render data in any particular way
 * Includes many checks to give useful debugging information
 * Supports pygame, pyglet, and pysdl2 image loading
 
-### PyTMX is supported:
+### pytmx is supported:
 * GitHub hosting allows for community participation
-* I have kept PyTMX current with new versions of Tiled since v.7
+* I have kept pytmx current with new versions of Tiled since v.7
 
 
 Installation
@@ -353,7 +345,7 @@ for group in tile_map.visible_object_groups:
 Working with Tile Layers
 ===============================================================================
 
-Pytmx loads tile layers and their data:
+pytmx loads tile layers and their data:
 
 - name
 - opacity
@@ -448,7 +440,7 @@ Working with Objects
 ===============================================================================
 
 Tiled "objects" are things that are created in object layers, and include
-polygons, polylings, boxes, ellipses, and tile objects.  Pytmx loads all objects
+polygons, polylings, boxes, ellipses, and tile objects.  pytmx loads all objects
 and their data:
 
 - name
@@ -503,7 +495,7 @@ Understanding Properties
 ===============================================================================
 
 Properties are a powerful feature of Tiled that allows the level designer to
-assign key/value data to individual maps, tilesets, tiles, and objects.  Pytmx
+assign key/value data to individual maps, tilesets, tiles, and objects.  pytmx
 includes full support for reading this data so you can set parameters for stuff
 in Tiled, instead of maintaining external data files, or even values in source.
 
@@ -553,7 +545,7 @@ objects, like the map, tileset, objects, etc.  Due to how the Tiled XML data is
 stored, there are situations where Tiled internal metadata might have the same
 name as user-created properties.
 
-Pytmx will raise a ValueError if it detects any conflicts.  This check is
+pytmx will raise a ValueError if it detects any conflicts.  This check is
 performed in order to prevent any situations where a level change might be made
 in Tiled, but the programmer/designer doesn't know or forgets if the change was
 made in the Tiled metadata or the user properties.
@@ -591,7 +583,7 @@ object:      id, name, type, x, y, width, height, gid, properties, polygon,
 
 #### Please consider the following:
 
-PyTMX is a map __loader__.  Pytmx takes the pain out of parsing XML, variable type conversion, shape loading, properties, and of course image loading.  When asking for help, please understand that I want people to make their own games or utilities, and that PyTMX is able to make Tiled Maps easy to use.
+pytmx is a map __loader__.  pytmx takes the pain out of parsing XML, variable type conversion, shape loading, properties, and of course image loading.  When asking for help, please understand that I want people to make their own games or utilities, and that pytmx is able to make Tiled Maps easy to use.
 
 pytmx is not going to make your JRPG for you.  You will need to do that yourself, and I, the author, cannot simply respond to every new developer who expects pytmx, pygame, or any other game library to simply make it work for them.  Programming is a learned skill, and for most it takes practice and diligent study to get proficient at.  I'm generally open to help, so before you flame me on your blog or reddit, understand what pytmx is used for, read the documentation and copy/paste the demo code if you have to.  Thank you.
 
