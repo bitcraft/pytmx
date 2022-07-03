@@ -1024,6 +1024,9 @@ class TiledMap(TiledElement):
             if colliders:
                 yield gid, colliders
 
+    def pixels_to_tile_pos(self, position: Tuple[int, int]) -> Tuple[int, int]:
+        return int(position[0] / self.tilewidth), int(position[1] / self.tileheight)
+
     @property
     def objectgroups(self) -> Iterable[TiledObjectGroup]:
         """Returns iterator of all object groups.
