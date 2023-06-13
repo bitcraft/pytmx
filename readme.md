@@ -20,6 +20,8 @@ correctly handle most Tiled object types, it also will load metadata for
 them so you can modify your maps and objects in Tiled instead of modifying
 your source code. See the "apps" folder for example use and cut/paste code.
 
+__pygame-ce is supported__
+
 Since pytmx was built with games in mind, it differs slightly from Tiled in
 a few minor aspects:
  - Layers not aligned to the grid are not supported.
@@ -51,6 +53,7 @@ News
 
 | Date     | Changes
 | -------- | --------
+| 06/13/23 | Fix flipped tile objects.
 | 09/21/21 | Supports pygame._sdl2.
 | 09/08/21 | Much faster loading, especially for large maps.
 | 12/04/20 | Support tile colliders.
