@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2022, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2023, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -1115,6 +1115,29 @@ class TiledMap(TiledElement):
         else:
             return 0
 
+    def register_gid_check_flags(
+            self,
+            tiled_gid: int,
+    ) -> int:
+        """Used to manage the mapping of GIDs between .tmx and pytmx.
+
+        Checks the GID for rotation/flip flags
+
+        Args:
+            tiled_gid (int): GID that is found in TMX data.
+
+        Returns:
+            int: New or existing GID for pytmx use.
+
+        """
+        # NOTE: the register* methods are getting really spaghetti-like
+        if tiled_gid == 0:
+            return 0
+        elif tiled_gid < GID_TRANS_ROT:
+            return self.register_gid(tiled_gid)
+        else:
+            return self.register_gid(*decode_gid(tiled_gid))
+
     def map_gid(self, tiled_gid: int) -> Optional[List[int]]:
         """Used to lookup a GID read from a TMX file's data.
 
@@ -1408,23 +1431,14 @@ class TiledTileLayer(TiledElement):
                 "XML tile elements are no longer supported. Must use base64 or csv map formats."
             )
 
-        reg = self.parent.register_gid
-        temp = list()
-        temp_append = temp.append
-        for gid in unpack_gids(
-            text=data_node.text.strip(),
-            encoding=data_node.get("encoding", None),
-            compression=data_node.get("compression", None),
-        ):
-            if gid == 0:
-                temp_append(0)
-            elif gid < GID_TRANS_ROT:
-                gid = reg(gid)
-                temp_append(gid)
-            else:
-                gid, flags = decode_gid(gid)
-                gid = reg(gid, flags)
-                temp_append(gid)
+        temp = [
+            self.parent.register_gid_check_flags(gid) for gid in
+            unpack_gids(
+                text=data_node.text.strip(),
+                encoding=data_node.get("encoding", None),
+                compression=data_node.get("compression", None),
+            )
+        ]
 
         self.data = reshape_data(temp, self.width)
         return self
@@ -1531,7 +1545,7 @@ class TiledObject(TiledElement):
 
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
-            self.gid = self.parent.register_gid(self.gid)
+            self.gid = self.parent.register_gid_check_flags(self.gid)
 
         points = None
         polygon = node.find("polygon")

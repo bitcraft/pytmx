@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2021, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2023, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -27,7 +27,7 @@ try:
 except ImportError:
     logger.debug("cannot import pygame tools")
 
-__version__ = (3, 31)
+__version__ = (3, 32)
 __author__ = "bitcraft"
 __author_email__ = "leif.theden@gmail.com"
 __description__ = "Map loader for TMX Files - Python 3.3 +"

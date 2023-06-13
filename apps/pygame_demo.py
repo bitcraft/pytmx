@@ -1,6 +1,6 @@
 """
 This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2022
+Leif Theden "bitcraft", 2012-2023
 
 Rendering demo for the TMXLoader.
 
@@ -234,7 +234,8 @@ if __name__ == "__main__":
 
     # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join("apps", "data", "*.tmx")):
+        here = os.path.dirname(os.path.abspath(__file__))
+        for filename in glob.glob(os.path.join(here, "data", "*.tmx")):
             logger.info("Testing %s", filename)
             if not SimpleTest(filename).run():
                 break
