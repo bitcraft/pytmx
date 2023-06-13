@@ -118,6 +118,12 @@ class TiledMapTest(unittest.TestCase):
         self.assertFalse(self.m.properties["test_bool"])
         self.assertTrue(self.m.properties["test_bool_true"])
 
+    def test_pixels_to_tile_pos(self):
+        self.assertEqual(self.m.pixels_to_tile_pos((0, 33)), (0, 2))
+        self.assertEqual(self.m.pixels_to_tile_pos((33, 0)), (2, 0))
+        self.assertEqual(self.m.pixels_to_tile_pos((0, 0)), (0, 0))
+        self.assertEqual(self.m.pixels_to_tile_pos((65, 86)), (4, 5))
+
 
 class TiledElementTestCase(unittest.TestCase):
     def setUp(self):
