@@ -939,14 +939,16 @@ class TiledMap(TiledElement):
         assert isinstance(tileset, TiledTileset)
         self.tilesets.append(tileset)
 
-    def get_layer_by_name(self, name: str) -> int:
+    def get_layer_by_name(self, name: str) -> Union[
+        TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup
+    ]:
         """Return a layer by name.
 
         Args:
             name (str): The layer's name. Case-sensitive!
 
         Returns:
-            int: The layer number.
+            Union[TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup]: The layer.
 
         Raises:
             ValueError: if layer by name does not exist
