@@ -81,6 +81,7 @@ TileFlags = namedtuple("TileFlags", flag_names)
 empty_flags = TileFlags(False, False, False)
 ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
 MapPoint = Tuple[int, int, int]
+TiledLayer = Union["TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"]
 
 # need a more graceful way to handle annotations for optional dependencies
 if pygame:
@@ -917,14 +918,12 @@ class TiledMap(TiledElement):
 
     def add_layer(
         self,
-        layer: Union[
-            TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup
-        ],
+        layer: TiledLayer,
     ) -> None:
         """Add a layer to the map.
 
         Args:
-            layer (Union[TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup]): The layer.
+            layer (TiledLayer): The layer.
 
         """
         assert isinstance(
@@ -939,16 +938,14 @@ class TiledMap(TiledElement):
         assert isinstance(tileset, TiledTileset)
         self.tilesets.append(tileset)
 
-    def get_layer_by_name(self, name: str) -> Union[
-        TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup
-    ]:
+    def get_layer_by_name(self, name: str) -> TiledLayer:
         """Return a layer by name.
 
         Args:
             name (str): The layer's name. Case-sensitive!
 
         Returns:
-            Union[TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup]: The layer.
+            TiledLayer: The layer.
 
         Raises:
             ValueError: if layer by name does not exist
