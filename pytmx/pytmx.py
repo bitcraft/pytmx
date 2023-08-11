@@ -19,7 +19,6 @@ License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-
 import gzip
 import logging
 import os
@@ -68,7 +67,6 @@ GID_TRANS_FLIPX = 1 << 31
 GID_TRANS_FLIPY = 1 << 30
 GID_TRANS_ROT = 1 << 29
 GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT
-
 
 # error message format strings go here
 duplicate_name_fmt = (
@@ -148,7 +146,7 @@ def reshape_data(
         List[List[int]]: 2D nested list object.
 
     """
-    return [gids[i : i + width] for i in range(0, len(gids), width)]
+    return [gids[i:i + width] for i in range(0, len(gids), width)]
 
 
 def unpack_gids(
@@ -1119,8 +1117,8 @@ class TiledMap(TiledElement):
             return 0
 
     def register_gid_check_flags(
-            self,
-            tiled_gid: int,
+        self,
+        tiled_gid: int,
     ) -> int:
         """Used to manage the mapping of GIDs between .tmx and pytmx.
 
