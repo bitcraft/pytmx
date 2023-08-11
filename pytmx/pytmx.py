@@ -81,7 +81,9 @@ TileFlags = namedtuple("TileFlags", flag_names)
 empty_flags = TileFlags(False, False, False)
 ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
 MapPoint = Tuple[int, int, int]
-TiledLayer = Union["TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"]
+TiledLayer = Union[
+    "TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"
+]
 
 # need a more graceful way to handle annotations for optional dependencies
 if pygame:
@@ -147,7 +149,7 @@ def reshape_data(
         List[List[int]]: 2D nested list object.
 
     """
-    return [gids[i:i + width] for i in range(0, len(gids), width)]
+    return [gids[i : i + width] for i in range(0, len(gids), width)]
 
 
 def unpack_gids(
@@ -618,7 +620,6 @@ class TiledMap(TiledElement):
 
         # iterate through tile objects and handle the image
         for o in [o for o in self.objects if o.gid]:
-
             # gids might also have properties assigned to them
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
@@ -644,7 +645,6 @@ class TiledMap(TiledElement):
 
         # iterate through tilesets to get source images
         for ts in self.tilesets:
-
             # skip tilesets without a source
             if ts.source is None:
                 continue
@@ -1224,7 +1224,6 @@ class TiledTileset(TiledElement):
         source = node.get("source", None)
         if source:
             if source[-4:].lower() == ".tsx":
-
                 # external tilesets don't save this, store it for later
                 self.firstgid = int(node.get("firstgid"))
 
@@ -1432,8 +1431,8 @@ class TiledTileLayer(TiledElement):
             )
 
         temp = [
-            self.parent.register_gid_check_flags(gid) for gid in
-            unpack_gids(
+            self.parent.register_gid_check_flags(gid)
+            for gid in unpack_gids(
                 text=data_node.text.strip(),
                 encoding=data_node.get("encoding", None),
                 compression=data_node.get("compression", None),
