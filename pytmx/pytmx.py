@@ -508,7 +508,7 @@ class TiledMap(TiledElement):
         self.layers = list()  # all layers in proper order
         self.tilesets = list()  # TiledTileset objects
         self.tile_properties = dict()  # tiles that have properties
-        self.layers_by_name = dict()
+        self.layernames = dict()
         self.objects_by_id = dict()
         self.objects_by_name = dict()
 
@@ -931,7 +931,7 @@ class TiledMap(TiledElement):
         )
 
         self.layers.append(layer)
-        self.layers_by_name[layer.name] = layer
+        self.layernames[layer.name] = layer
 
     def add_tileset(self, tileset: TiledTileset) -> None:
         """Add a tileset to the map."""
@@ -952,7 +952,7 @@ class TiledMap(TiledElement):
 
         """
         try:
-            return self.layers_by_name[name]
+            return self.layernames[name]
         except KeyError:
             msg = 'Layer "{0}" not found.'
             logger.debug(msg.format(name))
