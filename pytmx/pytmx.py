@@ -19,7 +19,6 @@ License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-
 import gzip
 import logging
 import os
@@ -69,7 +68,6 @@ GID_TRANS_FLIPY = 1 << 30
 GID_TRANS_ROT = 1 << 29
 GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT
 
-
 # error message format strings go here
 duplicate_name_fmt = (
     'Cannot set user {} property on {} "{}"; Tiled property already exists.'
@@ -83,6 +81,9 @@ TileFlags = namedtuple("TileFlags", flag_names)
 empty_flags = TileFlags(False, False, False)
 ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
 MapPoint = Tuple[int, int, int]
+TiledLayer = Union[
+    "TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"
+]
 
 # need a more graceful way to handle annotations for optional dependencies
 if pygame:
@@ -619,7 +620,6 @@ class TiledMap(TiledElement):
 
         # iterate through tile objects and handle the image
         for o in [o for o in self.objects if o.gid]:
-
             # gids might also have properties assigned to them
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
@@ -645,7 +645,6 @@ class TiledMap(TiledElement):
 
         # iterate through tilesets to get source images
         for ts in self.tilesets:
-
             # skip tilesets without a source
             if ts.source is None:
                 continue
@@ -919,14 +918,12 @@ class TiledMap(TiledElement):
 
     def add_layer(
         self,
-        layer: Union[
-            TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup
-        ],
+        layer: TiledLayer,
     ) -> None:
         """Add a layer to the map.
 
         Args:
-            layer (Union[TiledTileLayer, TiledImageLayer, TiledGroupLayer, TiledObjectGroup]): The layer.
+            layer (TiledLayer): The layer.
 
         """
         assert isinstance(
@@ -941,14 +938,14 @@ class TiledMap(TiledElement):
         assert isinstance(tileset, TiledTileset)
         self.tilesets.append(tileset)
 
-    def get_layer_by_name(self, name: str) -> int:
+    def get_layer_by_name(self, name: str) -> TiledLayer:
         """Return a layer by name.
 
         Args:
             name (str): The layer's name. Case-sensitive!
 
         Returns:
-            int: The layer number.
+            TiledLayer: The layer.
 
         Raises:
             ValueError: if layer by name does not exist
@@ -1119,8 +1116,8 @@ class TiledMap(TiledElement):
             return 0
 
     def register_gid_check_flags(
-            self,
-            tiled_gid: int,
+        self,
+        tiled_gid: int,
     ) -> int:
         """Used to manage the mapping of GIDs between .tmx and pytmx.
 
@@ -1227,7 +1224,6 @@ class TiledTileset(TiledElement):
         source = node.get("source", None)
         if source:
             if source[-4:].lower() == ".tsx":
-
                 # external tilesets don't save this, store it for later
                 self.firstgid = int(node.get("firstgid"))
 
@@ -1435,8 +1431,8 @@ class TiledTileLayer(TiledElement):
             )
 
         temp = [
-            self.parent.register_gid_check_flags(gid) for gid in
-            unpack_gids(
+            self.parent.register_gid_check_flags(gid)
+            for gid in unpack_gids(
                 text=data_node.text.strip(),
                 encoding=data_node.get("encoding", None),
                 compression=data_node.get("compression", None),
