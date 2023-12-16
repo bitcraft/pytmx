@@ -496,6 +496,7 @@ class TiledMap(TiledElement):
         self.filename = filename
         self.custom_property_filename = custom_property_filename
         self.image_loader = image_loader
+        self.image_loader_kwargs = kwargs
 
         # optional keyword arguments checked here
         self.optional_gids = kwargs.get("optional_gids", set())
@@ -651,7 +652,9 @@ class TiledMap(TiledElement):
 
             path = os.path.join(os.path.dirname(self.filename), ts.source)
             colorkey = getattr(ts, "trans", None)
-            loader = self.image_loader(path, colorkey, tileset=ts)
+            kwargs_to_pass = self.image_loader_kwargs.copy()
+            kwargs_to_pass["tileset"] = "ts"
+            loader = self.image_loader(path, colorkey, **kwargs_to_pass)
 
             p = product(
                 range(
@@ -698,7 +701,7 @@ class TiledMap(TiledElement):
                 gid = self.register_gid(real_gid)
                 layer.gid = gid
                 path = os.path.join(os.path.dirname(self.filename), source)
-                loader = self.image_loader(path, colorkey)
+                loader = self.image_loader(path, colorkey, **self.image_loader_kwargs)
                 image = loader()
                 self.images.append(image)
 
@@ -710,7 +713,7 @@ class TiledMap(TiledElement):
             if source:
                 colorkey = props.get("trans", None)
                 path = os.path.join(os.path.dirname(self.filename), source)
-                loader = self.image_loader(path, colorkey)
+                loader = self.image_loader(path, colorkey, **self.image_loader_kwargs)
                 image = loader()
                 self.images[real_gid] = image
 
