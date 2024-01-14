@@ -29,10 +29,11 @@ import os
 
 os.environ["PYSDL2_DLL_PATH"] = os.path.dirname(__file__)
 
+import sdl2.ext
+from sdl2 import *
+
 from pytmx import *
 from pytmx.util_pysdl2 import load_pysdl2
-from sdl2 import *
-import sdl2.ext
 
 
 class TiledRenderer(object):
@@ -126,8 +127,8 @@ class SimpleTest(object):
 
 
 def all_filenames():
-    import os.path
     import glob
+    import os.path
 
     return glob.glob(os.path.join("data", "*.tmx"))
 

@@ -28,8 +28,8 @@ import pytmx
 logger = logging.getLogger(__name__)
 
 try:
-    from pygame._sdl2 import Texture, Image, Renderer, Window
     import pygame
+    from pygame._sdl2 import Image, Renderer, Texture, Window
 except ImportError:
     logger.error("cannot import pygame (is it installed?)")
     raise

@@ -17,9 +17,10 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
+import pyglet
+
 from pytmx import *
 from pytmx.util_pyglet import load_pyglet
-import pyglet
 
 
 class TiledRenderer(object):
@@ -129,8 +130,8 @@ class SimpleTest(object):
 
 
 def all_filenames():
-    import os.path
     import glob
+    import os.path
 
     _list = glob.glob(os.path.join("data", "*.tmx"))
     try:

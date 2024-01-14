@@ -20,19 +20,19 @@ License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import gzip
+import json
 import logging
 import os
 import struct
 import zlib
 from base64 import b64decode
 from collections import defaultdict, namedtuple
+from copy import deepcopy
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
-from typing import List, Tuple, Optional, Sequence, Union, Dict, Iterable
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
 from xml.etree import ElementTree
-import json
-from copy import deepcopy
 
 # for type hinting
 try:

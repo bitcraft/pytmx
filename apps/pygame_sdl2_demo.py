@@ -149,8 +149,8 @@ class SimpleTest:
 
 
 if __name__ == "__main__":
-    import os.path
     import glob
+    import os.path
 
     pygame.init()
     pygame.font.init()
