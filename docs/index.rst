@@ -74,7 +74,7 @@ Load with pysdl2 images (experimental):
 Load with pyglet images (experimental):
 
     >>> from pytmx.util_pyglet import pyglet_image_loader
-    >>> tmx_data = load_pygame('map.tmx')
+    >>> tmx_data = pyglet_image_loader('map.tmx')
 
 Getting the tile image:
 
