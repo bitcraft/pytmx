@@ -19,7 +19,7 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
 import itertools
 import logging
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 import pytmx
 from pytmx.pytmx import ColorLike, PointLike
@@ -27,8 +27,8 @@ from pytmx.pytmx import ColorLike, PointLike
 logger = logging.getLogger(__name__)
 
 try:
-    from pygame.transform import flip, rotate
     import pygame
+    from pygame.transform import flip, rotate
 except ImportError:
     logger.error("cannot import pygame (is it installed?)")
     raise

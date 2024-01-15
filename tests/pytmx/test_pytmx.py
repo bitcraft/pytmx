@@ -1,8 +1,7 @@
 import unittest
 
 import pytmx
-from pytmx import TiledElement
-from pytmx import convert_to_bool
+from pytmx import TiledElement, convert_to_bool
 
 
 class TestConvertToBool(unittest.TestCase):

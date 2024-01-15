@@ -208,8 +208,9 @@ class SimpleTest(object):
 
 
 if __name__ == "__main__":
-    import os.path
     import glob
+    import os.path
+
     import pytmx
 
     pygame.init()

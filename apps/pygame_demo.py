@@ -21,9 +21,7 @@ import pygame
 from pygame.locals import *
 
 import pytmx
-from pytmx import TiledImageLayer
-from pytmx import TiledObjectGroup
-from pytmx import TiledTileLayer
+from pytmx import TiledImageLayer, TiledObjectGroup, TiledTileLayer
 from pytmx.util_pygame import load_pygame
 
 logger = logging.getLogger(__name__)
@@ -221,8 +219,8 @@ class SimpleTest(object):
 
 
 if __name__ == "__main__":
-    import os.path
     import glob
+    import os.path
 
     pygame.init()
     pygame.font.init()
