@@ -1,6 +1,6 @@
 """
 This is tested on pysdl2 1.2 and python 2.7.
-Leif Theden "bitcraft", 2012-2022
+Leif Theden "bitcraft", 2012-2024
 
 Rendering demo for the TMXLoader.
 
@@ -43,13 +43,13 @@ class TiledRenderer(object):
     no shape drawing yet
     """
 
-    def __init__(self, filename, renderer):
+    def __init__(self, filename, renderer) -> None:
         tm = load_pysdl2(renderer, filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
         self.renderer = renderer
 
-    def render_tile_layer(self, layer):
+    def render_tile_layer(self, layer) -> None:
         """Render the tile layer
 
         DOES NOT CHECK FOR DRAWING TILES OFF THE SCREEN
@@ -69,7 +69,7 @@ class TiledRenderer(object):
             angle = 90 if (flip & 4) else 0
             rce(renderer, texture, src, dest, angle, None, flip)
 
-    def render_map(self):
+    def render_map(self) -> None:
         """Render the entire map
 
         Only tile layer drawing is implemented
@@ -82,7 +82,7 @@ class TiledRenderer(object):
 
 
 class SimpleTest(object):
-    def __init__(self, filename, window):
+    def __init__(self, filename, window) -> None:
         self.running = False
         self.dirty = False
         self.exit_status = 0
@@ -99,7 +99,7 @@ class SimpleTest(object):
         for k, v in self.map_renderer.tmx_data.tile_properties.items():
             logger.info("%s\t%s", k, v)
 
-    def draw(self):
+    def draw(self) -> None:
         self.sdl_renderer.clear()
         self.map_renderer.render_map()
         self.sdl_renderer.present()

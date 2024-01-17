@@ -5,7 +5,7 @@ from pytmx import TiledElement, convert_to_bool
 
 
 class TestConvertToBool(unittest.TestCase):
-    def test_string_string_true(self):
+    def test_string_string_true(self) -> None:
         self.assertTrue(convert_to_bool("1"))
         self.assertTrue(convert_to_bool("y"))
         self.assertTrue(convert_to_bool("Y"))
@@ -18,7 +18,7 @@ class TestConvertToBool(unittest.TestCase):
         self.assertTrue(convert_to_bool("True"))
         self.assertTrue(convert_to_bool("TRUE"))
 
-    def test_string_string_false(self):
+    def test_string_string_false(self) -> None:
         self.assertFalse(convert_to_bool("0"))
         self.assertFalse(convert_to_bool("n"))
         self.assertFalse(convert_to_bool("N"))
@@ -31,36 +31,36 @@ class TestConvertToBool(unittest.TestCase):
         self.assertFalse(convert_to_bool("False"))
         self.assertFalse(convert_to_bool("FALSE"))
 
-    def test_string_number_true(self):
+    def test_string_number_true(self) -> None:
         self.assertTrue(convert_to_bool(1))
         self.assertTrue(convert_to_bool(1.0))
 
-    def test_string_number_false(self):
+    def test_string_number_false(self) -> None:
         self.assertFalse(convert_to_bool(0))
         self.assertFalse(convert_to_bool(0.0))
         self.assertFalse(convert_to_bool(-1))
         self.assertFalse(convert_to_bool(-1.1))
 
-    def test_string_bool_true(self):
+    def test_string_bool_true(self) -> None:
         self.assertTrue(convert_to_bool(True))
 
-    def test_string_bool_false(self):
+    def test_string_bool_false(self) -> None:
         self.assertFalse(convert_to_bool(False))
 
-    def test_string_bool_none(self):
+    def test_string_bool_none(self) -> None:
         self.assertFalse(convert_to_bool(None))
 
-    def test_string_bool_empty(self):
+    def test_string_bool_empty(self) -> None:
         self.assertFalse(convert_to_bool(""))
 
-    def test_string_bool_whitespace_only(self):
+    def test_string_bool_whitespace_only(self) -> None:
         self.assertFalse(convert_to_bool(" "))
 
-    def test_non_boolean_string_raises_error(self):
+    def test_non_boolean_string_raises_error(self) -> None:
         with self.assertRaises(ValueError):
             convert_to_bool("garbage")
 
-    def test_non_boolean_number_raises_error(self):
+    def test_non_boolean_number_raises_error(self) -> None:
         with self.assertRaises(ValueError):
             convert_to_bool("200")
 
@@ -68,10 +68,10 @@ class TestConvertToBool(unittest.TestCase):
 class TiledMapTest(unittest.TestCase):
     filename = "tests/resources/test01.tmx"
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.m = pytmx.TiledMap(self.filename)
 
-    def test_build_rects(self):
+    def test_build_rects(self) -> None:
         try:
             from pytmx import util_pygame
 
@@ -82,30 +82,30 @@ class TiledMapTest(unittest.TestCase):
         except ImportError:
             pass
 
-    def test_get_tile_image(self):
+    def test_get_tile_image(self) -> None:
         image = self.m.get_tile_image(0, 0, 0)
 
-    def test_get_tile_image_by_gid(self):
+    def test_get_tile_image_by_gid(self) -> None:
         image = self.m.get_tile_image_by_gid(0)
         self.assertIsNone(image)
 
         image = self.m.get_tile_image_by_gid(1)
         self.assertIsNotNone(image)
 
-    def test_reserved_names_check_disabled_with_option(self):
+    def test_reserved_names_check_disabled_with_option(self) -> None:
         pytmx.TiledElement.allow_duplicate_names = False
         pytmx.TiledMap(allow_duplicate_names=True)
         self.assertTrue(pytmx.TiledElement.allow_duplicate_names)
 
-    def test_map_width_height_is_int(self):
+    def test_map_width_height_is_int(self) -> None:
         self.assertIsInstance(self.m.width, int)
         self.assertIsInstance(self.m.height, int)
 
-    def test_layer_width_height_is_int(self):
+    def test_layer_width_height_is_int(self) -> None:
         self.assertIsInstance(self.m.layers[0].width, int)
         self.assertIsInstance(self.m.layers[0].height, int)
 
-    def test_properties_are_converted_to_builtin_types(self):
+    def test_properties_are_converted_to_builtin_types(self) -> None:
         self.assertIsInstance(self.m.properties["test_bool"], bool)
         self.assertIsInstance(self.m.properties["test_color"], str)
         self.assertIsInstance(self.m.properties["test_file"], str)
@@ -113,11 +113,11 @@ class TiledMapTest(unittest.TestCase):
         self.assertIsInstance(self.m.properties["test_int"], int)
         self.assertIsInstance(self.m.properties["test_string"], str)
 
-    def test_properties_are_converted_to_correct_values(self):
+    def test_properties_are_converted_to_correct_values(self) -> None:
         self.assertFalse(self.m.properties["test_bool"])
         self.assertTrue(self.m.properties["test_bool_true"])
 
-    def test_pixels_to_tile_pos(self):
+    def test_pixels_to_tile_pos(self) -> None:
         self.assertEqual(self.m.pixels_to_tile_pos((0, 33)), (0, 2))
         self.assertEqual(self.m.pixels_to_tile_pos((33, 0)), (2, 0))
         self.assertEqual(self.m.pixels_to_tile_pos((0, 0)), (0, 0))
@@ -125,14 +125,14 @@ class TiledMapTest(unittest.TestCase):
 
 
 class TiledElementTestCase(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.element = TiledElement()
 
-    def test_from_xml_string_should_raise_on_TiledElement(self):
+    def test_from_xml_string_should_raise_on_TiledElement(self) -> None:
         with self.assertRaises(AttributeError):
             TiledElement.from_xml_string("<element></element>")
 
-    def test_contains_reserved_property_name(self):
+    def test_contains_reserved_property_name(self) -> None:
         """Reserved names are checked from any attributes in the instance
         after it is created.  Instance attributes are defaults from the
         specification.  We check that new properties are not named same
@@ -143,7 +143,7 @@ class TiledElementTestCase(unittest.TestCase):
         result = self.element._contains_invalid_property_name(items.items())
         self.assertTrue(result)
 
-    def test_not_contains_reserved_property_name(self):
+    def test_not_contains_reserved_property_name(self) -> None:
         """Reserved names are checked from any attributes in the instance
         after it is created.  Instance attributes are defaults from the
         specification.  We check that new properties are not named same
@@ -153,7 +153,7 @@ class TiledElementTestCase(unittest.TestCase):
         result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
-    def test_reserved_names_check_disabled_with_option(self):
+    def test_reserved_names_check_disabled_with_option(self) -> None:
         """Reserved names are checked from any attributes in the instance
         after it is created.  Instance attributes are defaults from the
         specification.  We check that new properties are not named same
@@ -167,6 +167,6 @@ class TiledElementTestCase(unittest.TestCase):
         result = self.element._contains_invalid_property_name(items.items())
         self.assertFalse(result)
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         self.element.name = "foo"
         self.assertEqual('<TiledElement: "foo">', self.element.__repr__())

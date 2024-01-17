@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2022, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2024, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -19,7 +19,7 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 import dataclasses
 import logging
 from functools import partial
-from typing import Tuple
+from typing import Any, Optional
 
 from pygame.rect import Rect
 
@@ -39,14 +39,14 @@ except ImportError:
 class PygameSDL2Tile:
     texture: Texture
     srcrect: Rect
-    size: Tuple[int, int]
+    size: tuple[int, int]
     angle: float = 0.0
     center: None = None
     flipx: bool = False
     flipy: bool = False
 
 
-def handle_flags(flags: pytmx.TileFlags):
+def handle_flags(flags: Optional[pytmx.TileFlags]) -> tuple[float, bool, bool]:
     """
     Return angle and flip values for the SDL2 renderer
 
@@ -94,7 +94,9 @@ def pygame_sd2_image_loader(renderer: Renderer, filename: str, colorkey, **kwarg
     return load_image
 
 
-def load_pygame_sdl2(renderer: Renderer, filename: str, *args, **kwargs):
+def load_pygame_sdl2(
+    renderer: Renderer, filename: str, *args: Any, **kwargs: Any
+) -> pytmx.TiledMap:
     """
     Load a TMX file, images, and return a TiledMap class
 
