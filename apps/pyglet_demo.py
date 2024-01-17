@@ -1,6 +1,6 @@
 """
 This is tested on pyglet 1.2 and python 2.7.
-Leif Theden "bitcraft", 2012-2022
+Leif Theden "bitcraft", 2012-2024
 
 Rendering demo for the TMXLoader.
 
@@ -30,7 +30,7 @@ class TiledRenderer(object):
     no shape drawing yet
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
@@ -39,13 +39,13 @@ class TiledRenderer(object):
         self.generate_sprites()
         self.clock_display = pyglet.clock.ClockDisplay()
 
-    def draw_rect(self, color, rect, width):
+    def draw_rect(self, color, rect, width) -> None:
         pass
 
-    def draw_lines(self, color, closed, points, width):
+    def draw_lines(self, color, closed, points, width) -> None:
         pass
 
-    def generate_sprites(self):
+    def generate_sprites(self) -> None:
         tw = self.tmx_data.tilewidth
         th = self.tmx_data.tileheight
         mw = self.tmx_data.width
@@ -98,21 +98,21 @@ class TiledRenderer(object):
                     sprite = pyglet.sprite.Sprite(layer.image, batch=batch, x=x, y=y)
                     self.sprites.append(sprite)
 
-    def draw(self):
+    def draw(self) -> None:
         for b in self.batches:
             b.draw()
         self.clock_display.draw()
 
 
 class SimpleTest(object):
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename):
+    def load_map(self, filename) -> None:
         self.renderer = TiledRenderer(filename)
 
         logger.info("Objects in map:")
@@ -125,7 +125,7 @@ class SimpleTest(object):
         for k, v in self.renderer.tmx_data.tile_properties.items():
             logger.info("%s\t%s", k, v)
 
-    def draw(self):
+    def draw(self) -> None:
         self.renderer.draw()
 
 
@@ -142,7 +142,7 @@ def all_filenames():
 
 
 class TestWindow(pyglet.window.Window):
-    def on_draw(self):
+    def on_draw(self) -> None:
         if not hasattr(self, "filenames"):
             self.filenames = all_filenames()
             self.next_map()
@@ -150,7 +150,7 @@ class TestWindow(pyglet.window.Window):
         self.clear()
         self.contents.draw()
 
-    def next_map(self):
+    def next_map(self) -> None:
         try:
             self.contents = SimpleTest(next(self.filenames))
         except StopIteration:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2012-2023, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2024, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -19,7 +19,7 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
 import itertools
 import logging
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import pytmx
 from pytmx.pytmx import ColorLike, PointLike
@@ -188,7 +188,7 @@ def build_rects(
     layer: Union[int, str],
     tileset: Optional[Union[int, str]],
     real_gid: Optional[int],
-) -> List[pygame.Rect]:
+) -> list[pygame.Rect]:
     """
     Generate a set of non-overlapping rects that represents the distribution of the specified gid.
 
@@ -258,10 +258,10 @@ def build_rects(
 
 
 def simplify(
-    all_points: List[PointLike],
+    all_points: list[PointLike],
     tilewidth: int,
     tileheight: int,
-) -> List[pygame.Rect]:
+) -> list[pygame.Rect]:
     """Given a list of points, return list of rects that represent them
     kludge:
 
@@ -304,7 +304,7 @@ def simplify(
     making a list of rects, one for each tile on the map!
     """
 
-    def pick_rect(points, rects):
+    def pick_rect(points, rects) -> None:
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox
         y = oy

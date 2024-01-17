@@ -1,6 +1,6 @@
 """
 This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2022
+Leif Theden "bitcraft", 2012-2024
 
 Rendering demo for the TMXLoader.
 
@@ -41,7 +41,7 @@ class TiledRenderer(object):
     Super simple way to render a tiled map
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         tm = load_pygame(filename)
 
         # self.size will be the pixel size of the map
@@ -55,7 +55,7 @@ class TiledRenderer(object):
                 print(i)
                 continue
 
-    def render_map(self, surface):
+    def render_map(self, surface) -> None:
         """Render our map to a pygame surface
 
         Feel free to use this as a starting point for your pygame app.
@@ -84,7 +84,7 @@ class TiledRenderer(object):
             elif isinstance(layer, TiledImageLayer):
                 self.render_image_layer(surface, layer)
 
-    def render_tile_layer(self, surface, layer):
+    def render_tile_layer(self, surface, layer) -> None:
         """Render all TiledTiles in this layer"""
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
@@ -95,7 +95,7 @@ class TiledRenderer(object):
         for x, y, image in layer.tiles():
             surface_blit(image, (x * tw, y * th))
 
-    def render_object_layer(self, surface, layer):
+    def render_object_layer(self, surface, layer) -> None:
         """Render all TiledObjects contained in this layer"""
         # deref these heavily used references for speed
         draw_rect = pygame.draw.rect
@@ -125,7 +125,7 @@ class TiledRenderer(object):
             else:
                 draw_rect(surface, rect_color, (obj.x, obj.y, obj.width, obj.height), 3)
 
-    def render_image_layer(self, surface, layer):
+    def render_image_layer(self, surface, layer) -> None:
         if layer.image:
             surface.blit(layer.image, (0, 0))
 
@@ -133,18 +133,18 @@ class TiledRenderer(object):
 class SimpleTest(object):
     """Basic app to display a rendered Tiled map"""
 
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename):
+    def load_map(self, filename) -> None:
         """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
 
-    def draw(self, surface):
+    def draw(self, surface) -> None:
         """Draw our map to some surface (probably the display)"""
         # first we make a temporary surface that will accommodate the entire
         # size of the map.
@@ -164,7 +164,7 @@ class SimpleTest(object):
         i = f.render("press any key for next map or ESC to quit", 1, (180, 180, 0))
         surface.blit(i, (0, 0))
 
-    def handle_input(self):
+    def handle_input(self) -> None:
         try:
             event = pygame.event.wait()
 

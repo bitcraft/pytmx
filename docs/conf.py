@@ -18,10 +18,10 @@ sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
-from typing import Any, List
+from typing import Any
 
 project = "pytmx"
-copyright = "2012-2021, Leif Theden"
+copyright = "2012-2024, Leif Theden"
 author = "Leif Theden"
 
 # The full version, including alpha/beta/rc tags
@@ -72,7 +72,7 @@ napoleon_custom_sections = ["Script usage", ("Script parameters", "params_style"
 # Apidoc call to generate automatic reference docs. Taken from
 # https://github.com/readthedocs/readthedocs.org/issues/1139#issuecomment-398083449
 def run_apidoc(_: Any) -> None:
-    ignore_paths: List[str] = []
+    ignore_paths: list[str] = []
 
     argv = ["-f", "-e", "-M", "-o", "autogen", ".."] + ignore_paths
 

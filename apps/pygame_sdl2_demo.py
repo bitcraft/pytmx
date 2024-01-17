@@ -1,6 +1,6 @@
 """
 This is tested on pygame 2.0.1 and python 3.9.6.
-Leif Theden "bitcraft", 2012-2022
+Leif Theden "bitcraft", 2012-2024
 
 Rendering demo for the TMXLoader.
 
@@ -32,12 +32,12 @@ class TiledRenderer(object):
 
     """
 
-    def __init__(self, ctx: GameContext, filename):
+    def __init__(self, ctx: GameContext, filename) -> None:
         self.ctx = ctx
         self.tmx_data = tm = load_pygame_sdl2(ctx.renderer, filename)
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
 
-    def render_map(self):
+    def render_map(self) -> None:
         """
         Render our map to a pygame surface
 
@@ -53,7 +53,7 @@ class TiledRenderer(object):
             if isinstance(layer, TiledTileLayer):
                 self.render_tile_layer(layer)
 
-    def render_tile_layer(self, layer):
+    def render_tile_layer(self, layer) -> None:
         """
         Render all TiledTiles in this layer
 
@@ -81,14 +81,14 @@ class SimpleTest:
 
     """
 
-    def __init__(self, ctx: GameContext, filename):
+    def __init__(self, ctx: GameContext, filename) -> None:
         self.ctx = ctx
         self.map_renderer = None
         self.running = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename):
+    def load_map(self, filename) -> None:
         """
         Create a renderer, load data, and print some debug info
 
@@ -109,7 +109,7 @@ class SimpleTest:
         for k, v in self.map_renderer.tmx_data.get_tile_colliders():
             logger.info("%s\t%s", k, list(v))
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draw our map to some surface (probably the display)
 
@@ -117,7 +117,7 @@ class SimpleTest:
         self.map_renderer.render_map()
         self.ctx.renderer.present()
 
-    def handle_input(self):
+    def handle_input(self) -> None:
         try:
             event = pygame.event.wait()
 

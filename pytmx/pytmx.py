@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2023, Leif Theden <leif.theden@gmail.com>
+Copyright (C) 2012-2024, Leif Theden <leif.theden@gmail.com>
 
 This file is part of pytmx.
 
@@ -27,11 +27,12 @@ import struct
 import zlib
 from base64 import b64decode
 from collections import defaultdict, namedtuple
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Optional, Union
 from xml.etree import ElementTree
 
 # for type hinting
@@ -79,17 +80,17 @@ AnimationFrame = namedtuple("AnimationFrame", ["gid", "duration"])
 Point = namedtuple("Point", ["x", "y"])
 TileFlags = namedtuple("TileFlags", flag_names)
 empty_flags = TileFlags(False, False, False)
-ColorLike = Union[Tuple[int, int, int, int], Tuple[int, int, int], int, str]
-MapPoint = Tuple[int, int, int]
+ColorLike = Union[tuple[int, int, int, int], tuple[int, int, int], int, str]
+MapPoint = tuple[int, int, int]
 TiledLayer = Union[
     "TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"
 ]
 
 # need a more graceful way to handle annotations for optional dependencies
 if pygame:
-    PointLike = Union[Tuple[int, int], pygame.Vector2, Point]
+    PointLike = Union[tuple[int, int], pygame.Vector2, Point]
 else:
-    PointLike = Union[Tuple[int, int], Point]
+    PointLike = Union[tuple[int, int], Point]
 
 
 def default_image_loader(filename: str, flags, **kwargs):
@@ -112,7 +113,7 @@ def default_image_loader(filename: str, flags, **kwargs):
     return load
 
 
-def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
+def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
     """Decode a GID from TMX data.
 
     Args:
@@ -136,9 +137,9 @@ def decode_gid(raw_gid: int) -> Tuple[int, TileFlags]:
 
 
 def reshape_data(
-    gids: List[int],
+    gids: list[int],
     width: int,
-) -> List[List[int]]:
+) -> list[list[int]]:
     """Change 1D list to 2d list
 
     Args:
@@ -156,7 +157,7 @@ def unpack_gids(
     text: str,
     encoding: Optional[str] = None,
     compression: Optional[str] = None,
-) -> List[int]:
+) -> list[int]:
     """Return all gids from encoded/compressed layer data
 
     Args:
@@ -184,7 +185,7 @@ def unpack_gids(
         raise ValueError(f"layer encoding {encoding} is not supported.")
 
 
-def convert_to_bool(value: str) -> bool:
+def convert_to_bool(value: Optional[Union[str, int, float]] = None) -> bool:
     """Convert a few common variations of "true" and "false" to boolean
 
     Args:
@@ -230,7 +231,7 @@ def rotate(
     points: Sequence[Point],
     origin: Point,
     angle: Union[int, float],
-) -> List[Point]:
+) -> list[Point]:
     """Rotate a sequence of points around an axis.
 
     Args:
@@ -330,7 +331,7 @@ prop_type = {
 }
 
 
-def parse_properties(node: ElementTree.Element, customs: dict = None) -> Dict:
+def parse_properties(node: ElementTree.Element, customs: dict = None) -> dict:
     """Parse a Tiled xml node and return a dict.
 
     Args:
@@ -372,7 +373,7 @@ class TiledElement:
 
     allow_duplicate_names = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.properties = dict()
 
     @classmethod
@@ -458,7 +459,7 @@ class TiledElement:
 class TiledClassType:
     """Contains custom Tiled types."""
 
-    def __init__(self, name: str, members: List[dict]) -> None:
+    def __init__(self, name: str, members: list[dict]) -> None:
         """Creates the TiledClassType.
 
         Args:
@@ -477,7 +478,7 @@ class TiledMap(TiledElement):
     def __init__(
         self,
         filename: Optional[str] = None,
-        custom_property_filename: Optional[List[str]] = None,
+        custom_property_filename: Optional[list[str]] = None,
         image_loader=default_image_loader,
         **kwargs,
     ) -> None:
@@ -809,7 +810,7 @@ class TiledMap(TiledElement):
             logger.debug(msg.format(x, y, layer))
             raise ValueError(msg.format(x, y, layer))
 
-    def get_tile_properties(self, x: int, y: int, layer: int) -> Optional[Dict]:
+    def get_tile_properties(self, x: int, y: int, layer: int) -> Optional[dict]:
         """Return the tile image GID for this location.
 
         Args:
@@ -864,7 +865,7 @@ class TiledMap(TiledElement):
             for x, y, _gid in [i for i in self.layers[l].iter_data() if i[2] == gid]:
                 yield x, y, l
 
-    def get_tile_properties_by_gid(self, gid: int) -> Optional[Dict]:
+    def get_tile_properties_by_gid(self, gid: int) -> Optional[dict]:
         """Get the tile properties of a tile GID.
 
         Args:
@@ -1009,7 +1010,7 @@ class TiledMap(TiledElement):
 
         raise ValueError("Tileset not found")
 
-    def get_tile_colliders(self) -> Iterable[Tuple[int, List[Dict]]]:
+    def get_tile_colliders(self) -> Iterable[tuple[int, list[dict]]]:
         """Return iterator of (gid, dict) pairs of tiles with colliders.
 
         Returns:
@@ -1021,7 +1022,7 @@ class TiledMap(TiledElement):
             if colliders:
                 yield gid, colliders
 
-    def pixels_to_tile_pos(self, position: Tuple[int, int]) -> Tuple[int, int]:
+    def pixels_to_tile_pos(self, position: tuple[int, int]) -> tuple[int, int]:
         return int(position[0] / self.tilewidth), int(position[1] / self.tileheight)
 
     @property
@@ -1138,7 +1139,7 @@ class TiledMap(TiledElement):
         else:
             return self.register_gid(*decode_gid(tiled_gid))
 
-    def map_gid(self, tiled_gid: int) -> Optional[List[int]]:
+    def map_gid(self, tiled_gid: int) -> Optional[list[int]]:
         """Used to lookup a GID read from a TMX file's data.
 
         Args:
@@ -1157,7 +1158,7 @@ class TiledMap(TiledElement):
             logger.debug(msg)
             raise TypeError(msg)
 
-    def map_gid2(self, tiled_gid: int) -> List[Tuple[int, Optional[int]]]:
+    def map_gid2(self, tiled_gid: int) -> list[tuple[int, Optional[int]]]:
         """WIP.  need to refactor the gid code"""
         tiled_gid = int(tiled_gid)
 
@@ -1375,7 +1376,7 @@ class TiledTileLayer(TiledElement):
     def __iter__(self):
         return self.iter_data()
 
-    def iter_data(self) -> Iterable[Tuple[int, int, int]]:
+    def iter_data(self) -> Iterable[tuple[int, int, int]]:
         """Yields X, Y, GID tuples for each tile in the layer.
 
         Returns:
@@ -1574,7 +1575,7 @@ class TiledObject(TiledElement):
 
         return self
 
-    def apply_transformations(self) -> List[Point]:
+    def apply_transformations(self) -> list[Point]:
         """Return all points for object, taking in account rotation."""
         if hasattr(self, "points"):
             return rotate(self.points, self, self.rotation)
@@ -1582,9 +1583,7 @@ class TiledObject(TiledElement):
             return rotate(self.as_points, self, self.rotation)
 
     @property
-    def as_points(
-        self,
-    ) -> List[Point]:
+    def as_points(self) -> list[Point]:
         return [
             Point(*i)
             for i in [
