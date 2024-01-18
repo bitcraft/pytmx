@@ -19,11 +19,13 @@ logger.setLevel(logging.INFO)
 
 import pyglet
 
+from pyglet.sprite import Sprite
+
 from pytmx import *
 from pytmx.util_pyglet import load_pyglet
 
 
-class TiledRenderer(object):
+class TiledRenderer:
     """
     Super simple way to render a tiled map with pyglet
 
@@ -34,15 +36,16 @@ class TiledRenderer(object):
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
-        self.batches = []  # list of batches, e.g. layers
+        self.batch = pyglet.graphics.Batch()
         self.sprites = []  # container for tiles
         self.generate_sprites()
-        self.clock_display = pyglet.clock.ClockDisplay()
 
     def draw_rect(self, color, rect, width) -> None:
+        # TODO: use pyglet.shapes
         pass
 
     def draw_lines(self, color, closed, points, width) -> None:
+        # TODO: use pyglet.shapes
         pass
 
     def generate_sprites(self) -> None:
@@ -57,23 +60,22 @@ class TiledRenderer(object):
         rect_color = (255, 0, 0)
         poly_color = (0, 255, 0)
 
-        for layer in self.tmx_data.visible_layers:
-            batch = pyglet.graphics.Batch()  # create a new batch
-            self.batches.append(batch)  # add the batch to the list
+        for i, layer in enumerate(self.tmx_data.visible_layers):
+            # Use Groups to seperate layers inside the Batch:
+            group = pyglet.graphics.Group(order=i)
+
             # draw map tile layers
             if isinstance(layer, TiledTileLayer):
-
                 # iterate over the tiles in the layer
                 for x, y, image in layer.tiles():
                     y = mh - y
                     x = x * tw
                     y = y * th
-                    sprite = pyglet.sprite.Sprite(image, batch=batch, x=x, y=y)
+                    sprite = Sprite(image, x, y, batch=self.batch, group=group)
                     self.sprites.append(sprite)
 
             # draw object layers
             elif isinstance(layer, TiledObjectGroup):
-
                 # iterate over all the objects in the layer
                 for obj in layer:
                     logger.info(obj)
@@ -95,16 +97,14 @@ class TiledRenderer(object):
                 if layer.image:
                     x = mw // 2  # centers image
                     y = mh // 2
-                    sprite = pyglet.sprite.Sprite(layer.image, batch=batch, x=x, y=y)
+                    sprite = Sprite(layer.image, x, y, batch=self.batch)
                     self.sprites.append(sprite)
 
-    def draw(self) -> None:
-        for b in self.batches:
-            b.draw()
-        self.clock_display.draw()
+    def draw(self):
+        self.batch.draw()
 
 
-class SimpleTest(object):
+class SimpleTest:
     def __init__(self, filename) -> None:
         self.renderer = None
         self.running = False
@@ -142,13 +142,16 @@ def all_filenames():
 
 
 class TestWindow(pyglet.window.Window):
-    def on_draw(self) -> None:
-        if not hasattr(self, "filenames"):
-            self.filenames = all_filenames()
-            self.next_map()
+    def __init__(self, width, height, vsync):
+        super().__init__(width=width, height=height, vsync=vsync)
+        self.fps_display = pyglet.window.FPSDisplay(self, color=(50, 255, 50, 255))
+        self.filenames = all_filenames()
+        self.next_map()
 
+    def on_draw(self) -> None:
         self.clear()
         self.contents.draw()
+        self.fps_display.draw()
 
     def next_map(self) -> None:
         try:
@@ -165,6 +168,5 @@ class TestWindow(pyglet.window.Window):
 
 if __name__ == "__main__":
     window = TestWindow(600, 600, vsync=False)
-    # Add schedule_interval with a dummy callable to force speeding up fps
-    pyglet.clock.schedule_interval(int, 1.0 / 240)
-    pyglet.app.run()
+    pyglet.clock.schedule_interval(window.draw, 1/120)
+    pyglet.app.run(None)

@@ -46,7 +46,7 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
     if colorkey:
         logger.debug("colorkey not implemented")
 
-    image = pyglet.image.load(filename)
+    image = pyglet.resource.image(filename)
 
     def load_image(rect=None, flags=None):
         if rect:
