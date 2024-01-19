@@ -62,6 +62,7 @@ def smart_convert(
     original: pygame.Surface,
     colorkey: Optional[ColorLike],
     pixelalpha: bool,
+    alphaonly: bool
 ) -> pygame.Surface:
     """
     Return new pygame Surface with optimal pixel/data format
@@ -72,7 +73,8 @@ def smart_convert(
     Parameters:
         original: tile surface to inspect
         colorkey: optional colorkey for the tileset image
-        pixelalpha: if true, prefer per-pixel alpha surfaces
+        pixelalpha: if true, prefer per-pixel alpha surfaces (default is true)
+        alphaonly: if true, always use per-pixel alpha surfaces (default is false)
 
     Returns:
         new tile surface
@@ -90,22 +92,30 @@ def smart_convert(
         threshold = 254  # the default
 
         try:
-            # count the number of pixels in the tile that are not transparent
+            # Count the number of pixels in the tile that are not transparent.
+            # Pygame .convert() can misbehave.  Calling .mask() correctly determines there are no 
+            # transparent pixels.  But when we call .convert(), it then makes black (0,0,0) pixels 
+            # transparent when we didn't specify alpha behavior.  If this happens to you, consider 
+            # using the alphaonly override.
             px = pygame.mask.from_surface(original, threshold).count()
         except:
             # pygame_sdl2 will fail because the mask module is not included
             # in this case, just convert_alpha and return it
             return original.convert_alpha()
 
-        # there are no transparent pixels in the image
-        if px == tile_size[0] * tile_size[1]:
+        # Caller wants alpha no matter what.  Accommodate them.
+        if alphaonly:
+            tile = original.convert_alpha()
+
+        # There are no transparent pixels in the image.  
+        elif px == tile_size[0] * tile_size[1]:
             tile = original.convert()
 
-        # there are transparent pixels, and set for perpixel alpha
+        # There are transparent pixels, and set for per-pixel alpha.
         elif pixelalpha:
             tile = original.convert_alpha()
 
-        # there are transparent pixels, and we won't handle them
+        # There are transparent pixels, and we won't handle them.
         else:
             tile = original.convert()
 
@@ -119,6 +129,8 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
     Parameters:
         filename: filename, including path, to load
         colorkey: colorkey for the image
+        pixelalpha: prefer per-pixel alpha surfaces
+        alphaonly : always use per-pixel alpha surfaces
 
     Returns:
         function to load tile images
@@ -127,6 +139,7 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
     if colorkey:
         colorkey = pygame.Color("#{0}".format(colorkey))
 
+    alphaonly = kwargs.get("alphaonly", False)
     pixelalpha = kwargs.get("pixelalpha", True)
     image = pygame.image.load(filename)
 
@@ -143,7 +156,7 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
         if flags:
             tile = handle_transformation(tile, flags)
 
-        tile = smart_convert(tile, colorkey, pixelalpha)
+        tile = smart_convert(tile, colorkey, pixelalpha, alphaonly)
         return tile
 
     return load_image
