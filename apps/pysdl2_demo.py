@@ -36,7 +36,7 @@ from pytmx import *
 from pytmx.util_pysdl2 import load_pysdl2
 
 
-class TiledRenderer(object):
+class TiledRenderer:
     """
     Super simple way to render a tiled map with pyglet
 
@@ -81,7 +81,7 @@ class TiledRenderer(object):
                 self.render_tile_layer(layer)
 
 
-class SimpleTest(object):
+class SimpleTest:
     def __init__(self, filename, window) -> None:
         self.running = False
         self.dirty = False

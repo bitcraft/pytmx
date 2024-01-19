@@ -27,12 +27,12 @@ import struct
 import zlib
 from base64 import b64decode
 from collections import defaultdict, namedtuple
-from collections.abc import Iterable, Sequence
+from collections.abc import Generator, Iterable, Sequence
 from copy import deepcopy
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
-from typing import Optional, Union
+from typing import Any, Optional, Union
 from xml.etree import ElementTree
 
 # for type hinting
@@ -136,10 +136,7 @@ def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
     )
 
 
-def reshape_data(
-    gids: list[int],
-    width: int,
-) -> list[list[int]]:
+def reshape_data(gids: list[int], width: int) -> list[list[int]]:
     """Change 1D list to 2d list
 
     Args:
@@ -418,7 +415,9 @@ class TiledElement:
         msg = "Some name are reserved for {0} objects and cannot be used."
         logger.error(msg)
 
-    def _set_properties(self, node: ElementTree.Element, customs=None) -> None:
+    def _set_properties(
+        self, node: ElementTree.Element, customs: Optional[dict] = None
+    ) -> None:
         """Set properties from xml data
 
         Reads the xml attributes and Tiled "properties" from an XML node and fills
@@ -449,7 +448,7 @@ class TiledElement:
             else:
                 raise AttributeError("Element has no property {0}".format(item))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if hasattr(self, "id"):
             return '<{}[{}]: "{}">'.format(self.__class__.__name__, self.id, self.name)
         else:
@@ -506,8 +505,8 @@ class TiledMap(TiledElement):
         # allow duplicate names to be parsed and loaded
         TiledElement.allow_duplicate_names = kwargs.get("allow_duplicate_names", False)
 
-        self.layers = list()  # all layers in proper order
-        self.tilesets = list()  # TiledTileset objects
+        self.layers: list[TiledLayer] = []  # all layers in proper order
+        self.tilesets: list[TiledTileset] = []  # TiledTileset objects
         self.tile_properties = dict()  # tiles that have properties
         self.layernames = dict()
         self.objects_by_id = dict()
@@ -550,7 +549,7 @@ class TiledMap(TiledElement):
         if filename:
             self.parse_xml(ElementTree.parse(self.filename).getroot())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{0}: "{1}">'.format(self.__class__.__name__, self.filename)
 
     # iterate over layers and objects in map
@@ -1046,11 +1045,11 @@ class TiledMap(TiledElement):
         return chain(*self.objectgroups)
 
     @property
-    def visible_layers(self):
+    def visible_layers(self) -> Iterable[TiledLayer]:
         """Returns iterator of Layer objects that are set "visible".
 
         Returns:
-            ???: Iterator of Layer objects that are set "visible".
+            Iterable[TiledLayer]: Layer objects that are set "visible".
 
         """
 
@@ -1178,11 +1177,11 @@ class TiledTileset(TiledElement):
 
     """
 
-    def __init__(self, parent, node) -> None:
+    def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         """Represents a Tiled Tileset
 
         Args:
-            parent (???): ???.
+            parent (TiledMap): ???.
             node (ElementTree.Element): ???.
 
         """
@@ -1208,7 +1207,7 @@ class TiledTileset(TiledElement):
 
         self.parse_xml(node)
 
-    def parse_xml(self, node: ElementTree.Element) -> "TiledTileset":
+    def parse_xml(self, node: ElementTree.Element) -> TiledTileset:
         """Parse a Tileset from ElementTree xml element.
 
         A bit of mangling is done here so that tilesets that have
@@ -1320,21 +1319,21 @@ class TiledTileset(TiledElement):
 
 
 class TiledGroupLayer(TiledElement):
-    def __init__(self, parent, node: ElementTree.Element) -> None:
+    def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         """
 
         Args:
-            parent (???): ???.
+            parent (TiledMap): ???.
             node (ElementTree.Element): ???.
 
         """
         TiledElement.__init__(self)
         self.parent = parent
         self.name = None
-        self.visible = 1
+        self.visible = True
         self.parse_xml(node)
 
-    def parse_xml(self, node) -> "TiledGroupLayer":
+    def parse_xml(self, node: ElementTree.Element) -> TiledGroupLayer:
         """
         Parse a TiledGroup layer from ElementTree xml node.
 
@@ -1357,10 +1356,10 @@ class TiledTileLayer(TiledElement):
 
     """
 
-    def __init__(self, parent, node) -> None:
+    def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         TiledElement.__init__(self)
         self.parent = parent
-        self.data = list()
+        self.data: list[list[int]] = []
 
         # defaults from the specification
         self.name = None
@@ -1373,7 +1372,7 @@ class TiledTileLayer(TiledElement):
 
         self.parse_xml(node)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[tuple[int, int, int]]:
         return self.iter_data()
 
     def iter_data(self) -> Iterable[tuple[int, int, int]]:
@@ -1387,7 +1386,7 @@ class TiledTileLayer(TiledElement):
             for x, gid in enumerate(row):
                 yield x, y, gid
 
-    def tiles(self):
+    def tiles(self) -> Generator[tuple[int, int, Any], Any, None]:
         """Yields X, Y, Image tuples for each tile in the layer.
 
         Yields:
@@ -1407,7 +1406,7 @@ class TiledTileLayer(TiledElement):
         self.height = int(self.height)
         self.width = int(self.width)
 
-    def parse_xml(self, node: ElementTree.Element) -> "TiledTileLayer":
+    def parse_xml(self, node: ElementTree.Element) -> TiledTileLayer:
         """Parse a Tile Layer from ElementTree xml node.
 
         Args:
@@ -1451,7 +1450,12 @@ class TiledObjectGroup(TiledElement, list):
 
     """
 
-    def __init__(self, parent, node, customs) -> None:
+    def __init__(
+        self,
+        parent: TiledMap,
+        node: ElementTree.Element,
+        customs: Optional[dict] = None,
+    ) -> None:
         TiledElement.__init__(self)
         self.parent = parent
 
@@ -1459,7 +1463,7 @@ class TiledObjectGroup(TiledElement, list):
         self.name = None
         self.color = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
         self.offsetx = 0
         self.offsety = 0
         self.custom_types = customs
@@ -1467,7 +1471,7 @@ class TiledObjectGroup(TiledElement, list):
 
         self.parse_xml(node)
 
-    def parse_xml(self, node: ElementTree.Element) -> "TiledObjectGroup":
+    def parse_xml(self, node: ElementTree.Element) -> TiledObjectGroup:
         """Parse an Object Group from ElementTree xml node
 
         Args:
@@ -1490,7 +1494,12 @@ class TiledObject(TiledElement):
 
     """
 
-    def __init__(self, parent, node, custom_types) -> None:
+    def __init__(
+        self,
+        parent: TiledMap,
+        node: ElementTree.Element,
+        custom_types: Optional[dict] = None,
+    ) -> None:
         TiledElement.__init__(self)
         self.parent = parent
 
@@ -1504,7 +1513,7 @@ class TiledObject(TiledElement):
         self.height = 0
         self.rotation = 0
         self.gid = 0
-        self.visible = 1
+        self.visible = True
         self.closed = True
         self.template = None
         self.custom_types = custom_types
@@ -1523,7 +1532,7 @@ class TiledObject(TiledElement):
             return self.parent.images[self.gid]
         return None
 
-    def parse_xml(self, node: ElementTree.Element) -> "TiledObject":
+    def parse_xml(self, node: ElementTree.Element) -> TiledObject:
         """Parse an Object from ElementTree xml node.
 
         Args:
@@ -1602,7 +1611,7 @@ class TiledImageLayer(TiledElement):
 
     """
 
-    def __init__(self, parent, node: ElementTree.Element) -> None:
+    def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         TiledElement.__init__(self)
         self.parent = parent
         self.source = None
@@ -1612,7 +1621,7 @@ class TiledImageLayer(TiledElement):
         # defaults from the specification
         self.name = None
         self.opacity = 1
-        self.visible = 1
+        self.visible = True
 
         self.parse_xml(node)
 
@@ -1633,7 +1642,7 @@ class TiledImageLayer(TiledElement):
         self._set_properties(node)
         self.name = node.get("name", None)
         self.opacity = node.get("opacity", self.opacity)
-        self.visible = node.get("visible", self.visible)
+        self.visible = bool(node.get("visible", self.visible))
         image_node = node.find("image")
         self.source = image_node.get("source", None)
         self.trans = image_node.get("trans", None)
@@ -1643,7 +1652,7 @@ class TiledImageLayer(TiledElement):
 class TiledProperty(TiledElement):
     """Represents Tiled Property."""
 
-    def __init__(self, parent, node: ElementTree.Element) -> None:
+    def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         TiledElement.__init__(self)
 
         # defaults from the specification

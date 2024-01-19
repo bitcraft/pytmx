@@ -240,8 +240,8 @@ def build_rects(
         layer_data = tmxmap.get_layer_data(layer)
     elif isinstance(layer, str):
         try:
-            layer = [l for l in tmxmap.layers if l.name == layer].pop()
-            layer_data = layer.data
+            _layer = [l for l in tmxmap.layers if l.name == layer].pop()
+            layer_data = _layer.data
         except IndexError:
             msg = 'Layer "{0}" not found in map {1}.'
             logger.debug(msg.format(layer, tmxmap))

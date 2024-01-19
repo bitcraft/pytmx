@@ -26,7 +26,7 @@ class GameContext:
     renderer: Renderer
 
 
-class TiledRenderer(object):
+class TiledRenderer:
     """
     Super simple way to render a tiled map
 
@@ -136,8 +136,13 @@ class SimpleTest:
             self.exit_status = 0
             self.running = False
 
-    def run(self):
-        """This is our app main loop"""
+    def run(self) -> int:
+        """
+        This is our app main loop
+
+        Returns:
+            Int: 0 means no error, 1 is an error
+        """
         self.running = True
         self.exit_status = 1
 
