@@ -652,9 +652,8 @@ class TiledMap(TiledElement):
 
             path = os.path.join(os.path.dirname(self.filename), ts.source)
             colorkey = getattr(ts, "trans", None)
-            kwargs_to_pass = self.image_loader_kwargs.copy()
-            kwargs_to_pass["tileset"] = "ts"
-            loader = self.image_loader(path, colorkey, **kwargs_to_pass)
+            self.image_loader_kwargs["tileset"] = "ts"
+            loader = self.image_loader(path, colorkey, **self.image_loader_kwargs)
 
             p = product(
                 range(

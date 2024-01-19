@@ -71,15 +71,13 @@ def smart_convert(
     flags and pixel format for each tile surface.
 
     Parameters:
-        original:   Tile surface to inspect.
-        colorkey:   Optional colorkey for the tileset image.
-        pixelalpha: If true, prefer per-pixel alpha surfaces.  Default is True.
-        alphaonly:  If true, always use per-pixel alpha surfaces.  Default is False.
-                    Use this to correct a common issue where pygame .convert() 
-                    will not display black (0,0,0) pixels from your images.
+        original: tile surface to inspect
+        colorkey: optional colorkey for the tileset image
+        pixelalpha: if true, prefer per-pixel alpha surfaces (default is true)
+        alphaonly: if true, always use per-pixel alpha surfaces (default is false)
 
     Returns:
-        A new tile surface.
+        new tile surface
 
     """
     # tiled set a colorkey
@@ -129,19 +127,13 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
     pytmx image loader for pygame
 
     Parameters:
-        filename: The filename, including path, to be loaded.
-        colorkey: The colorkey for the image.
-
-    Optional named parameters:
-        pixelalpha: Intelligently choose to use per-pixel alpha transparency 
-                    only if there are no fully transparent pixels in the 
-                    image and colorkey is not specified.  This is overridden 
-                    if alphaonly is specified.
-        alphaonly : Always use alpha transparency when converting 
-                    images to target surface format.
+        filename: filename, including path, to load
+        colorkey: colorkey for the image
+        pixelalpha: prefer per-pixel alpha surfaces
+        alphaonly : always use per-pixel alpha surfaces
 
     Returns:
-        A function to load tile images.
+        function to load tile images
 
     """
     if colorkey:
