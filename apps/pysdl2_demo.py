@@ -104,8 +104,13 @@ class SimpleTest:
         self.map_renderer.render_map()
         self.sdl_renderer.present()
 
-    def run(self, window):
-        """Starts an event loop without actually processing any event."""
+    def run(self, window) -> int:
+        """
+        Starts an event loop without actually processing any event.
+
+        Returns:
+            Int: 0 means no error, 1 is an error
+        """
         import ctypes
 
         event = events.SDL_Event()
@@ -126,7 +131,7 @@ class SimpleTest:
         return self.exit_status
 
 
-def all_filenames():
+def all_filenames() -> list[str]:
     import glob
     import os.path
 

@@ -27,12 +27,12 @@ import struct
 import zlib
 from base64 import b64decode
 from collections import defaultdict, namedtuple
-from collections.abc import Generator, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
-from typing import Any, Optional, Union
+from typing import DefaultDict, Optional, Union
 from xml.etree import ElementTree
 
 # for type hinting
@@ -74,11 +74,11 @@ duplicate_name_fmt = (
     'Cannot set user {} property on {} "{}"; Tiled property already exists.'
 )
 
-flag_names = ("flipped_horizontally", "flipped_vertically", "flipped_diagonally")
-
 AnimationFrame = namedtuple("AnimationFrame", ["gid", "duration"])
 Point = namedtuple("Point", ["x", "y"])
-TileFlags = namedtuple("TileFlags", flag_names)
+TileFlags = namedtuple(
+    "TileFlags", ("flipped_horizontally", "flipped_vertically", "flipped_diagonally")
+)
 empty_flags = TileFlags(False, False, False)
 ColorLike = Union[tuple[int, int, int, int], tuple[int, int, int], int, str]
 MapPoint = tuple[int, int, int]
@@ -505,19 +505,24 @@ class TiledMap(TiledElement):
         # allow duplicate names to be parsed and loaded
         TiledElement.allow_duplicate_names = kwargs.get("allow_duplicate_names", False)
 
-        self.layers: list[TiledLayer] = []  # all layers in proper order
-        self.tilesets: list[TiledTileset] = []  # TiledTileset objects
-        self.tile_properties = dict()  # tiles that have properties
-        self.layernames = dict()
-        self.objects_by_id = dict()
-        self.objects_by_name = dict()
+        # all layers in proper order
+        self.layers: list[TiledLayer] = []
+        # TiledTileset objects
+        self.tilesets: list[TiledTileset] = []
+        # tiles that have properties
+        self.tile_properties: dict[int, dict[str, str]] = {}
+        self.layernames: dict[str, TiledLayer] = {}
+        self.objects_by_id: dict[str, TiledObject] = {}
+        self.objects_by_name: dict[int, TiledObject] = {}
 
         # only used tiles are actually loaded, so there will be a difference
         # between the GIDs in the Tiled map data (tmx) and the data in this
         # object and the layers.  This dictionary keeps track of that.
-        self.gidmap = defaultdict(list)
-        self.imagemap = dict()  # mapping of gid and trans flags to real gids
-        self.tiledgidmap = dict()  # mapping of tiledgid to pytmx gid
+        self.gidmap: DefaultDict[int, list[tuple[int, TileFlags]]] = defaultdict(list)
+        # mapping of gid and trans flags to real gids
+        self.imagemap: dict[tuple[int, TileFlags], tuple[int, TileFlags]] = {}
+        # mapping of tiledgid to pytmx gid
+        self.tiledgidmap: dict[int, int] = {}
         self.maxgid = 1
 
         # should be filled in by a loader function
@@ -535,13 +540,13 @@ class TiledMap(TiledElement):
         self.hexsidelength = 0
         self.staggeraxis = None
         self.staggerindex = None
-        self.background_color = None
+        self.background_color: Optional[str] = None
         self.nextobjectid = 0
 
         self.custom_types = dict()
 
         # initialize the gid mapping
-        self.imagemap[(0, 0)] = 0
+        self.imagemap[(0, TileFlags(0, 0, 0))] = (0, TileFlags(0, 0, 0))
 
         if custom_property_filename:
             self.parse_json(json.load(open(custom_property_filename)))
@@ -556,8 +561,10 @@ class TiledMap(TiledElement):
     def __iter__(self):
         return chain(self.layers, self.objects)
 
-    def _set_properties(self, node: ElementTree.Element) -> None:
-        TiledElement._set_properties(self, node)
+    def _set_properties(
+        self, node: ElementTree.Element, customs: Optional[dict] = None
+    ) -> None:
+        TiledElement._set_properties(self, node, customs)
 
         # TODO: make class/layer-specific type casting
         # layer height and width must be int, but TiledElement.set_properties()
@@ -809,7 +816,9 @@ class TiledMap(TiledElement):
             logger.debug(msg.format(x, y, layer))
             raise ValueError(msg.format(x, y, layer))
 
-    def get_tile_properties(self, x: int, y: int, layer: int) -> Optional[dict]:
+    def get_tile_properties(
+        self, x: int, y: int, layer: int
+    ) -> Optional[dict[str, str]]:
         """Return the tile image GID for this location.
 
         Args:
@@ -864,7 +873,7 @@ class TiledMap(TiledElement):
             for x, y, _gid in [i for i in self.layers[l].iter_data() if i[2] == gid]:
                 yield x, y, l
 
-    def get_tile_properties_by_gid(self, gid: int) -> Optional[dict]:
+    def get_tile_properties_by_gid(self, gid: int) -> Optional[dict[str, str]]:
         """Get the tile properties of a tile GID.
 
         Args:
@@ -879,7 +888,7 @@ class TiledMap(TiledElement):
         except KeyError:
             return None
 
-    def set_tile_properties(self, gid: int, properties: dict) -> None:
+    def set_tile_properties(self, gid: int, properties: dict[str, str]) -> None:
         """Set the tile properties of a tile GID.
 
         Args:
@@ -931,6 +940,7 @@ class TiledMap(TiledElement):
         )
 
         self.layers.append(layer)
+        assert layer.name
         self.layernames[layer.name] = layer
 
     def add_tileset(self, tileset: TiledTileset) -> None:
@@ -1009,7 +1019,7 @@ class TiledMap(TiledElement):
 
         raise ValueError("Tileset not found")
 
-    def get_tile_colliders(self) -> Iterable[tuple[int, list[dict]]]:
+    def get_tile_colliders(self) -> Iterable[tuple[int, str]]:
         """Return iterator of (gid, dict) pairs of tiles with colliders.
 
         Returns:
@@ -1138,7 +1148,7 @@ class TiledMap(TiledElement):
         else:
             return self.register_gid(*decode_gid(tiled_gid))
 
-    def map_gid(self, tiled_gid: int) -> Optional[list[int]]:
+    def map_gid(self, tiled_gid: int) -> Optional[list[tuple[int, TileFlags]]]:
         """Used to lookup a GID read from a TMX file's data.
 
         Args:
@@ -1149,7 +1159,7 @@ class TiledMap(TiledElement):
 
         """
         try:
-            return self.gidmap[int(tiled_gid)]
+            return self.gidmap[tiled_gid]
         except KeyError:
             return None
         except TypeError:
@@ -1157,10 +1167,8 @@ class TiledMap(TiledElement):
             logger.debug(msg)
             raise TypeError(msg)
 
-    def map_gid2(self, tiled_gid: int) -> list[tuple[int, Optional[int]]]:
+    def map_gid2(self, tiled_gid: int) -> list[tuple[int, Optional[TileFlags]]]:
         """WIP.  need to refactor the gid code"""
-        tiled_gid = int(tiled_gid)
-
         # gidmap is a default dict, so cannot trust to raise KeyError
         if tiled_gid in self.gidmap:
             return self.gidmap[tiled_gid]
@@ -1201,7 +1209,7 @@ class TiledTileset(TiledElement):
         self.columns = 0
 
         # image properties
-        self.trans = None
+        self.trans: Optional[str] = None
         self.width = 0
         self.height = 0
 
@@ -1225,7 +1233,7 @@ class TiledTileset(TiledElement):
         if source:
             if source[-4:].lower() == ".tsx":
                 # external tilesets don't save this, store it for later
-                self.firstgid = int(node.get("firstgid"))
+                self.firstgid = int(node.get("firstgid", 0))
 
                 # we need to mangle the path - tiled stores relative paths
                 dirname = os.path.dirname(self.parent.filename)
@@ -1255,7 +1263,7 @@ class TiledTileset(TiledElement):
         # we store it separately in the parent (a TiledMap instance)
         register_gid = self.parent.register_gid
         for child in node.iter("tile"):
-            tiled_gid = int(child.get("id"))
+            tiled_gid = int(child.get("id", 0))
 
             p = {k: types[k](v) for k, v in child.items()}
             p.update(parse_properties(child))
@@ -1267,8 +1275,8 @@ class TiledTileset(TiledElement):
             # handle tiles that have their own image
             image = child.find("image")
             if image is None:
-                p["width"] = self.tilewidth
-                p["height"] = self.tileheight
+                p["width"] = str(self.tilewidth)
+                p["height"] = str(self.tileheight)
             else:
                 tile_source = image.get("source")
                 # images are listed as relative to the .tsx file, not the .tmx file:
@@ -1276,8 +1284,8 @@ class TiledTileset(TiledElement):
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p["source"] = tile_source
                 p["trans"] = image.get("trans", None)
-                p["width"] = image.get("width", None)
-                p["height"] = image.get("height", None)
+                p["width"] = image.get("width", "0")
+                p["height"] = image.get("height", "0")
 
             # handle tiles with animations
             anim = child.find("animation")
@@ -1285,8 +1293,8 @@ class TiledTileset(TiledElement):
             p["frames"] = frames
             if anim is not None:
                 for frame in anim.findall("frame"):
-                    duration = int(frame.get("duration"))
-                    gid = register_gid(int(frame.get("tileid")) + self.firstgid)
+                    duration = int(frame.get("duration", 0))
+                    gid = register_gid(int(frame.get("tileid", 0)) + self.firstgid)
                     frames.append(AnimationFrame(gid, duration))
 
             for objgrp_node in child.findall("objectgroup"):
@@ -1297,23 +1305,25 @@ class TiledTileset(TiledElement):
                 self.parent.set_tile_properties(gid, p)
 
         # handle the optional 'tileoffset' node
-        self.offset = node.find("tileoffset")
-        if self.offset is None:
+        _offset = node.find("tileoffset")
+        if _offset is None:
             self.offset = (0, 0)
         else:
-            self.offset = (self.offset.get("x", 0), self.offset.get("y", 0))
+            _x = int(_offset.get("x", 0))
+            _y = int(_offset.get("y", 0))
+            self.offset = (_x, _y)
 
         image_node = node.find("image")
         if image_node is not None:
             self.source = image_node.get("source")
 
             # When loading from tsx, tileset image path is relative to the tsx file, not the tmx:
-            if source:
+            if source and self.source:
                 self.source = os.path.join(os.path.dirname(source), self.source)
 
             self.trans = image_node.get("trans", None)
-            self.width = int(image_node.get("width"))
-            self.height = int(image_node.get("height"))
+            self.width = int(image_node.get("width", 0))
+            self.height = int(image_node.get("height", 0))
 
         return self
 
@@ -1386,7 +1396,7 @@ class TiledTileLayer(TiledElement):
             for x, gid in enumerate(row):
                 yield x, y, gid
 
-    def tiles(self) -> Generator[tuple[int, int, Any], Any, None]:
+    def tiles(self):
         """Yields X, Y, Image tuples for each tile in the layer.
 
         Yields:
@@ -1397,8 +1407,10 @@ class TiledTileLayer(TiledElement):
         for x, y, gid in [i for i in self.iter_data() if i[2]]:
             yield x, y, images[gid]
 
-    def _set_properties(self, node) -> None:
-        TiledElement._set_properties(self, node)
+    def _set_properties(
+        self, node: ElementTree.Element, customs: Optional[dict] = None
+    ) -> None:
+        TiledElement._set_properties(self, node, customs)
 
         # TODO: make class/layer-specific type casting
         # layer height and width must be int, but TiledElement.set_properties()
@@ -1418,6 +1430,8 @@ class TiledTileLayer(TiledElement):
         """
         self._set_properties(node)
         data_node = node.find("data")
+        if data_node is None:
+            raise ValueError("Data not found")
         chunk_nodes = data_node.findall("chunk")
         if chunk_nodes:
             msg = "TMX map size: infinite is not supported."
@@ -1543,11 +1557,12 @@ class TiledObject(TiledElement):
 
         """
 
-        def read_points(text):
+        def read_points(text: Optional[str]) -> tuple[tuple[float, ...], ...]:
             """
             Parse a text string of float tuples and return [(x,...),...]
 
             """
+            assert text
             return tuple(tuple(map(float, i.split(","))) for i in text.split())
 
         self._set_properties(node, self.custom_types)
@@ -1571,13 +1586,13 @@ class TiledObject(TiledElement):
             x1 = x2 = y1 = y2 = 0
             for x, y in points:
                 if x < x1:
-                    x1 = x
+                    x1 = int(x)
                 if x > x2:
-                    x2 = x
+                    x2 = int(x)
                 if y < y1:
-                    y1 = y
+                    y1 = int(y)
                 if y > y2:
-                    y2 = y
+                    y2 = int(y)
             self.width = abs(x1) + abs(x2)
             self.height = abs(y1) + abs(y2)
             self.points = tuple([Point(i[0] + self.x, i[1] + self.y) for i in points])
@@ -1614,8 +1629,8 @@ class TiledImageLayer(TiledElement):
     def __init__(self, parent: TiledMap, node: ElementTree.Element) -> None:
         TiledElement.__init__(self)
         self.parent = parent
-        self.source = None
-        self.trans = None
+        self.source: Optional[str] = None
+        self.trans: Optional[str] = None
         self.gid = 0
 
         # defaults from the specification
@@ -1637,15 +1652,16 @@ class TiledImageLayer(TiledElement):
             return self.parent.images[self.gid]
         return None
 
-    def parse_xml(self, node: ElementTree.Element):
+    def parse_xml(self, node: ElementTree.Element) -> TiledImageLayer:
         """Parse an Image Layer from ElementTree xml node."""
         self._set_properties(node)
         self.name = node.get("name", None)
-        self.opacity = node.get("opacity", self.opacity)
+        self.opacity = int(node.get("opacity", self.opacity))
         self.visible = bool(node.get("visible", self.visible))
         image_node = node.find("image")
-        self.source = image_node.get("source", None)
-        self.trans = image_node.get("trans", None)
+        if image_node is not None:
+            self.source = image_node.get("source", None)
+            self.trans = image_node.get("trans", None)
         return self
 
 

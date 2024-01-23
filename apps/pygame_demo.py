@@ -134,16 +134,17 @@ class TiledRenderer:
 class SimpleTest:
     """Basic app to display a rendered Tiled map"""
 
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename) -> None:
+    def load_map(self, filename: str) -> None:
         """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
+        assert self.renderer
 
         logger.info("Objects in map:")
         for obj in self.renderer.tmx_data.objects:

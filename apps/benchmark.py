@@ -41,7 +41,7 @@ class TiledRenderer:
     Super simple way to render a tiled map
     """
 
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         tm = load_pygame(filename)
 
         # self.size will be the pixel size of the map

@@ -27,6 +27,8 @@ except ImportError:
     logger.error("cannot import pyglet (is it installed?)")
     raise
 
+from typing import Any
+
 import pytmx
 
 
@@ -68,7 +70,7 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
     return load_image
 
 
-def load_pyglet(filename, *args, **kwargs):
+def load_pyglet(filename: str, *args: Any, **kwargs: Any) -> pytmx.TiledMap:
     kwargs["image_loader"] = pyglet_image_loader
     kwargs["invert_y"] = True
     return pytmx.TiledMap(filename, *args, **kwargs)
