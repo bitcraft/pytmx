@@ -19,10 +19,11 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 """
 import itertools
 import logging
-from typing import Optional, Union
+from collections.abc import Callable
+from typing import Any, Optional, Union
 
 import pytmx
-from pytmx.pytmx import ColorLike, PointLike
+from pytmx.pytmx import ColorLike, TileFlags
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +38,7 @@ __all__ = ["load_pygame", "pygame_image_loader", "simplify", "build_rects"]
 
 
 def handle_transformation(
-    tile: pygame.Surface,
-    flags: pytmx.TileFlags,
+    tile: pygame.Surface, flags: pytmx.TileFlags
 ) -> pygame.Surface:
     """
     Transform tile according to the flags and return a new one
@@ -112,7 +112,9 @@ def smart_convert(
     return tile
 
 
-def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
+def pygame_image_loader(
+    filename: str, colorkey: Optional[ColorLike], **kwargs: Any
+) -> Callable[[Optional[pygame.Rect], Optional[TileFlags]], pygame.Surface]:
     """
     pytmx image loader for pygame
 
@@ -130,7 +132,9 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
     pixelalpha = kwargs.get("pixelalpha", True)
     image = pygame.image.load(filename)
 
-    def load_image(rect=None, flags=None):
+    def load_image(
+        rect: Optional[pygame.Rect] = None, flags: Optional[TileFlags] = None
+    ) -> pygame.Surface:
         if rect:
             try:
                 tile = image.subsurface(rect)
@@ -149,11 +153,7 @@ def pygame_image_loader(filename: str, colorkey: Optional[ColorLike], **kwargs):
     return load_image
 
 
-def load_pygame(
-    filename: str,
-    *args,
-    **kwargs,
-) -> pytmx.TiledMap:
+def load_pygame(filename: str, *args: Any, **kwargs: Any) -> pytmx.TiledMap:
     """Load a TMX file, images, and return a TiledMap class
 
     PYGAME USERS: Use me.
@@ -208,7 +208,7 @@ def build_rects(
     """
     if isinstance(tileset, int):
         try:
-            tileset = tmxmap.tilesets[tileset]
+            _tileset = tmxmap.tilesets[tileset]
         except IndexError:
             msg = "Tileset #{0} not found in map {1}."
             logger.debug(msg.format(tileset, tmxmap))
@@ -216,7 +216,7 @@ def build_rects(
 
     elif isinstance(tileset, str):
         try:
-            tileset = [t for t in tmxmap.tilesets if t.name == tileset].pop()
+            _tileset = [t for t in tmxmap.tilesets if t.name == tileset].pop()
         except IndexError:
             msg = 'Tileset "{0}" not found in map {1}.'
             logger.debug(msg.format(tileset, tmxmap))
@@ -230,7 +230,9 @@ def build_rects(
     gid = None
     if real_gid:
         try:
-            gid, flags = tmxmap.map_gid(real_gid)[0]
+            _map_gid = tmxmap.map_gid(real_gid)
+            if _map_gid:
+                gid, flags = _map_gid[0]
         except IndexError:
             msg = "GID #{0} not found"
             logger.debug(msg.format(real_gid))
@@ -240,7 +242,7 @@ def build_rects(
         layer_data = tmxmap.get_layer_data(layer)
     elif isinstance(layer, str):
         try:
-            _layer = [l for l in tmxmap.layers if l.name == layer].pop()
+            _layer = [l for l in tmxmap.layers if l.name and l.name == layer].pop()
             layer_data = _layer.data
         except IndexError:
             msg = 'Layer "{0}" not found in map {1}.'
@@ -258,7 +260,7 @@ def build_rects(
 
 
 def simplify(
-    all_points: list[PointLike],
+    all_points: list[tuple[int, int]],
     tilewidth: int,
     tileheight: int,
 ) -> list[pygame.Rect]:
@@ -304,7 +306,7 @@ def simplify(
     making a list of rects, one for each tile on the map!
     """
 
-    def pick_rect(points, rects) -> None:
+    def pick_rect(points: list[tuple[int, int]], rects: list[pygame.Rect]) -> None:
         ox, oy = sorted([(sum(p), p) for p in points])[0][1]
         x = ox
         y = oy
@@ -345,7 +347,7 @@ def simplify(
         if points:
             pick_rect(points, rects)
 
-    rect_list = []
+    rect_list: list[pygame.Rect] = []
     while all_points:
         pick_rect(all_points, rect_list)
 

@@ -32,7 +32,7 @@ from copy import deepcopy
 from itertools import chain, product
 from math import cos, radians, sin
 from operator import attrgetter
-from typing import DefaultDict, Optional, Union
+from typing import Any, Optional, Union
 from xml.etree import ElementTree
 
 # for type hinting
@@ -518,7 +518,9 @@ class TiledMap(TiledElement):
         # only used tiles are actually loaded, so there will be a difference
         # between the GIDs in the Tiled map data (tmx) and the data in this
         # object and the layers.  This dictionary keeps track of that.
-        self.gidmap: DefaultDict[int, list[tuple[int, TileFlags]]] = defaultdict(list)
+        self.gidmap: defaultdict[
+            int, list[tuple[int, Optional[TileFlags]]]
+        ] = defaultdict(list)
         # mapping of gid and trans flags to real gids
         self.imagemap: dict[tuple[int, TileFlags], tuple[int, TileFlags]] = {}
         # mapping of tiledgid to pytmx gid
@@ -546,7 +548,7 @@ class TiledMap(TiledElement):
         self.custom_types = dict()
 
         # initialize the gid mapping
-        self.imagemap[(0, TileFlags(0, 0, 0))] = (0, TileFlags(0, 0, 0))
+        self.imagemap[(0, empty_flags)] = (0, empty_flags)
 
         if custom_property_filename:
             self.parse_json(json.load(open(custom_property_filename)))
@@ -655,7 +657,7 @@ class TiledMap(TiledElement):
             # skip tilesets without a source
             if ts.source is None:
                 continue
-
+            assert self.filename
             path = os.path.join(os.path.dirname(self.filename), ts.source)
             colorkey = getattr(ts, "trans", None)
             loader = self.image_loader(path, colorkey, tileset=ts)
@@ -699,7 +701,7 @@ class TiledMap(TiledElement):
         # load image layer images
         for layer in (i for i in self.layers if isinstance(i, TiledImageLayer)):
             source = getattr(layer, "source", None)
-            if source:
+            if source and self.filename:
                 colorkey = getattr(layer, "trans", None)
                 real_gid = len(self.images)
                 gid = self.register_gid(real_gid)
@@ -714,7 +716,7 @@ class TiledMap(TiledElement):
         # was loaded from the tileset
         for real_gid, props in self.tile_properties.items():
             source = props.get("source", None)
-            if source:
+            if source and self.filename:
                 colorkey = props.get("trans", None)
                 path = os.path.join(os.path.dirname(self.filename), source)
                 loader = self.image_loader(path, colorkey)
@@ -1109,7 +1111,7 @@ class TiledMap(TiledElement):
 
         """
         if flags is None:
-            flags = TileFlags(0, 0, 0)
+            flags = empty_flags
 
         if tiled_gid:
             try:
@@ -1148,7 +1150,9 @@ class TiledMap(TiledElement):
         else:
             return self.register_gid(*decode_gid(tiled_gid))
 
-    def map_gid(self, tiled_gid: int) -> Optional[list[tuple[int, TileFlags]]]:
+    def map_gid(
+        self, tiled_gid: int
+    ) -> Optional[list[tuple[int, Optional[TileFlags]]]]:
         """Used to lookup a GID read from a TMX file's data.
 
         Args:
@@ -1199,8 +1203,8 @@ class TiledTileset(TiledElement):
 
         # defaults from the specification
         self.firstgid = 0
-        self.source = None
-        self.name = None
+        self.source: Optional[str] = None
+        self.name: Optional[str] = None
         self.tilewidth = 0
         self.tileheight = 0
         self.spacing = 0
@@ -1231,7 +1235,7 @@ class TiledTileset(TiledElement):
         # if true, then node references an external tileset
         source = node.get("source", None)
         if source:
-            if source[-4:].lower() == ".tsx":
+            if source[-4:].lower() == ".tsx" and self.parent.filename:
                 # external tilesets don't save this, store it for later
                 self.firstgid = int(node.get("firstgid", 0))
 
@@ -1253,6 +1257,7 @@ class TiledTileset(TiledElement):
                     logger.error(msg.format(path))
                     raise Exception(msg.format(path)) from io
             else:
+                assert self.source
                 msg = "Found external tileset, but cannot handle type: {0}"
                 logger.error(msg.format(self.source))
                 raise Exception(msg.format(self.source))
@@ -1278,18 +1283,18 @@ class TiledTileset(TiledElement):
                 p["width"] = str(self.tilewidth)
                 p["height"] = str(self.tileheight)
             else:
-                tile_source = image.get("source")
+                tile_source = image.get("source", "")
                 # images are listed as relative to the .tsx file, not the .tmx file:
                 if source and tile_source:
                     tile_source = os.path.join(os.path.dirname(source), tile_source)
                 p["source"] = tile_source
-                p["trans"] = image.get("trans", None)
+                p["trans"] = image.get("trans", "")
                 p["width"] = image.get("width", "0")
                 p["height"] = image.get("height", "0")
 
             # handle tiles with animations
             anim = child.find("animation")
-            frames = list()
+            frames: list[AnimationFrame] = []
             p["frames"] = frames
             if anim is not None:
                 for frame in anim.findall("frame"):
@@ -1339,7 +1344,7 @@ class TiledGroupLayer(TiledElement):
         """
         TiledElement.__init__(self)
         self.parent = parent
-        self.name = None
+        self.name: Optional[str] = None
         self.visible = True
         self.parse_xml(node)
 
@@ -1372,7 +1377,7 @@ class TiledTileLayer(TiledElement):
         self.data: list[list[int]] = []
 
         # defaults from the specification
-        self.name = None
+        self.name: Optional[str] = None
         self.width = 0
         self.height = 0
         self.opacity = 1.0
@@ -1444,6 +1449,7 @@ class TiledTileLayer(TiledElement):
                 "XML tile elements are no longer supported. Must use base64 or csv map formats."
             )
 
+        assert data_node.text
         temp = [
             self.parent.register_gid_check_flags(gid)
             for gid in unpack_gids(
@@ -1535,7 +1541,7 @@ class TiledObject(TiledElement):
         self.parse_xml(node)
 
     @property
-    def image(self):
+    def image(self) -> Optional[Any]:
         """Image for the object, if assigned.
 
         Returns:
@@ -1634,14 +1640,14 @@ class TiledImageLayer(TiledElement):
         self.gid = 0
 
         # defaults from the specification
-        self.name = None
+        self.name: Optional[str] = None
         self.opacity = 1
         self.visible = True
 
         self.parse_xml(node)
 
     @property
-    def image(self):
+    def image(self) -> Optional[Any]:
         """Image for the object, if assigned.
 
         Returns:
