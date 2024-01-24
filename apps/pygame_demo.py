@@ -27,14 +27,14 @@ from pytmx.util_pygame import load_pygame
 logger = logging.getLogger(__name__)
 
 
-def init_screen(width, height):
+def init_screen(width: int, height: int) -> pygame.Surface:
     """Set the screen mode
     This function is used to handle window resize events
     """
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
 
-class TiledRenderer(object):
+class TiledRenderer:
     """
     Super simple way to render a tiled map
     """
@@ -47,7 +47,7 @@ class TiledRenderer(object):
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
-    def render_map(self, surface) -> None:
+    def render_map(self, surface: pygame.Surface) -> None:
         """Render our map to a pygame surface
 
         Feel free to use this as a starting point for your pygame app.
@@ -76,7 +76,7 @@ class TiledRenderer(object):
             elif isinstance(layer, TiledImageLayer):
                 self.render_image_layer(surface, layer)
 
-    def render_tile_layer(self, surface, layer) -> None:
+    def render_tile_layer(self, surface: pygame.Surface, layer: TiledTileLayer) -> None:
         """Render all TiledTiles in this layer"""
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
@@ -96,7 +96,9 @@ class TiledRenderer(object):
                 sy = x * th2 + y * th2
                 surface_blit(image, (sx + ox, sy))
 
-    def render_object_layer(self, surface, layer) -> None:
+    def render_object_layer(
+        self, surface: pygame.Surface, layer: TiledObjectGroup
+    ) -> None:
         """Render all TiledObjects contained in this layer"""
         # deref these heavily used references for speed
         draw_lines = pygame.draw.lines
@@ -122,24 +124,27 @@ class TiledRenderer(object):
                     surface, rect_color, obj.closed, obj.apply_transformations(), 3
                 )
 
-    def render_image_layer(self, surface, layer) -> None:
+    def render_image_layer(
+        self, surface: pygame.Surface, layer: TiledImageLayer
+    ) -> None:
         if layer.image:
             surface.blit(layer.image, (0, 0))
 
 
-class SimpleTest(object):
+class SimpleTest:
     """Basic app to display a rendered Tiled map"""
 
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename) -> None:
+    def load_map(self, filename: str) -> None:
         """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
+        assert self.renderer
 
         logger.info("Objects in map:")
         for obj in self.renderer.tmx_data.objects:
@@ -155,7 +160,7 @@ class SimpleTest(object):
         for k, v in self.renderer.tmx_data.get_tile_colliders():
             logger.info("%s\t%s", k, list(v))
 
-    def draw(self, surface) -> None:
+    def draw(self, surface: pygame.Surface) -> None:
         """Draw our map to some surface (probably the display)"""
         # first we make a temporary surface that will accommodate the entire
         # size of the map.
@@ -172,7 +177,7 @@ class SimpleTest(object):
 
         # display a bit of use info on the display
         f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render("press any key for next map or ESC to quit", 1, (180, 180, 0))
+        i = f.render("press any key for next map or ESC to quit", True, (180, 180, 0))
         surface.blit(i, (0, 0))
 
     def handle_input(self) -> None:
@@ -198,8 +203,13 @@ class SimpleTest(object):
             self.exit_status = 0
             self.running = False
 
-    def run(self):
-        """This is our app main loop"""
+    def run(self) -> int:
+        """
+        This is our app main loop
+
+        Returns:
+            Int: 0 means no error, 1 is an error
+        """
         self.dirty = True
         self.running = True
         self.exit_status = 1

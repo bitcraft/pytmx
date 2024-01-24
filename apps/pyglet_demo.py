@@ -18,7 +18,6 @@ logger.addHandler(ch)
 logger.setLevel(logging.INFO)
 
 import pyglet
-
 from pyglet.sprite import Sprite
 
 from pytmx import *
@@ -32,7 +31,7 @@ class TiledRenderer:
     no shape drawing yet
     """
 
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         tm = load_pyglet(filename)
         self.size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
@@ -100,20 +99,21 @@ class TiledRenderer:
                     sprite = Sprite(layer.image, x, y, batch=self.batch)
                     self.sprites.append(sprite)
 
-    def draw(self):
+    def draw(self) -> None:
         self.batch.draw()
 
 
 class SimpleTest:
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename) -> None:
+    def load_map(self, filename: str) -> None:
         self.renderer = TiledRenderer(filename)
+        assert self.renderer
 
         logger.info("Objects in map:")
         for obj in self.renderer.tmx_data.objects:
@@ -126,6 +126,7 @@ class SimpleTest:
             logger.info("%s\t%s", k, v)
 
     def draw(self) -> None:
+        assert self.renderer
         self.renderer.draw()
 
 
@@ -142,7 +143,7 @@ def all_filenames():
 
 
 class TestWindow(pyglet.window.Window):
-    def __init__(self, width, height, vsync):
+    def __init__(self, width: int, height: int, vsync: bool):
         super().__init__(width=width, height=height, vsync=vsync)
         self.fps_display = pyglet.window.FPSDisplay(self, color=(50, 255, 50, 255))
         self.filenames = all_filenames()
@@ -168,5 +169,5 @@ class TestWindow(pyglet.window.Window):
 
 if __name__ == "__main__":
     window = TestWindow(600, 600, vsync=False)
-    pyglet.clock.schedule_interval(window.draw, 1/120)
+    pyglet.clock.schedule_interval(window.draw, 1 / 120)
     pyglet.app.run(None)

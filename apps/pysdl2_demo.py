@@ -36,7 +36,7 @@ from pytmx import *
 from pytmx.util_pysdl2 import load_pysdl2
 
 
-class TiledRenderer(object):
+class TiledRenderer:
     """
     Super simple way to render a tiled map with pyglet
 
@@ -81,7 +81,7 @@ class TiledRenderer(object):
                 self.render_tile_layer(layer)
 
 
-class SimpleTest(object):
+class SimpleTest:
     def __init__(self, filename, window) -> None:
         self.running = False
         self.dirty = False
@@ -104,8 +104,13 @@ class SimpleTest(object):
         self.map_renderer.render_map()
         self.sdl_renderer.present()
 
-    def run(self, window):
-        """Starts an event loop without actually processing any event."""
+    def run(self, window) -> int:
+        """
+        Starts an event loop without actually processing any event.
+
+        Returns:
+            Int: 0 means no error, 1 is an error
+        """
         import ctypes
 
         event = events.SDL_Event()
@@ -126,7 +131,7 @@ class SimpleTest(object):
         return self.exit_status
 
 
-def all_filenames():
+def all_filenames() -> list[str]:
     import glob
     import os.path
 
