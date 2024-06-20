@@ -24,6 +24,7 @@ import json
 import logging
 import os
 import struct
+import sys
 import zlib
 from base64 import b64decode
 from collections import defaultdict, namedtuple
@@ -40,6 +41,12 @@ try:
     import pygame
 except ImportError:
     pygame = None
+
+# optional zstd compression support
+try:
+    import zstd
+except ImportError:
+    zstd = False
 
 __all__ = (
     "TileFlags",
@@ -175,6 +182,14 @@ def unpack_gids(
             data = gzip.decompress(data)
         elif compression == "zlib":
             data = zlib.decompress(data)
+        elif compression == "zstd":
+            if zstd:
+                data = zstd.decompress(data)
+            else:
+                raise ValueError(
+                    "layer compression zstd is not supported. Install zstd "
+                    "to enable support."
+                )
         elif compression:
             raise ValueError(f"layer compression {compression} is not supported.")
         fmt = "<%dL" % (len(data) // 4)

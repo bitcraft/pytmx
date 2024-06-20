@@ -100,7 +100,7 @@ Design Goals and Features
 * API with many handy functions
 * Memory efficient and performant
 * Loads data, "properties" metadata, and images from Tiled's TMX format
-* Supports base64, csv, gzip, zlib and uncompressed XML formats
+* Supports base64, csv, gzip, zlib, zstd and uncompressed XML formats
 * Properties for all native Tiled object types
 * Point data for polygon and polyline objects
 * Automatic flipping and rotation of tiles
