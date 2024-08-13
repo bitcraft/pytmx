@@ -545,7 +545,7 @@ class TiledMap(TiledElement):
         self.imagemap[(0, 0)] = 0
 
         if custom_property_filename:
-            self.parse_json(json.load(open(custom_property_filename)))
+            self.parse_json(json.load(open(custom_property_filename))["propertyTypes"])
 
         if filename:
             self.parse_xml(ElementTree.parse(self.filename).getroot())
@@ -558,7 +558,7 @@ class TiledMap(TiledElement):
         return chain(self.layers, self.objects)
 
     def _set_properties(self, node: ElementTree.Element) -> None:
-        TiledElement._set_properties(self, node)
+        TiledElement._set_properties(self, node, self.custom_types)
 
         # TODO: make class/layer-specific type casting
         # layer height and width must be int, but TiledElement.set_properties()
@@ -1259,7 +1259,7 @@ class TiledTileset(TiledElement):
             tiled_gid = int(child.get("id"))
 
             p = {k: types[k](v) for k, v in child.items()}
-            p.update(parse_properties(child))
+            p.update(parse_properties(child, self.parent.custom_types))
 
             # images are listed as relative to the .tsx file, not the .tmx file:
             if source and "path" in p:
