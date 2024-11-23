@@ -1508,6 +1508,7 @@ class TiledObject(TiledElement):
         self.closed = True
         self.template = None
         self.custom_types = custom_types
+        self.ellipse = False
 
         self.parse_xml(node)
 
@@ -1557,6 +1558,8 @@ class TiledObject(TiledElement):
         if polyline is not None:
             points = read_points(polyline.get("points"))
             self.closed = False
+
+        self.ellipse = node.find("ellipse") is not None
 
         if points:
             x1 = x2 = y1 = y2 = 0
