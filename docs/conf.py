@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("../"))
 from typing import Any
 
 project = "pytmx"
-copyright = "2012-2024, Leif Theden"
+copyright = "2012-2025, Leif Theden"
 author = "Leif Theden"
 
 # The full version, including alpha/beta/rc tags

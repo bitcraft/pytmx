@@ -1,6 +1,6 @@
 """
 This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2024
+Leif Theden "bitcraft", 2012-2025
 
 Rendering demo for the TMXLoader.
 
@@ -14,7 +14,9 @@ Missing interactive_tests:
 - object rotation
 - terrains
 """
+
 import logging
+from pathlib import Path
 
 import pygame
 from pygame.locals import *
@@ -41,8 +43,8 @@ class TiledRenderer:
     Super simple way to render a tiled map
     """
 
-    def __init__(self, filename) -> None:
-        tm = load_pygame(filename)
+    def __init__(self, filename: Path) -> None:
+        tm = load_pygame(filename.as_posix())
 
         # self.size will be the pixel size of the map
         # this value is used later to render the entire map to a pygame surface
@@ -137,14 +139,14 @@ class TiledRenderer:
 class SimpleTest:
     """Basic app to display a rendered Tiled map"""
 
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: Path) -> None:
         self.renderer = None
         self.running = False
         self.dirty = False
         self.exit_status = 0
         self.load_map(filename)
 
-    def load_map(self, filename) -> None:
+    def load_map(self, filename: Path) -> None:
         """Create a renderer, load data, and print some debug info"""
         self.renderer = TiledRenderer(filename)
 
@@ -217,8 +219,7 @@ class SimpleTest:
 
 
 if __name__ == "__main__":
-    import glob
-    import os.path
+    import time
 
     import pytmx
 
@@ -227,22 +228,28 @@ if __name__ == "__main__":
     screen = init_screen(600, 600)
     pygame.display.set_caption("PyTMX Map Viewer")
 
-    logger.info(pytmx.__version__)
+    logger.info(f"PyTMX Version: {pytmx.__version__}")
 
-    # loop through a bunch of maps in the maps folder
-    import time
+    # Path to your maps folder
+    map_folder = Path("apps/data")
+    map_files = sorted(map_folder.glob("*.tmx"))  # sort for consistent order
+
+    if not map_files:
+        logger.warning("No TMX files found in apps/data/")
+    else:
+        logger.info(f"Found {len(map_files)} TMX files.")
 
     try:
-        # 6.6
         start = time.time()
+
         for i in range(500):
-            for filename in glob.glob(os.path.join("*.tmx")):
+            for filepath in map_files:
                 pygame.event.clear()
-                SimpleTest(filename)
+                SimpleTest(filepath).run()
 
-        end = time.time() - start
-        print(end)
+        logger.info(f"Total time: {time.time() - start:.2f} seconds")
 
-    except:
+    except Exception as e:
+        logger.exception("Unexpected error:")
         pygame.quit()
         raise

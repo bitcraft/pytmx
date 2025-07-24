@@ -1,6 +1,6 @@
 """
 This is tested on pyglet 1.2 and python 2.7.
-Leif Theden "bitcraft", 2012-2024
+Leif Theden "bitcraft", 2012-2025
 
 Rendering demo for the TMXLoader.
 

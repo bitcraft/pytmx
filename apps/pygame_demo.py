@@ -27,14 +27,14 @@ from pytmx.util_pygame import load_pygame
 logger = logging.getLogger(__name__)
 
 
-def init_screen(width: int, height: int) -> pygame.Surface:
+def init_screen(width, height):
     """Set the screen mode
     This function is used to handle window resize events
     """
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
 
-class TiledRenderer:
+class TiledRenderer(object):
     """
     Super simple way to render a tiled map
     """
@@ -47,7 +47,7 @@ class TiledRenderer:
         self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
 
-    def render_map(self, surface: pygame.Surface) -> None:
+    def render_map(self, surface) -> None:
         """Render our map to a pygame surface
 
         Feel free to use this as a starting point for your pygame app.
@@ -76,7 +76,7 @@ class TiledRenderer:
             elif isinstance(layer, TiledImageLayer):
                 self.render_image_layer(surface, layer)
 
-    def render_tile_layer(self, surface: pygame.Surface, layer: TiledTileLayer) -> None:
+    def render_tile_layer(self, surface, layer) -> None:
         """Render all TiledTiles in this layer"""
         # deref these heavily used references for speed
         tw = self.tmx_data.tilewidth
@@ -96,9 +96,7 @@ class TiledRenderer:
                 sy = x * th2 + y * th2
                 surface_blit(image, (sx + ox, sy))
 
-    def render_object_layer(
-        self, surface: pygame.Surface, layer: TiledObjectGroup
-    ) -> None:
+    def render_object_layer(self, surface, layer) -> None:
         """Render all TiledObjects contained in this layer"""
         # deref these heavily used references for speed
         draw_lines = pygame.draw.lines
@@ -124,14 +122,12 @@ class TiledRenderer:
                     surface, rect_color, obj.closed, obj.apply_transformations(), 3
                 )
 
-    def render_image_layer(
-        self, surface: pygame.Surface, layer: TiledImageLayer
-    ) -> None:
+    def render_image_layer(self, surface, layer) -> None:
         if layer.image:
             surface.blit(layer.image, (0, 0))
 
 
-class SimpleTest:
+class SimpleTest(object):
     """Basic app to display a rendered Tiled map"""
 
     def __init__(self, filename) -> None:
@@ -159,7 +155,7 @@ class SimpleTest:
         for k, v in self.renderer.tmx_data.get_tile_colliders():
             logger.info("%s\t%s", k, list(v))
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface) -> None:
         """Draw our map to some surface (probably the display)"""
         # first we make a temporary surface that will accommodate the entire
         # size of the map.
@@ -202,13 +198,8 @@ class SimpleTest:
             self.exit_status = 0
             self.running = False
 
-    def run(self) -> int:
-        """
-        This is our app main loop
-
-        Returns:
-            Int: 0 means no error, 1 is an error
-        """
+    def run(self):
+        """This is our app main loop"""
         self.dirty = True
         self.running = True
         self.exit_status = 1
