@@ -14,18 +14,12 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
-        dependencies:
-          - pygame pyglet
-          - pygame
-          - pyglet
-          - "null"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements
-        if: ${{ matrix.dependencies != 'null' }}
-        run: pip install ${{ matrix.dependencies }}
+        run: pip install pygame pyglet
       - name: Run Tests
-        run: python -m unittest tests/pytmx/test_pytmx.py
+        run: python -m unittest discover -s tests/pytmx -p "test_*.py"
