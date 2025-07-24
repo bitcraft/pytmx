@@ -20,6 +20,8 @@ License along with pytmx.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 logger = logging.getLogger(__name__)
+from pathlib import Path
+from typing import Any, Optional
 
 try:
     import pyglet
@@ -28,9 +30,12 @@ except ImportError:
     raise
 
 import pytmx
+from pytmx.pytmx import ColorLike, TileFlags
 
 
-def pyglet_image_loader(filename, colorkey, **kwargs):
+def pyglet_image_loader(
+    filename: str, colorkey: Optional[ColorLike] = None, **kwargs: Any
+):
     """basic image loading with pyglet
 
     returns pyglet Images, not textures
@@ -46,29 +51,60 @@ def pyglet_image_loader(filename, colorkey, **kwargs):
     if colorkey:
         logger.debug("colorkey not implemented")
 
-    image = pyglet.resource.image(filename)
+    image_path = Path(filename)
+    pyglet.resource.path = [str(image_path.parent.resolve())]
+    pyglet.resource.reindex()
 
-    def load_image(rect=None, flags=None):
-        if rect:
-            try:
+    image = pyglet.resource.image(image_path.name)
+
+    def load_image(
+        rect: Optional[tuple[int, int, int, int]] = None,
+        flags: Optional[TileFlags] = None,
+    ):
+        try:
+            if rect:
                 x, y, w, h = rect
                 y = image.height - y - h
                 tile = image.get_region(x, y, w, h)
-            except:
-                logger.error("cannot get region %s of image", rect)
-                raise
-        else:
-            tile = image
+            else:
+                tile = image
 
-        if flags:
-            logger.error("tile flags are not implemented")
+            angle, flip_x, flip_y = handle_flags(flags)
+            tile = tile.get_transform(flip_x=flip_x, flip_y=flip_y, rotate=int(angle))
 
-        return tile
+            return tile
+
+        except Exception as e:
+            logger.error(
+                "Error extracting or transforming tile %s: %s", rect, e, exc_info=True
+            )
+            raise
 
     return load_image
 
 
-def load_pyglet(filename, *args, **kwargs):
+def handle_flags(flags: Optional[TileFlags]) -> tuple[float, bool, bool]:
+    """
+    Convert Tiled tile flip flags into SDL2 rendering parameters.
+    """
+    if not flags:
+        return 0.0, False, False
+
+    flipped_h = flags.flipped_horizontally
+    flipped_v = flags.flipped_vertically
+    flipped_d = flags.flipped_diagonally
+
+    if flipped_d:
+        # Diagonal flip overrides horizontal/vertical flips for rotation
+        if flipped_v:
+            return 270.0, False, False
+        else:
+            return 90.0, False, False
+
+    return 0.0, flipped_h, flipped_v
+
+
+def load_pyglet(filename: str, *args: Any, **kwargs: Any) -> pytmx.TiledMap:
     kwargs["image_loader"] = pyglet_image_loader
     kwargs["invert_y"] = True
     return pytmx.TiledMap(filename, *args, **kwargs)
