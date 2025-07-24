@@ -1,7 +1,14 @@
+import logging
 import unittest
 
 import pytmx
 from pytmx import TiledElement, convert_to_bool
+
+# Tiled gid flags
+GID_TRANS_FLIPX = 1 << 31
+GID_TRANS_FLIPY = 1 << 30
+GID_TRANS_ROT = 1 << 29
+GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT
 
 
 class TestConvertToBool(unittest.TestCase):
@@ -63,6 +70,15 @@ class TestConvertToBool(unittest.TestCase):
     def test_non_boolean_number_raises_error(self) -> None:
         with self.assertRaises(ValueError):
             convert_to_bool("200")
+
+    def test_edge_cases(self):
+        # Whitespace
+        self.assertTrue(convert_to_bool("  t  "))
+        self.assertFalse(convert_to_bool("  f  "))
+
+        # Numeric edge cases
+        self.assertTrue(convert_to_bool(1e-10))  # Very small positive number
+        self.assertFalse(convert_to_bool(-1e-10))  # Very small negative number
 
 
 class TiledMapTest(unittest.TestCase):
@@ -138,10 +154,12 @@ class TiledElementTestCase(unittest.TestCase):
         specification.  We check that new properties are not named same
         as existing attributes.
         """
+        logging.disable(logging.CRITICAL)  # disable logging
         self.element.name = "foo"
         items = {"name": None}
         result = self.element._contains_invalid_property_name(items.items())
         self.assertTrue(result)
+        logging.disable(logging.NOTSET)  # reset logging
 
     def test_not_contains_reserved_property_name(self) -> None:
         """Reserved names are checked from any attributes in the instance

@@ -17,6 +17,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 from __future__ import annotations
 
 import gzip
@@ -54,6 +55,8 @@ __all__ = (
     "convert_to_bool",
     "resolve_to_class",
     "parse_properties",
+    "decode_gid",
+    "unpack_gids",
 )
 
 logger = logging.getLogger(__name__)
@@ -85,6 +88,7 @@ MapPoint = tuple[int, int, int]
 TiledLayer = Union[
     "TiledTileLayer", "TiledImageLayer", "TiledGroupLayer", "TiledObjectGroup"
 ]
+flag_cache: dict[int, TileFlags] = {}
 
 # need a more graceful way to handle annotations for optional dependencies
 if pygame:
@@ -125,15 +129,19 @@ def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
     """
     if raw_gid < GID_TRANS_ROT:
         return raw_gid, empty_flags
-    return (
-        raw_gid & ~GID_MASK,
-        # TODO: cache all combinations of flags
-        TileFlags(
-            raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
-            raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
-            raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
-        ),
+
+    # Check if the GID is already in the cache
+    if raw_gid in flag_cache:
+        return raw_gid & ~GID_MASK, flag_cache[raw_gid]
+
+    # Calculate and cache the flags
+    flags = TileFlags(
+        raw_gid & GID_TRANS_FLIPX == GID_TRANS_FLIPX,
+        raw_gid & GID_TRANS_FLIPY == GID_TRANS_FLIPY,
+        raw_gid & GID_TRANS_ROT == GID_TRANS_ROT,
     )
+    flag_cache[raw_gid] = flags
+    return raw_gid & ~GID_MASK, flags
 
 
 def reshape_data(
@@ -180,6 +188,8 @@ def unpack_gids(
         fmt = "<%dL" % (len(data) // 4)
         return list(struct.unpack(fmt, data))
     elif encoding == "csv":
+        if not text.strip():
+            return []
         return [int(i) for i in text.split(",")]
     elif encoding:
         raise ValueError(f"layer encoding {encoding} is not supported.")
