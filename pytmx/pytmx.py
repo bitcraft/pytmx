@@ -17,6 +17,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 from __future__ import annotations
 
 import gzip
@@ -46,6 +47,7 @@ __all__ = (
     "TiledElement",
     "TiledImageLayer",
     "TiledMap",
+    "TiledGroupLayer",
     "TiledObject",
     "TiledObjectGroup",
     "TiledTileLayer",
@@ -621,6 +623,10 @@ class TiledMap(TiledElement):
 
         # iterate through tile objects and handle the image
         for o in [o for o in self.objects if o.gid]:
+            # Decode rotation and flipping flags from the GID
+            gid, flags = decode_gid(o.gid)
+            rotation = self.get_rotation_from_flags(flags)  # Get rotation based on flags
+
             # gids might also have properties assigned to them
             # in that case, assign the gid properties to the object as well
             p = self.get_tile_properties_by_gid(o.gid)
@@ -628,12 +634,32 @@ class TiledMap(TiledElement):
                 for key in p:
                     o.properties.setdefault(key, p[key])
 
+            # Adjust based on rotation
+            if rotation == 90:
+                o.x, o.y = o.x + o.height, o.y
+            elif rotation == 180:
+                o.x, o.y = o.x + o.width, o.y + o.height
+            elif rotation == 270:
+                o.x, o.y = o.x, o.y + o.width
+
+            # Adjust Y-coordinate if invert_y is enabled
             if self.invert_y:
                 o.y -= o.height
 
         self.reload_images()
         return self
-
+    
+    def get_rotation_from_flags(self, flags: TileFlags) -> int:
+        """Determine the rotation angle from TileFlags."""
+        if flags.flipped_diagonally:
+            if flags.flipped_horizontally and not flags.flipped_vertically:
+                return 90
+            elif flags.flipped_horizontally and flags.flipped_vertically:
+                return 180
+            elif not flags.flipped_horizontally and flags.flipped_vertically:
+                return 270
+        return 0
+    
     def reload_images(self) -> None:
         """Load or reload the map images from disk.
 
@@ -1022,6 +1048,13 @@ class TiledMap(TiledElement):
             if colliders:
                 yield gid, colliders
 
+    def get_tile_flags_by_gid(self, gid: int) -> TileFlags:
+        real_gid = self.tiledgidmap[gid]
+        flags_list = self.gidmap[real_gid]
+        for tile_gid, flags in flags_list:
+            if gid == tile_gid:
+                return flags
+
     def pixels_to_tile_pos(self, position: tuple[int, int]) -> tuple[int, int]:
         return int(position[0] / self.tilewidth), int(position[1] / self.tileheight)
 
@@ -1112,7 +1145,7 @@ class TiledMap(TiledElement):
                 self.gidmap[tiled_gid].append((gid, flags))
                 self.tiledgidmap[gid] = tiled_gid
                 return gid
-
+                
         else:
             return 0
 
@@ -1498,6 +1531,7 @@ class TiledObject(TiledElement):
         self.id = 0
         self.name = None
         self.type = None
+        self.object_type = "rectangle"
         self.x = 0
         self.y = 0
         self.width = 0
@@ -1545,33 +1579,64 @@ class TiledObject(TiledElement):
 
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
+            self.object_type = "tile"  # set the object type to tile
             self.gid = self.parent.register_gid_check_flags(self.gid)
 
         points = None
         polygon = node.find("polygon")
         if polygon is not None:
+            self.object_type = "polygon"
             points = read_points(polygon.get("points"))
             self.closed = True
 
         polyline = node.find("polyline")
         if polyline is not None:
+            self.object_type = "polyline"
             points = read_points(polyline.get("points"))
             self.closed = False
 
+        ellipse = node.find("ellipse")
+        if ellipse is not None:
+            self.object_type = "ellipse"
+
+        point = node.find("point")
+        if point is not None:
+            self.object_type = "point"
+
+        text = node.find("text")
+        if text is not None:
+            self.object_type = "text"
+            # NOTE: The defaults have been taken from the tiled editor version 1.11.0
+            self.text = text.text
+            self.font_family = text.get("fontfamily", "Sans Serif")
+            # Not sure if this is really font size or not, but it's called
+            # pixel size in the .tmx file.
+            self.pixel_size = int(text.get("pixelsize", 16))
+            self.wrap = bool(text.get("wrap", False))
+            self.bold = bool(text.get("bold", False))
+            self.italic = bool(text.get("italic", False))
+            self.underline = bool(text.get("underline", False))
+            self.strike_out = bool(text.get("strikeout", False))
+            self.kerning = bool(text.get("kerning", True))
+            self.h_align = text.get("halign", "left")
+            self.v_align = text.get("valign", "top")
+            self.color = text.get("color", "#000000FF")
+
         if points:
-            x1 = x2 = y1 = y2 = 0
-            for x, y in points:
-                if x < x1:
-                    x1 = x
-                if x > x2:
-                    x2 = x
-                if y < y1:
-                    y1 = y
-                if y > y2:
-                    y2 = y
-            self.width = abs(x1) + abs(x2)
-            self.height = abs(y1) + abs(y2)
+            xs, ys = zip(*points)
+            self.width = max(xs) - min(xs)
+            self.height = max(ys) - min(ys)
             self.points = tuple([Point(i[0] + self.x, i[1] + self.y) for i in points])
+        # Set the points for a rectangle
+        elif self.object_type == "rectangle":
+            self.points = tuple(
+                [
+                    Point(self.x, self.y),
+                    Point(self.x + self.width, self.y),
+                    Point(self.x + self.width, self.y + self.height),
+                    Point(self.x, self.y + self.height),
+                ]
+            )
 
         return self
 

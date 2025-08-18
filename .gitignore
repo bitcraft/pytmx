@@ -7,3 +7,4 @@ thumbs.db
 build
 dist
 venv
+.venv/
