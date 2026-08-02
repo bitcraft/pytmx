@@ -1545,7 +1545,15 @@ class TiledObject(TiledElement):
 
         # correctly handle "tile objects" (object with gid set)
         if self.gid:
-            self.gid = self.parent.register_gid_check_flags(self.gid)
+            raw_gid = self.gid
+            
+            self.flip_x = bool(raw_gid & GID_TRANS_FLIPX)
+            self.flip_y = bool(raw_gid & GID_TRANS_FLIPY)
+            self.flip_diag = bool(raw_gid & GID_TRANS_ROT)
+
+            self.raw_gid = raw_gid
+
+            self.gid = self.parent.register_gid_check_flags(raw_gid)
 
         points = None
         polygon = node.find("polygon")
