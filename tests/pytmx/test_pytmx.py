@@ -124,6 +124,48 @@ class TiledMapTest(unittest.TestCase):
         self.assertEqual(self.m.pixels_to_tile_pos((65, 86)), (4, 5))
 
 
+class RotatedTileObjectTest(unittest.TestCase):
+    filename = "tests/resources/rotated_tile_objects.tmx"
+
+    def setUp(self) -> None:
+        self.m = pytmx.TiledMap(self.filename)
+
+    def test_tile_object_positions(self) -> None:
+        positions = {
+            1: (100, 184),
+            2: (116, 200),
+            3: (100, 216),
+            4: (84, 200),
+            5: (111.313708499, 188.686291501),
+            6: (132, 200),
+        }
+        for object_id, (x, y) in positions.items():
+            with self.subTest(object_id=object_id):
+                obj = self.m.objects_by_id[object_id]
+                self.assertAlmostEqual(obj.x, x)
+                self.assertAlmostEqual(obj.y, y)
+
+    def test_rotated_tile_object_corners(self) -> None:
+        obj = self.m.objects_by_id[2]
+        corners = [(116, 200), (100, 200), (100, 232), (116, 232)]
+        for point, (x, y) in zip(obj.apply_transformations(), corners):
+            self.assertAlmostEqual(point[0], x)
+            self.assertAlmostEqual(point[1], y)
+
+    def test_tile_object_positions_without_inversion(self) -> None:
+        tiled_map = pytmx.TiledMap(self.filename, invert_y=False)
+        for obj in tiled_map.objects:
+            self.assertEqual((obj.x, obj.y), (100, 200))
+
+    def test_rectangle_position_is_not_adjusted(self) -> None:
+        obj = self.m.objects_by_id[7]
+        self.assertEqual((obj.x, obj.y), (100, 200))
+        corners = [(100, 200), (84, 200), (84, 232), (100, 232)]
+        for point, (x, y) in zip(obj.apply_transformations(), corners):
+            self.assertAlmostEqual(point[0], x)
+            self.assertAlmostEqual(point[1], y)
+
+
 class TiledElementTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.element = TiledElement()

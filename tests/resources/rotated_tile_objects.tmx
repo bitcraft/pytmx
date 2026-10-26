@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="16" height="16" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="336" columns="16">
+  <image source="tileset.png" width="256" height="336"/>
+ </tileset>
+ <objectgroup name="objects">
+  <object id="1" gid="1" x="100" y="200" width="32" height="16" rotation="0"/>
+  <object id="2" gid="1" x="100" y="200" width="32" height="16" rotation="90"/>
+  <object id="3" gid="1" x="100" y="200" width="32" height="16" rotation="180"/>
+  <object id="4" gid="1" x="100" y="200" width="32" height="16" rotation="270"/>
+  <object id="5" gid="1" x="100" y="200" width="32" height="16" rotation="45"/>
+  <object id="6" gid="1" x="100" y="200" width="64" height="32" rotation="90"/>
+  <object id="7" x="100" y="200" width="32" height="16" rotation="90"/>
+ </objectgroup>
+</map>

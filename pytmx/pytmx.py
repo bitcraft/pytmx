@@ -17,6 +17,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 from __future__ import annotations
 
 import gzip
@@ -615,7 +616,7 @@ class TiledMap(TiledElement):
         # set after the tileset is loaded, so this step must be performed last
         # also, this step is performed for objects to load their tiles.
 
-        # tiled stores the origin of GID objects by the lower right corner
+        # tiled stores the origin of GID objects by the lower left corner
         # this is different for all other types, so i just adjust it here
         # so all types loaded with pytmx are uniform.
 
@@ -629,7 +630,7 @@ class TiledMap(TiledElement):
                     o.properties.setdefault(key, p[key])
 
             if self.invert_y:
-                o.y -= o.height
+                o.x, o.y = rotate([Point(o.x, o.y - o.height)], o, o.rotation)[0]
 
         self.reload_images()
         return self
