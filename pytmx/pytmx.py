@@ -1632,8 +1632,6 @@ class TiledImageLayer(TiledElement):
         """Parse an Image Layer from ElementTree xml node."""
         self._set_properties(node)
         self.name = node.get("name", None)
-        self.opacity = node.get("opacity", self.opacity)
-        self.visible = node.get("visible", self.visible)
         image_node = node.find("image")
         self.source = image_node.get("source", None)
         self.trans = image_node.get("trans", None)

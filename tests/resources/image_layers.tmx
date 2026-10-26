@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" orientation="orthogonal" width="1" height="1" tilewidth="16" tileheight="16">
+ <imagelayer id="1" name="hidden" visible="0" opacity="0.25">
+  <properties>
+   <property name="description" value="Hidden background"/>
+  </properties>
+  <image source="tileset.png" trans="ff00ff"/>
+ </imagelayer>
+ <imagelayer id="2" name="shown" visible="1" opacity="0.75">
+  <image source="tileset.png"/>
+ </imagelayer>
+ <imagelayer id="3" name="default">
+  <image source="tileset.png"/>
+ </imagelayer>
+ <imagelayer id="4" name="transparent" opacity="0">
+  <image source="tileset.png"/>
+ </imagelayer>
+</map>

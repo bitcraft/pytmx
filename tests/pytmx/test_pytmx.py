@@ -124,6 +124,45 @@ class TiledMapTest(unittest.TestCase):
         self.assertEqual(self.m.pixels_to_tile_pos((65, 86)), (4, 5))
 
 
+class TiledImageLayerTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.m = pytmx.TiledMap("tests/resources/image_layers.tmx")
+
+    def test_hidden_image_layer_is_not_visible(self) -> None:
+        self.assertEqual(
+            [layer.name for layer in self.m.visible_layers],
+            ["shown", "default", "transparent"],
+        )
+
+    def test_image_layer_visibility_is_boolean(self) -> None:
+        self.assertIs(self.m.get_layer_by_name("hidden").visible, False)
+        self.assertIs(self.m.get_layer_by_name("shown").visible, True)
+
+    def test_image_layer_opacity_is_numeric(self) -> None:
+        hidden = self.m.get_layer_by_name("hidden")
+        shown = self.m.get_layer_by_name("shown")
+        self.assertEqual(hidden.opacity, 0.25)
+        self.assertEqual(shown.opacity, 0.75)
+        self.assertEqual(hidden.opacity * 255, 63.75)
+
+    def test_zero_opacity_is_preserved(self) -> None:
+        layer = self.m.get_layer_by_name("transparent")
+        self.assertEqual(layer.opacity, 0.0)
+        self.assertTrue(layer.visible)
+
+    def test_image_layer_defaults(self) -> None:
+        layer = self.m.get_layer_by_name("default")
+        self.assertTrue(layer.visible)
+        self.assertEqual(layer.opacity, 1)
+
+    def test_image_and_custom_properties_are_preserved(self) -> None:
+        layer = self.m.get_layer_by_name("hidden")
+        self.assertEqual(layer.source, "tileset.png")
+        self.assertEqual(layer.trans, "ff00ff")
+        self.assertEqual(layer.properties, {"description": "Hidden background"})
+        self.assertIsNotNone(layer.image)
+
+
 class TiledElementTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.element = TiledElement()
