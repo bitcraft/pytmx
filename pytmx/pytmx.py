@@ -17,6 +17,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with pytmx.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 from __future__ import annotations
 
 import gzip
@@ -67,7 +68,9 @@ TRANS_ROT = 4
 GID_TRANS_FLIPX = 1 << 31
 GID_TRANS_FLIPY = 1 << 30
 GID_TRANS_ROT = 1 << 29
-GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT
+# Tiled can retain this bit even after changing to a non-hexagonal map.
+GID_TRANS_HEX120 = 1 << 28
+GID_MASK = GID_TRANS_FLIPX | GID_TRANS_FLIPY | GID_TRANS_ROT | GID_TRANS_HEX120
 
 # error message format strings go here
 duplicate_name_fmt = (
@@ -123,7 +126,7 @@ def decode_gid(raw_gid: int) -> tuple[int, TileFlags]:
         Tuple[int, TileFlags]: Tuple of the GID after rotation flags, and TileFlags object
 
     """
-    if raw_gid < GID_TRANS_ROT:
+    if raw_gid < GID_TRANS_HEX120:
         return raw_gid, empty_flags
     return (
         raw_gid & ~GID_MASK,
@@ -1134,7 +1137,7 @@ class TiledMap(TiledElement):
         # NOTE: the register* methods are getting really spaghetti-like
         if tiled_gid == 0:
             return 0
-        elif tiled_gid < GID_TRANS_ROT:
+        elif tiled_gid < GID_TRANS_HEX120:
             return self.register_gid(tiled_gid)
         else:
             return self.register_gid(*decode_gid(tiled_gid))

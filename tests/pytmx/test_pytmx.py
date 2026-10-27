@@ -1,7 +1,11 @@
+import itertools
+import tempfile
 import unittest
+from pathlib import Path
 
 import pytmx
 from pytmx import TiledElement, convert_to_bool
+from pytmx.pytmx import decode_gid
 
 
 class TestConvertToBool(unittest.TestCase):
@@ -170,3 +174,57 @@ class TiledElementTestCase(unittest.TestCase):
     def test_repr(self) -> None:
         self.element.name = "foo"
         self.assertEqual('<TiledElement: "foo">', self.element.__repr__())
+
+
+class TestGidFlags(unittest.TestCase):
+    def test_decode_all_flag_combinations(self):
+        for flags in itertools.product((False, True), repeat=4):
+            encoded_flags = sum(int(value) << (31 - i) for i, value in enumerate(flags))
+            for gid in (0, 1, 0x0FFFFFFF):
+                with self.subTest(flags=flags, gid=gid):
+                    decoded, transform = decode_gid(gid | encoded_flags)
+                    self.assertEqual(decoded, gid)
+                    self.assertEqual(tuple(transform), flags[:3])
+
+    def test_registration_ignores_hexagonal_rotation_bit(self):
+        map_ = pytmx.TiledMap()
+        for flags in itertools.product((False, True), repeat=3):
+            raw_gid = 1 | sum(int(value) << (31 - i) for i, value in enumerate(flags))
+            with self.subTest(flags=flags):
+                original = map_.register_gid_check_flags(raw_gid)
+                ignored = map_.register_gid_check_flags(raw_gid | 0x10000000)
+                self.assertEqual(ignored, original)
+                self.assertEqual(map_.tiledgidmap[ignored], 1)
+
+    def test_flagged_layer_and_object_images(self):
+        gids = [1 | (combination << 28) for combination in range(16)]
+        objects = "".join(
+            '<object id="{}" gid="{}" x="0" y="16" width="16" height="16"/>'.format(
+                i + 1, gid
+            )
+            for i, gid in enumerate(gids)
+        )
+        document = """<map orientation="orthogonal" width="16" height="1" tilewidth="16" tileheight="16">
+          <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="1" columns="1">
+            <image source="tile.png" width="16" height="16"/>
+          </tileset>
+          <layer name="tiles" width="16" height="1"><data encoding="csv">{}</data></layer>
+          <objectgroup name="objects">{}</objectgroup>
+        </map>""".format(
+            ",".join(str(gid) for gid in gids), objects
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            filename = Path(directory) / "map.tmx"
+            filename.write_text(document, encoding="utf-8")
+            # The default loader returns image references without opening pixels.
+            map_ = pytmx.TiledMap(str(filename))
+            objects = list(map_.objects)
+            for i, raw_gid in enumerate(gids):
+                with self.subTest(raw_gid=raw_gid):
+                    gid = map_.layers[0].data[0][i]
+                    image = map_.get_tile_image_by_gid(gid)
+                    self.assertIsNotNone(image)
+                    self.assertEqual(map_.tiledgidmap[gid], 1)
+                    self.assertEqual(objects[i].gid, gid)
+                    self.assertEqual(map_.get_tile_image_by_gid(objects[i].gid), image)
+                    self.assertEqual(gid, map_.layers[0].data[0][i ^ 1])
