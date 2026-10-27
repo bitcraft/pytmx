@@ -92,6 +92,17 @@ class TiledMapTest(unittest.TestCase):
         image = self.m.get_tile_image_by_gid(1)
         self.assertIsNotNone(image)
 
+    def test_invalid_gid_raises_value_error(self) -> None:
+        for gid in (-1, len(self.m.images), len(self.m.images) + 100):
+            with self.subTest(gid=gid):
+                with self.assertRaisesRegex(ValueError, f"Invalid GID: {gid}$"):
+                    self.m.get_tile_image_by_gid(gid)
+
+    def test_invalid_layer_gid_raises_value_error(self) -> None:
+        self.m.layers[0].data[0][0] = len(self.m.images)
+        with self.assertRaisesRegex(ValueError, "Invalid GID:"):
+            self.m.get_tile_image(0, 0, 0)
+
     def test_reserved_names_check_disabled_with_option(self) -> None:
         pytmx.TiledElement.allow_duplicate_names = False
         pytmx.TiledMap(allow_duplicate_names=True)

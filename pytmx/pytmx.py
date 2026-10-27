@@ -777,7 +777,7 @@ class TiledMap(TiledElement):
             logger.debug(msg.format(gid))
             raise TypeError(msg.format(gid))
         except (AssertionError, IndexError):
-            msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
+            msg = "Invalid GID: {0}"
             logger.debug(msg.format(gid))
             raise ValueError(msg.format(gid))
 
